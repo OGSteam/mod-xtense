@@ -30,7 +30,7 @@ abstract class Check {
 	}
 	
 	static function player_status($string) {
-		return preg_match('!^[snfdvbiIoph]*$!', $string);//fdvbiIoph en français, snvbiIoph in english
+		return preg_match('!^[AsnfdvbiIoph]*$!', $string);//fdvbiIoph en français, snvbiIoph in english
 	}
 	
 	static function player_status_forbidden($string) { //Le status "point d'honneur (ph)" est subjectif

@@ -591,6 +591,14 @@ Calendar.setup({
 	<div class="sep"></div>
 	<h2>Changelog</h2>
 	<dl class="changelog">
+	    		<dt>Janvier 2013</dt>
+			<dd>			
+				<div class="version">Module OGSpy 2.4.3</div>
+				<p>
+					<em>Correctif : </em><br />
+					&nbsp;* Support du Statut Admin dans la Galaxie
+				</p>
+			</dd>
     		<dt>Mai 2012</dt>
 			<dd>			
 				<div class="version">Module OGSpy 2.4.2</div>
