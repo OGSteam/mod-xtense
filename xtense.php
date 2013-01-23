@@ -748,8 +748,9 @@ switch ($pub_type){
 						$id_rcround[$i] = $db->sql_insertid();
 				}
 				
-				$j = 1;
+				$j = 0;
 				foreach ($pub_n as $i => $n){
+					$j = floor($i / (count($pub_n) / count($id_rcround))) + 1;
 					$fields = '';
 					$values = '';
 					
@@ -770,7 +771,6 @@ switch ($pub_type){
 					if($n['type'] == "D"){
 						if(!isset($update))
 							$update = $db->sql_query("UPDATE ".TABLE_PARSEDRC." SET coordinates = '".$n['coords']."' WHERE id_rc = '{$id_rc}'");
-						$j++;
 					}
 				}
 			}
