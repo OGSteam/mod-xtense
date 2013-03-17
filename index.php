@@ -304,7 +304,7 @@ function toggle_callback_info() {
 	
 <?php if ($page == 'infos') { ?>
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
-		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="http://update.ogsteam.fr/xtense/download.php" target="_blank">Module Xtense</a></p>
+		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome et Firefox : <a href="http://userscripts.org/scripts/show/112690" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
@@ -597,6 +597,7 @@ Calendar.setup({
 				<p>
 					<em>Correctif : </em><br />
 					&nbsp;* Support du Statut Admin dans la Galaxie
+					&nbsp;* Correctif lorsque le mod hostile n'est pas installé.
 				</p>
 			</dd>
     		<dt>Mai 2012</dt>

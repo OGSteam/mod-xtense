@@ -176,6 +176,8 @@ switch ($pub_type){
 				));
 			}
 			
+			add_log('overview', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
+			
 			// Appel fonction de callback
 			$call->add('overview', array(
 						'coords' => explode(':', $coords),
@@ -187,7 +189,7 @@ switch ($pub_type){
 						'ressources' => $ressources
 			));
 			
-			add_log('overview', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
+			
 		}
 	break;
 
@@ -839,53 +841,61 @@ switch ($pub_type){
 	break;
 	
 	case 'hostiles': // Hostiles
-		$line = $pub_data;
-		$line['attacker_name'] = Check::filterSpecialChars($line['attacker_name']);
-		$line['origin_attack_name'] = Check::filterSpecialChars($line['origin_attack_name']);
-		$line['destination_name'] = Check::filterSpecialChars($line['destination_name']);
-		$line['composition'] = Check::filterSpecialChars($line['composition']);
-		
-		$hostile = array('id' => $line['id'],
-						'id_vague' => $line['id_vague'],
-						'player_id' => $line['player_id'],
-						'ally_id' => $line['ally_id'],
-						'arrival_time' => $line['arrival_time'],
-						'destination_name' => $line['destination_name'],
-						'id_vague' => $line['id_vague'],
-						'attacker' => $line['attacker_name'],
-						'origin_planet' => $line['origin_attack_name'],
-						'origin_coords' => $line['origin_attack_coords'],
-						'cible_planet' => $line['destination_name'],
-						'cible_coords' => $line['destination_coords'],
-						'composition_flotte' => $line['composition'],
-						'clean' => $line['clean']
-		);
-		$call->add('hostiles', $hostile);	
-		$io->set(array('function' => 'hostiles',
-					   		'type' => 'hostiles'
-		));
-		add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
+		//On vérifie que le mod est activé
+		$query = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='hostiles' AND `active`='1' LIMIT 1";
+		if ($db->sql_numrows($db->sql_query($query)) > 0){
+			$line = $pub_data;
+			$line['attacker_name'] = Check::filterSpecialChars($line['attacker_name']);
+			$line['origin_attack_name'] = Check::filterSpecialChars($line['origin_attack_name']);
+			$line['destination_name'] = Check::filterSpecialChars($line['destination_name']);
+			$line['composition'] = Check::filterSpecialChars($line['composition']);
+			
+			$hostile = array('id' => $line['id'],
+							'id_vague' => $line['id_vague'],
+							'player_id' => $line['player_id'],
+							'ally_id' => $line['ally_id'],
+							'arrival_time' => $line['arrival_time'],
+							'destination_name' => $line['destination_name'],
+							'id_vague' => $line['id_vague'],
+							'attacker' => $line['attacker_name'],
+							'origin_planet' => $line['origin_attack_name'],
+							'origin_coords' => $line['origin_attack_coords'],
+							'cible_planet' => $line['destination_name'],
+							'cible_coords' => $line['destination_coords'],
+							'composition_flotte' => $line['composition'],
+							'clean' => $line['clean']
+			);
+			$call->add('hostiles', $hostile);	
+			$io->set(array('function' => 'hostiles',
+								'type' => 'hostiles'
+			));
+			add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
+		}
 	break;
 		
 	case 'checkhostiles': // Verification des flotttes Hostiles
-		$user_attack="";
-		$query = "SELECT DISTINCT(hos.user_id) AS user_id, user_name "
-				."FROM " . TABLE_USER . " user, ".$table_prefix."hostiles hos "
-				."WHERE user.user_id=hos.user_id";
-		$result = $db->sql_query($query);
-		$isAttack=0;
-		//while($value = $db->sql_fetch_assoc($check)){
-		while(list($user_id,$user_name)=$db->sql_fetch_row($result)){			
-			$user_attack .= $user_name;
-			$user_attack .= " ";
-			$isAttack=1;
+		//On vérifie que le mod est activé
+		$query = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='hostiles' AND `active`='1' LIMIT 1";
+		if ($db->sql_numrows($db->sql_query($query)) > 0){
+			$user_attack="";
+			$query = "SELECT DISTINCT(hos.user_id) AS user_id, user_name "
+					."FROM " . TABLE_USER . " user, ".$table_prefix."hostiles hos "
+					."WHERE user.user_id=hos.user_id";
+			$result = $db->sql_query($query);
+			$isAttack=0;
+			//while($value = $db->sql_fetch_assoc($check)){
+			while(list($user_id,$user_name)=$db->sql_fetch_row($result)){			
+				$user_attack .= $user_name;
+				$user_attack .= " ";
+				$isAttack=1;
+			}
+			
+			$io->set(array('type' => 'checkhostiles',
+								'check' => $isAttack,
+								'user' => $user_attack
+			));
+			add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
 		}
-		
-		$io->set(array('type' => 'checkhostiles',
-							'check' => $isAttack,
-							'user' => $user_attack
-		));
-		add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
 	break;
 		
 	case 'messages': //PAGE MESSAGES
