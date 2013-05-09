@@ -508,7 +508,8 @@ switch ($pub_type){
 							'ally_tag' => '',
 							'debris' =>  Array('metal' => 0, 'cristal' => 0),
 							'moon' => 0,
-							'activity' => ''
+							'activity' => '',
+							'activityMoon' => ''
 					);
 				}
 			}
