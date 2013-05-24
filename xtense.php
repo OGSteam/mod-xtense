@@ -26,6 +26,8 @@ require_once("mod/{$root}/includes/Callback.php");
 require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php"); 
 
+require_once("includes/gcm/gcm.php");
+
 set_error_handler('error_handler');
 $start_time = get_microtime();
 
@@ -1090,7 +1092,44 @@ switch ($pub_type){
 		}
 		
 	break;
-
+	
+	case 'android': // Récupération des données pour android		   
+		/*******************************************************
+		 ***  Récuperation des données venant du mod Hostiles ***
+		 ********************************************************/	
+		//On vérifie que le mod Hostile est activé
+		$queryModHostile = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='hostiles' AND `active`='1' LIMIT 1";
+		$hostile=array();
+		if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
+			$isAttack=0;$user_attack="";
+			
+			$queryHostile = "SELECT DISTINCT(hos.user_id) AS user_id, user_name ".
+					 "FROM " . TABLE_USER . " user, ".$table_prefix."hostiles hos ".
+					 "WHERE user.user_id=hos.user_id";
+			
+			$resultHostile = $db->sql_query($queryHostile);
+			$nb_attaques = $db->sql_numrows($resultHostile);
+			
+			$i=1;
+			while(list($user_id,$user_name)=$db->sql_fetch_row($resultHostile)){
+				$user_attack .= $user_name;
+				if($i < $nb_attaques){				
+					$user_attack .= ";";
+				}
+				$isAttack=1;
+				$i++;
+			}
+			$hostile = array('isAttack' => $isAttack, 'user' => explode(";", $user_attack));
+		}
+		
+		/***********************************
+		 ***  Construction de la réponse ***
+		 ***********************************/		
+		$io->set(array('type' => 'android', 'hostile' => $hostile));
+		
+		//add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));			}
+	break;
+		
 	default:
 		die('hack '.$pub_type);
 }
