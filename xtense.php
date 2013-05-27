@@ -1121,6 +1121,40 @@ switch ($pub_type){
 			}
 			$hostile = array('isAttack' => $isAttack, 'user' => explode(";", $user_attack));
 		}
+		/****************************************************
+		 * **
+		 */
+		//On vérifie que le mod Hostile est activé
+		$queryModAttaques = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='attaques' AND `active`='1' LIMIT 1";
+		$renta=array();
+		if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
+			// Dates du jour
+			$pub_date_from = mktime(0, 0, 0, $mois, $date, $annee);
+			$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+			$pub_date_from = intval($pub_date_from);
+			$pub_date_to = intval($pub_date_to);
+			
+			$queryAlliUser = "SELECT `ally`,`datadate` FROM `" . TABLE_RANK_PLAYER_POINTS ."` WHERE `player`='" . $user_data["user_stat_name"] . "' ORDER BY `datadate` DESC LIMIT 1";
+			$userAlly="";
+			while(list($ally,$datadate)=$db->sql_fetch_row($db->sql_query($queryAlliUser))){
+				$userAlly = $ally;
+			}
+						
+			$requete_nb_attack_asgards = "SELECT attack_id FROM ogspy_asgard_attaques_attaques attks INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id INNER JOIN ogspy_asgard_group grp ON grp.group_id = usrgrp.group_id WHERE grp.group_name = '" . $userAlly . "'  AND (attks.attack_date BETWEEN ".$pub_date_from." AND ".$pub_date_to.")";
+			$result_nb_attaques = mysql_query($requete_nb_attack_asgards);
+			$nb_attaques = mysql_num_rows($result_nb_attaques);
+			
+			$requete_renta_ally = "SELECT usr.user_stat_name AS user, SUM(attack_metal) AS metal, SUM(attack_cristal) AS cristal, SUM(attack_deut) AS deuterium, SUM(attack_pertes) AS pertes, ((SUM(attack_metal) + SUM(attack_cristal) + SUM(attack_deut)) - SUM(attack_pertes)) AS gains ".
+										"FROM ogspy_asgard_attaques_attaques attks ".
+										"INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id ".
+										"INNER JOIN ogspy_asgard_group grp ON grp.group_id = usrgrp.group_id ".
+										"INNER JOIN ogspy_asgard_user usr ON usr.user_id = usrgrp.user_id ".
+										"WHERE usr.user_id = '' AND (attack_metal + attack_cristal + attack_deut) > 0 AND (attks.attack_date BETWEEN ".$pub_date_from." AND ".$pub_date_to.") ".
+										"GROUP BY attks.attack_user_id ".
+										"ORDER BY gains DESC";
+			
+		}	
+				
 		
 		/***********************************
 		 ***  Construction de la réponse ***
