@@ -1103,16 +1103,19 @@ switch ($pub_type){
 		if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
 			$isAttack=0;$user_attack="";
 			
-			$queryHostile = "SELECT DISTINCT(hos.user_id) AS user_id, user_name ".
-					 "FROM " . TABLE_USER . " user, ".$table_prefix."hostiles hos ".
-					 "WHERE user.user_id=hos.user_id";
+			$queryHostile = "SELECT DISTINCT(hos.user_id) AS user_id, user_name, hos.id_attack ".
+					 "FROM " . TABLE_USER . " user ".
+					 "INNER JOIN ".$table_prefix."hostiles hos ON user.user_id = hos.user_id";
 			
 			$resultHostile = $db->sql_query($queryHostile);
 			$nb_attaques = $db->sql_numrows($resultHostile);
 			
-			$i=1;
-			while(list($user_id,$user_name)=$db->sql_fetch_row($resultHostile)){
+			$i=1;			
+			while(list($user_id,$user_name,$id_attack)=$db->sql_fetch_row($resultHostile)){
 				$user_attack .= $user_name;
+				$queryHostileAttack = "SELECT hos.id_attack ".
+									 "FROM " . TABLE_USER . " user ".
+									 "INNER JOIN ".$table_prefix."hostiles_attacks hosattks ON hosattks.id_attack = hos.id_attack";
 				if($i < $nb_attaques){				
 					$user_attack .= ";";
 				}
@@ -1124,8 +1127,8 @@ switch ($pub_type){
 		/****************************************************
 		 * **
 		 */
-		//On vérifie que le mod Hostile est activé
-		$queryModAttaques = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='attaques' AND `active`='1' LIMIT 1";
+		//On vérifie que le mod attaques est activé
+		/*$queryModAttaques = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='attaques' AND `active`='1' LIMIT 1";
 		$renta=array();
 		if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
 			// Dates du jour
@@ -1154,7 +1157,7 @@ switch ($pub_type){
 										"ORDER BY gains DESC";
 			
 		}	
-				
+			*/	
 		
 		/***********************************
 		 ***  Construction de la réponse ***
