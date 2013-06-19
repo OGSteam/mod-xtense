@@ -1103,26 +1103,38 @@ switch ($pub_type){
 		if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
 			$isAttack=0;$user_attack="";
 			
-			$queryHostile = "SELECT DISTINCT(hos.user_id) AS user_id, user_name, hos.id_attack ".
+			$queryHostile = "SELECT hos.user_id AS user_id, user.user_name, hos.id_attack ".
 					 "FROM " . TABLE_USER . " user ".
-					 "INNER JOIN ".$table_prefix."hostiles hos ON user.user_id = hos.user_id";
+					 "INNER JOIN " . $table_prefix . "hostiles hos ON user.user_id = hos.user_id";
 			
 			$resultHostile = $db->sql_query($queryHostile);
 			$nb_attaques = $db->sql_numrows($resultHostile);
 			
-			$i=1;			
-			while(list($user_id,$user_name,$id_attack)=$db->sql_fetch_row($resultHostile)){
-				$user_attack .= $user_name;
-				$queryHostileAttack = "SELECT hos.id_attack ".
-									 "FROM " . TABLE_USER . " user ".
-									 "INNER JOIN ".$table_prefix."hostiles_attacks hosattks ON hosattks.id_attack = hos.id_attack";
-				if($i < $nb_attaques){				
-					$user_attack .= ";";
+			$i=1;
+			$datas = array();
+			//while(list($user_id,$user_name,$id_attack)=$db->sql_fetch_row($resultHostile)){
+			if($nb_attaques > 0) {
+				$queryHostileAttack = 	"SELECT hosattks.*, usr.user_stat_name, hos.arrival_time ".
+										"FROM " . $table_prefix . "hostiles hos ".
+										"INNER JOIN " . TABLE_USER . " usr ON usr.user_id = hos.user_id " .
+										"INNER JOIN " . $table_prefix . "hostiles_attacks hosattks ON hosattks.id_attack = hos.id_attack ";
+				$resultHostileUser = $db->sql_query($queryHostileAttack);
+				
+				while(list($id, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $user_stat_name, $arrival_time)=$db->sql_fetch_row($resultHostileUser)){
+					$compo = array();
+					$queryCompo = 	"SELECT type_ship, nb_ship ".
+									"FROM " . $table_prefix . "hostiles_composition " .
+									"WHERE id_attack = '" . $id . "'";
+					$resultCompo = $db->sql_query($queryCompo);
+					while(list($sheep, $nb)=$db->sql_fetch_row($resultCompo)){
+						$compo[] = array($sheep,$nb);
+					}
+					$datas[] = array($id, $user_stat_name, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $arrival_time, 'compo' => $compo);
 				}
 				$isAttack=1;
 				$i++;
-			}
-			$hostile = array('isAttack' => $isAttack, 'user' => explode(";", $user_attack));
+			}		
+			$hostile = array('isAttack' => $isAttack, 'attaks' => $datas);
 		}
 		/****************************************************
 		 * **
