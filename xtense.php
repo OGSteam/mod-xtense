@@ -1120,16 +1120,18 @@ switch ($pub_type){
 										"INNER JOIN " . $table_prefix . "hostiles_attacks hosattks ON hosattks.id_attack = hos.id_attack ";
 				$resultHostileUser = $db->sql_query($queryHostileAttack);
 				
-				while(list($id, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $user_stat_name, $arrival_time)=$db->sql_fetch_row($resultHostileUser)){
-					$compo = array();
+				$compo = array();
+				while(list($id, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $user_stat_name, $arrival_time)=$db->sql_fetch_row($resultHostileUser)){					
 					$queryCompo = 	"SELECT type_ship, nb_ship ".
 									"FROM " . $table_prefix . "hostiles_composition " .
 									"WHERE id_attack = '" . $id . "'";
 					$resultCompo = $db->sql_query($queryCompo);
+										
 					while(list($sheep, $nb)=$db->sql_fetch_row($resultCompo)){
 						$compo[] = array($sheep,$nb);
 					}
 					$datas[] = array($id, $user_stat_name, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $arrival_time, 'compo' => $compo);
+					$compo = array();
 				}
 				$isAttack=1;
 				$i++;
