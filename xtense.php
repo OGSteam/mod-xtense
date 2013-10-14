@@ -1214,6 +1214,61 @@ switch ($pub_type){
 				
 			break;
 			
+			case 'rentas':
+				/*******************************************************
+				 ***  Récuperation des données des espionnages ***
+				 ********************************************************/
+				
+				//Gestion des dates
+				$date = date("j");
+				$mois = date("m");
+				$annee = date("Y");
+				
+				//Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
+				if($pub_interval=='day'){
+					$pub_date_from = mktime(0, 0, 0, $mois, $date, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				} else if($pub_interval=='yesterday'){					
+					$yesterday = $date-1;
+					if($yesterday < 1) $yesterday = 1;
+					
+					$pub_date_from = mktime(0, 0, 0, $mois, $yesterday, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $yesterday, $annee);
+				} else if ($pub_interval=='week') {
+					$septjours = $date-7;
+					if($septjours < 1) $septjours = 1;
+					
+					$pub_date_from = mktime(0, 0, 0, $mois, $septjours, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				} else {
+					$pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				}
+				
+				$pub_date_from = intval($pub_date_from);
+				$pub_date_to = intval($pub_date_to);
+				
+				
+				$requete_renta_asgards = "SELECT usr.user_stat_name AS user, SUM(attack_metal) AS metal, SUM(attack_cristal) AS cristal, SUM(attack_deut) AS deuterium, SUM(attack_pertes) AS pertes, ((SUM(attack_metal) + SUM(attack_cristal) + SUM(attack_deut)) - SUM(attack_pertes)) AS gains ".
+							"FROM ogspy_asgard_attaques_attaques attks ".
+							"INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id ".
+							"INNER JOIN ogspy_asgard_group grp ON grp.group_id = usrgrp.group_id ".
+							"INNER JOIN ogspy_asgard_user usr ON usr.user_id = usrgrp.user_id ".
+							"WHERE grp.group_name = 'Asgards' AND usr.user_stat_name != '' AND (attack_metal + attack_cristal + attack_deut) > 0 AND (attks.attack_date BETWEEN ".$pub_date_from." AND ".$pub_date_to.") ".
+							"GROUP BY attks.attack_user_id ".
+							"ORDER BY gains DESC";
+				
+				$rentasPlayers = array();
+				
+				$result_renta_asgards = $db->sql_query($requete_renta_asgards);
+				
+				while ($row = $db->sql_fetch_assoc($result_renta_asgards)) {
+					$rentasPlayers[] = array($row['user'],$row['metal'],$row['cristal'],$row['deuterium'],$row['pertes'],$row['gains']);
+				}
+				$io->set(array('rentasPlayers' => $rentasPlayers));
+				
+			break;
+			
 			case 'server':
 				
 				/***********************************
