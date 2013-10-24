@@ -26,7 +26,7 @@ require_once("mod/{$root}/includes/Callback.php");
 require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php"); 
 
-require_once("includes/gcm/gcm.php");
+//require_once("includes/gcm/gcm.php");
 
 set_error_handler('error_handler');
 $start_time = get_microtime();
