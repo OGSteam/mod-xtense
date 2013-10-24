@@ -381,7 +381,7 @@ function toggle_callback_info() {
 				<label for="spy_autodelete">Effacement automatique des RE trop vieux (configurable depuis l&#039;admin de OGSpy).</label>
 			</p>
 			<p>
-				<span class="chk"><input type="text" size="30" maxlength="30" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" /></span>
+				<span class="chk"><input type="text" size="30" maxlength="40" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" /></span>
 				<label for="universe">Serveur de jeu</label>
 			</p>
 		</div>

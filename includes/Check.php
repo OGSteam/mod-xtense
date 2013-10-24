@@ -9,10 +9,10 @@ abstract class Check {
 	static function filterSpecialChars ($string) {//http://www.wikistuce.info/doku.php/php/supprimer_tous_les_caracteres_speciaux_d-une_chaine
 		$string = utf8_decode($string);
 		//echo $string;
-		//$search = array ('@[éèêëÊË]@i','@[àâäÂÄ]@i','@[îïÎÏ]@i','@[ûùüÛÜ]@i','@[ôöÔÖ]@i','@[ç]@i','@[^a-zA-Z0-9_ -]@');
+		//$search = array ('@[Ã©Ã¨ÃªÃ«ÃŠÃ‹]@i','@[Ã Ã¢Ã¤Ã‚Ã„]@i','@[Ã®Ã¯ÃŽÃ�]@i','@[Ã»Ã¹Ã¼Ã›Ãœ]@i','@[Ã´Ã¶Ã”Ã–]@i','@[Ã§]@i','@[^a-zA-Z0-9_ -]@');
 		//$replace = array ('e','a','i','u','o','c','');
 		
-		//$search = '@[^éèêëÊËàâäÂÄîïÎÏûùüÛÜôöÔÖç_. a-zA-Z0-9-]@';
+		//$search = '@[^Ã©Ã¨ÃªÃ«ÃŠÃ‹Ã Ã¢Ã¤Ã‚Ã„Ã®Ã¯ÃŽÃ�Ã»Ã¹Ã¼Ã›ÃœÃ´Ã¶Ã”Ã–Ã§_. a-zA-Z0-9-]@';
 		/*$search = '@[^a-zA-Z0-9_. -]@';
 		$replace = '';
 		return preg_replace($search, $replace, $string);*/
@@ -25,12 +25,12 @@ abstract class Check {
 	}
 	
 	static function planet_name($string) {
-		//return preg_match('![A-Z0-9éè_. -]{1,20}!i', $string);
+		//return preg_match('![A-Z0-9Ã©Ã¨_. -]{1,20}!i', $string);
 		return preg_match('!.{1,20}!i', $string);
 	}
 	
 	static function player_status($string) {
-		return preg_match('!^[AsnfdvbiIoph]*$!', $string);//fdvbiIoph en français, snvbiIoph in english
+		return preg_match('!^[AsnfdvbiIoph]*$!', $string);//fdvbiIoph en franÃ§ais, snvbiIoph in english
 	}
 	
 	static function player_status_forbidden($string) { //Le status "point d'honneur (ph)" est subjectif
@@ -70,7 +70,7 @@ abstract class Check {
 	
 	static function coords($string, $exp = 0) {
 		global $server_config;
-		if ($string == "unknown") return true; //cas avec une seule planète
+		if ($string == "unknown") return true; //cas avec une seule planÃ¨te
 		if (!preg_match('!^([0-9]{1,2}):([0-9]{1,3}):([0-9]{1,2})$!Usi', $string, $match)) return false;
 		return !($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15))) ;
 	}
@@ -97,8 +97,8 @@ abstract class Check {
 	
 	static function universe($str) {
 		$universe = false;//'http://uni0.ogame.fr';
-		if (preg_match('!([a-z0-9]+.ogame\\.[A-Z.]+)(\\/|$)!Ui', $str, $matches)) 
-				$universe = 'http://'.strtolower($matches[1]);
+		//if (preg_match('!([a-z0-9]+.ogame\\.[A-Z.]+)(\\/|$)!Ui', $str, $matches)) $universe = 'http://'.strtolower($matches[1]);
+		if (preg_match('!([a-z0-9-]+[A-Z.]+.ogame.gameforge.com)(\\/|$)!Ui', $str, $matches)) $universe = 'http://'.strtolower($matches[1]);
 		return $universe;
 	}
 	
