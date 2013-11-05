@@ -82,7 +82,7 @@ abstract class Check {
 	
 	static function data() {
 		foreach (func_get_args() as $v) {
-			if (!$v) die('hack');
+			if (!$v) die('hack datas');
 		}
 	}
 	

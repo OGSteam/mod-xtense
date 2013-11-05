@@ -1248,7 +1248,6 @@ switch ($pub_type){
 				$pub_date_from = intval($pub_date_from);
 				$pub_date_to = intval($pub_date_to);
 				
-				
 				$requete_renta_asgards = "SELECT usr.user_stat_name AS user, SUM(attack_metal) AS metal, SUM(attack_cristal) AS cristal, SUM(attack_deut) AS deuterium, SUM(attack_pertes) AS pertes, ((SUM(attack_metal) + SUM(attack_cristal) + SUM(attack_deut)) - SUM(attack_pertes)) AS gains ".
 							"FROM ogspy_asgard_attaques_attaques attks ".
 							"INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id ".
@@ -1266,7 +1265,6 @@ switch ($pub_type){
 					$rentasPlayers[] = array($row['user'],$row['metal'],$row['cristal'],$row['deuterium'],$row['pertes'],$row['gains']);
 				}
 				$io->set(array('rentasPlayers' => $rentasPlayers));
-				
 			break;
 			
 			case 'server':
@@ -1275,7 +1273,14 @@ switch ($pub_type){
 				 ***  Construction de la réponse ***
 				***********************************/
 				//$io->set(array('server' => $server_config['servername'], 'type' => 'android', 'hostile' => $hostile, 'alliance' => $alliance, 'spys' => $spys));
-				$io->set(array('server' => $server_config['servername']));
+				$count=-1;
+				if(isset($pub_gcmRegid) && isset($pub_versionAndroid)){
+					$sqlUpdate = "UPDATE " . TABLE_GCM_USERS . " SET version_android='" . $pub_versionAndroid . "', version_ogspy='" . $pub_versionOgspy . "', device='" . $pub_device ."' WHERE gcm_regid='" . $pub_gcmRegid ."'";
+					$count = $db->sql_query($sqlUpdate);
+				}
+				
+				//$io->set(array('server' => $server_config['servername'],'update' => $count, 'sqlUpdate' => $sqlUpdate));
+				$io->set(array('server' => $server_config['servername'],'update' => $count));
 						
 			break;
 		}
@@ -1284,7 +1289,7 @@ switch ($pub_type){
 	break;
 		
 	default:
-		die('hack '.$pub_type);
+		die('hack xtense.php : ' . $pub_type);
 }
 
 $call->apply();
