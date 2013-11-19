@@ -1268,7 +1268,8 @@ switch ($pub_type){
 			break;
 			
 			case 'server':
-				
+				add_log('android', array('toolbar' => $toolbar_info, 'version' => $pub_versionOgspy, 'device' => $pub_device));
+								
 				/***********************************
 				 ***  Construction de la réponse ***
 				***********************************/
