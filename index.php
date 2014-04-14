@@ -138,15 +138,15 @@ if ($page == 'mods') {
 		'expedition' => 'Rapports d\'expeditions',
 		'trade' => 'Livraisons Amies',
 		'trade_me' => 'Mes Livraisons',
-		'overview' => 'Vue g�n�rale',
+		'overview' => 'Vue générale',
 		'ennemy_spy' => 'Espionnages ennemis',
-		'system' => 'Syst�mes solaires',
+		'system' => 'Systèmes solaires',
 		'ally_list' => 'Liste des joueurs d\'alliance',
-		'buildings' => 'B�timents',
+		'buildings' => 'Bâtiments',
 		'research' => 'Laboratoire',
 		'fleet' => 'Flotte',
-		'fleetSending' => 'D�part de flotte',
-		'defense' => 'D�fense',
+		'fleetSending' => 'Départ de flotte',
+		'defense' => 'Défense',
 		'rc' => 'Rapports de combat',
 		'ranking_player_fleet' => 'Statistiques (flotte) des joueurs',
 		'ranking_player_points' => 'Statistiques (points) des joueurs',
@@ -154,7 +154,7 @@ if ($page == 'mods') {
 		'ranking_ally_fleet' => 'Statistiques (flotte) des alliances',
 		'ranking_ally_points' => 'Statistiques (points) des alliances',
 		'ranking_ally_research' => 'Statistiques (recherches) des alliances',
-		'trade' => 'Livraisons Alli�es',
+		'trade' => 'Livraisons Alliées',
 		'trade_me' => 'Mes livraisons',
 		'hostiles' => 'Flottes Hostiles'
 	);
@@ -304,7 +304,7 @@ function toggle_callback_info() {
 	
 <?php if ($page == 'infos') { ?>
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
-		<p>Version Firefox (R�cup�rez la derni�re version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
+		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome et Firefox : <a href="http://userscripts.org/scripts/show/112690" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
@@ -597,7 +597,7 @@ Calendar.setup({
 				<p>
 					<em>Correctif : </em><br />
 					&nbsp;* Support du Statut Admin dans la Galaxie
-					&nbsp;* Correctif lorsque le mod hostile n'est pas install�.
+					&nbsp;* Correctif lorsque le mod hostile n'est pas installé.
 				</p>
 			</dd>
     		<dt>Mai 2012</dt>
