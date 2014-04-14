@@ -8,14 +8,6 @@
 abstract class Check {
 	static function filterSpecialChars ($string) {//http://www.wikistuce.info/doku.php/php/supprimer_tous_les_caracteres_speciaux_d-une_chaine
 		$string = utf8_decode($string);
-		//echo $string;
-		//$search = array ('@[Ã©Ã¨ÃªÃ«ÃŠÃ‹]@i','@[Ã Ã¢Ã¤Ã‚Ã„]@i','@[Ã®Ã¯ÃŽÃ�]@i','@[Ã»Ã¹Ã¼Ã›Ãœ]@i','@[Ã´Ã¶Ã”Ã–]@i','@[Ã§]@i','@[^a-zA-Z0-9_ -]@');
-		//$replace = array ('e','a','i','u','o','c','');
-		
-		//$search = '@[^Ã©Ã¨ÃªÃ«ÃŠÃ‹Ã Ã¢Ã¤Ã‚Ã„Ã®Ã¯ÃŽÃ�Ã»Ã¹Ã¼Ã›ÃœÃ´Ã¶Ã”Ã–Ã§_. a-zA-Z0-9-]@';
-		/*$search = '@[^a-zA-Z0-9_. -]@';
-		$replace = '';
-		return preg_replace($search, $replace, $string);*/
 		return $string;
 	}
 	
@@ -97,7 +89,7 @@ abstract class Check {
 	
 	static function universe($str) {
 		$universe = false;//'http://s67-fr.ogame.gameforge.com';
-		if (preg_match("[a-z][0-9]+-[a-z]+.ogame.gameforge.com", $str, $matches)) $universe = 'http://'.strtolower($matches[0]);
+		if (preg_match('/[a-z][0-9]+-[a-z]+.ogame.gameforge.com/', $str, $matches)) $universe = 'http://'.strtolower($matches[0]);
 		return $universe;
 	}
 	
