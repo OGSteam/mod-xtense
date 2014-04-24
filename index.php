@@ -49,7 +49,7 @@ if ($page == 'config') {
 	if (isset($pub_universe, $pub_keep_log)) {
 		$universe = Check::universe($pub_universe);
 		if($universe===false)
-			$universe = 'http://uni0.ogame.fr';
+			$universe = 'http://sxx-fr.ogame.gameforge.com';
 		
 		$keep_log = (int)$pub_keep_log;
 		$keep_log = ($keep_log > 360 ? 360 : $keep_log);
@@ -138,15 +138,15 @@ if ($page == 'mods') {
 		'expedition' => 'Rapports d\'expeditions',
 		'trade' => 'Livraisons Amies',
 		'trade_me' => 'Mes Livraisons',
-		'overview' => 'Vue générale',
+		'overview' => 'Vue gÃ©nÃ©rale',
 		'ennemy_spy' => 'Espionnages ennemis',
-		'system' => 'Systèmes solaires',
+		'system' => 'SystÃ¨mes solaires',
 		'ally_list' => 'Liste des joueurs d\'alliance',
-		'buildings' => 'Bâtiments',
+		'buildings' => 'BÃ¢timents',
 		'research' => 'Laboratoire',
 		'fleet' => 'Flotte',
-		'fleetSending' => 'Départ de flotte',
-		'defense' => 'Défense',
+		'fleetSending' => 'DÃ©part de flotte',
+		'defense' => 'DÃ©fense',
 		'rc' => 'Rapports de combat',
 		'ranking_player_fleet' => 'Statistiques (flotte) des joueurs',
 		'ranking_player_points' => 'Statistiques (points) des joueurs',
@@ -154,7 +154,7 @@ if ($page == 'mods') {
 		'ranking_ally_fleet' => 'Statistiques (flotte) des alliances',
 		'ranking_ally_points' => 'Statistiques (points) des alliances',
 		'ranking_ally_research' => 'Statistiques (recherches) des alliances',
-		'trade' => 'Livraisons Alliées',
+		'trade' => 'Livraisons AlliÃ©es',
 		'trade_me' => 'Mes livraisons',
 		'hostiles' => 'Flottes Hostiles'
 	);
@@ -304,7 +304,7 @@ function toggle_callback_info() {
 	
 <?php if ($page == 'infos') { ?>
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
-		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
+		<p>Version Firefox (RÃ©cupÃ©rez la derniÃ¨re version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome et Firefox : <a href="http://userscripts.org/scripts/show/112690" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
@@ -597,7 +597,7 @@ Calendar.setup({
 				<p>
 					<em>Correctif : </em><br />
 					&nbsp;* Support du Statut Admin dans la Galaxie
-					&nbsp;* Correctif lorsque le mod hostile n'est pas installé.
+					&nbsp;* Correctif lorsque le mod hostile n'est pas installÃ©.
 				</p>
 			</dd>
     		<dt>Mai 2012</dt>
