@@ -1175,12 +1175,37 @@ switch ($pub_type){
 				$mois = date("m");
 				$annee = date("Y");
 				
-				//Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
+				/*
 				$pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
 				$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
 				
 				$pub_date_from = intval($pub_date_from);
+				$pub_date_to = intval($pub_date_to);*/
+								
+				//Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
+				if($pub_interval=='day'){
+					$pub_date_from = mktime(0, 0, 0, $mois, $date, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				} else if($pub_interval=='yesterday'){					
+					$yesterday = $date-1;
+					if($yesterday < 1) $yesterday = 1;
+					
+					$pub_date_from = mktime(0, 0, 0, $mois, $yesterday, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $yesterday, $annee);
+				} else if ($pub_interval=='week') {
+					$septjours = $date-7;
+					if($septjours < 1) $septjours = 1;
+					
+					$pub_date_from = mktime(0, 0, 0, $mois, $septjours, $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				} else {
+					$pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
+					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
+				}
+				
+				$pub_date_from = intval($pub_date_from);
 				$pub_date_to = intval($pub_date_to);
+				
 				
 				$querySpyPlayer =	"SELECT joueur, alliance, count(*) AS nb " . 
 									"FROM " . $table_prefix . "QuiMeSonde " . 
@@ -1188,13 +1213,27 @@ switch ($pub_type){
 									"GROUP BY joueur " . 
 									"ORDER BY nb DESC " .
 									"LIMIT 5";
+									
+				$querySpyPlayerAndHighscore =	"SELECT joueur, alliance, count(*) AS nb, 
+				(SELECT rank FROM " . $table_prefix . "rank_player_points WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS rankgeneral, 
+				(SELECT points FROM " . $table_prefix . "rank_player_points WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS pointsgeneral, 
+				(SELECT rank FROM " . $table_prefix . "rank_player_military WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS rankmilitary, 
+				(SELECT points FROM " . $table_prefix . "rank_player_military WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS pointsmilitary, 
+				(SELECT rank FROM " . $table_prefix . "rank_player_technology WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS ranktechnology, 
+				(SELECT points FROM " . $table_prefix . "rank_player_technology WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS pointstechnology, 
+				(SELECT rank FROM " . $table_prefix . "rank_player_economique WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS rankeconomique, 
+				(SELECT points FROM " . $table_prefix . "rank_player_economique WHERE player = qms.joueur ORDER BY datadate DESC LIMIT 1) AS pointseconomique " .
+									"FROM " . $table_prefix . "QuiMeSonde qms " . 
+									"WHERE sender_id = '" . $user_data['user_id'] . "' AND (datadate BETWEEN " . $pub_date_from . " AND " . $pub_date_to . ") " . 
+								 	"GROUP BY joueur " . 
+									"ORDER BY nb DESC " .
+									"LIMIT 5";
 						
 				$spysPlayer = array();
 				
-				$result = $db->sql_query($querySpyPlayer);
-				
-				while($players = $db->sql_fetch_row($result)){
-					$spysPlayer[] = array($players[0], $players[1], $players[2]);
+				$result = $db->sql_query($querySpyPlayerAndHighscore);
+				while($players = $db->sql_fetch_row($result)){					
+					$spysPlayer[] = array($players[0], $players[1], $players[2], $players[3], $players[5], $players[7], $players[9], $players[4], $players[6], $players[8], $players[10]);
 				}
 				$io->set(array('mostCuriousPlayer' => $spysPlayer));
 						
@@ -1204,11 +1243,27 @@ switch ($pub_type){
 								 	"GROUP BY alliance " . 
 									"ORDER BY nb DESC " .
 									"LIMIT 5";
-				$result = $db->sql_query($querySpyAlliance);
+				
+				$querySpyAllianceAndHighscore =	"SELECT alliance, count(*) AS nb, 
+				(SELECT rank FROM " . $table_prefix . "rank_ally_points WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS rankgeneral, 
+				(SELECT points FROM " . $table_prefix . "rank_ally_points WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS pointsgeneral, 
+				(SELECT rank FROM " . $table_prefix . "rank_ally_military WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS rankmilitary, 
+				(SELECT points FROM " . $table_prefix . "rank_ally_military WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS pointsmilitary, 
+				(SELECT rank FROM " . $table_prefix . "rank_ally_technology WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS ranktechnology, 
+				(SELECT points FROM " . $table_prefix . "rank_ally_technology WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS pointstechnology, 
+				(SELECT rank FROM " . $table_prefix . "rank_ally_economique WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS rankeconomique, 
+				(SELECT points FROM " . $table_prefix . "rank_ally_economique WHERE ally = qms.alliance ORDER BY datadate DESC LIMIT 1) AS pointseconomique " .
+									"FROM " . $table_prefix . "QuiMeSonde qms " . 
+									"WHERE sender_id = '" . $user_data['user_id'] . "' AND (datadate BETWEEN " . $pub_date_from . " AND " . $pub_date_to . ") " . 
+								 	"GROUP BY alliance " . 
+									"ORDER BY nb DESC " .
+									"LIMIT 5";
+				
+				$result = $db->sql_query($querySpyAllianceAndHighscore);
 				
 				$spysAlliance = array();		
-				while($alliances = $db->sql_fetch_row($result)){
-					$spysAlliance[] = array($alliances[0], $alliances[1]);
+				while($alliances = $db->sql_fetch_row($result)){					
+					$spysAlliance[] = array($alliances[0], $alliances[1], $alliances[2], $alliances[4], $alliances[6], $alliances[8], $alliances[3], $alliances[5], $alliances[7], $alliances[9]);
 				}
 				$io->set(array('mostCuriousAlliance' => $spysAlliance));
 				
@@ -1216,7 +1271,7 @@ switch ($pub_type){
 			
 			case 'rentas':
 				/*******************************************************
-				 ***  Récuperation des données des espionnages ***
+				 ***  Récuperation des données des rentabilités ***
 				 ********************************************************/
 				
 				//Gestion des dates
@@ -1249,11 +1304,11 @@ switch ($pub_type){
 				$pub_date_to = intval($pub_date_to);
 				
 				$requete_renta_asgards = "SELECT usr.user_stat_name AS user, SUM(attack_metal) AS metal, SUM(attack_cristal) AS cristal, SUM(attack_deut) AS deuterium, SUM(attack_pertes) AS pertes, ((SUM(attack_metal) + SUM(attack_cristal) + SUM(attack_deut)) - SUM(attack_pertes)) AS gains ".
-							"FROM ogspy_asgard_attaques_attaques attks ".
-							"INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id ".
-							"INNER JOIN ogspy_asgard_group grp ON grp.group_id = usrgrp.group_id ".
-							"INNER JOIN ogspy_asgard_user usr ON usr.user_id = usrgrp.user_id ".
-							"WHERE grp.group_name = 'Asgards' AND usr.user_stat_name != '' AND (attack_metal + attack_cristal + attack_deut) > 0 AND (attks.attack_date BETWEEN ".$pub_date_from." AND ".$pub_date_to.") ".
+							"FROM " . $table_prefix . "attaques_attaques attks ".
+							"INNER JOIN " . $table_prefix . "user_group usrgrp ON usrgrp.user_id = attks.attack_user_id ".
+							"INNER JOIN " . $table_prefix . "group grp ON grp.group_id = usrgrp.group_id ".
+							"INNER JOIN " . $table_prefix . "user usr ON usr.user_id = usrgrp.user_id ".
+							"WHERE usr.user_stat_name != '' AND (attack_metal + attack_cristal + attack_deut) > 0 AND (attks.attack_date BETWEEN ".$pub_date_from." AND ".$pub_date_to.") ".
 							"GROUP BY attks.attack_user_id ".
 							"ORDER BY gains DESC";
 				
