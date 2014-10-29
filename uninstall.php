@@ -6,7 +6,9 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME')) die("Hacking Attemp!");
+if (!defined('IN_SPYOGAME') && !defined('IN_UNISPY2')) {
+    die("Hacking attempt");
+}
 
 global $de,$table_prefix;
 $mod_uninstall_name = "xtense";

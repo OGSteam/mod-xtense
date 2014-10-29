@@ -179,19 +179,15 @@ function add_log($type, $data = null) {
 	global $server_config, $user_data, $root;
 	$message = '';
 	if(!isset($data['toolbar'])) {$data['toolbar'] = "";}
-	if ($type == 'buildings' || $type == 'overview' || $type == 'defense' || $type == 'research' || $type == 'fleet' || $type == 'info') {
+	if ($type == 'buildings' || $type == 'overview' || $type == 'defense' || $type == 'research' || $type == 'fleet'||$type == 'info') {
 		if (!$server_config['xtense_log_empire']) return;
 		
 		if ($type == 'buildings') 	$message = 'envoie les batiments de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'overview') 	$message = 'envoie les informations de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'defense') 	$message = 'envoie les defenses de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'research') 	$message = 'envoie ses recherches';
-		if ($type == 'fleet') 		$message = 'envoie la flotte de sa planète '.$data['planet_name'].' ('.$data['coords'].')';		
+		if ($type == 'fleet') 		$message = 'envoie la flotte de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'info')		$message = $data['message'];
-	}
-	
-	if ($type == 'android') {
-		$message = 'lance son application android '.$data['version'].' sur son appareil '.$data['device'];
 	}
 	
 	if ($type == 'system') {

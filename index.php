@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-if (!defined('IN_SPYOGAME')) die("Hacking Attemp!");
+if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT version, root FROM ".TABLE_MOD." WHERE action = 'xtense'"));
 
@@ -49,7 +49,7 @@ if ($page == 'config') {
 	if (isset($pub_universe, $pub_keep_log)) {
 		$universe = Check::universe($pub_universe);
 		if($universe===false)
-			$universe = 'http://sxx-fr.ogame.gameforge.com';
+			$universe = 'http://uni0.ogame.fr';
 		
 		$keep_log = (int)$pub_keep_log;
 		$keep_log = ($keep_log > 360 ? 360 : $keep_log);
@@ -138,15 +138,15 @@ if ($page == 'mods') {
 		'expedition' => 'Rapports d\'expeditions',
 		'trade' => 'Livraisons Amies',
 		'trade_me' => 'Mes Livraisons',
-		'overview' => 'Vue g√©n√©rale',
+		'overview' => 'Vue gÈnÈrale',
 		'ennemy_spy' => 'Espionnages ennemis',
-		'system' => 'Syst√®mes solaires',
+		'system' => 'SystËmes solaires',
 		'ally_list' => 'Liste des joueurs d\'alliance',
-		'buildings' => 'B√¢timents',
+		'buildings' => 'B‚timents',
 		'research' => 'Laboratoire',
 		'fleet' => 'Flotte',
-		'fleetSending' => 'D√©part de flotte',
-		'defense' => 'D√©fense',
+		'fleetSending' => 'DÈpart de flotte',
+		'defense' => 'DÈfense',
 		'rc' => 'Rapports de combat',
 		'ranking_player_fleet' => 'Statistiques (flotte) des joueurs',
 		'ranking_player_points' => 'Statistiques (points) des joueurs',
@@ -154,7 +154,7 @@ if ($page == 'mods') {
 		'ranking_ally_fleet' => 'Statistiques (flotte) des alliances',
 		'ranking_ally_points' => 'Statistiques (points) des alliances',
 		'ranking_ally_research' => 'Statistiques (recherches) des alliances',
-		'trade' => 'Livraisons Alli√©es',
+		'trade' => 'Livraisons AlliÈes',
 		'trade_me' => 'Mes livraisons',
 		'hostiles' => 'Flottes Hostiles'
 	);
@@ -256,7 +256,7 @@ function toggle_callback_info() {
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" >
 <head>
 	<title>Xtense <?php echo $version; ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link rel="stylesheet" media="all" type="text/css" href="mod/<?php echo $root; ?>/style.css" />
 </head>
 <body>
@@ -304,7 +304,7 @@ function toggle_callback_info() {
 	
 <?php if ($page == 'infos') { ?>
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
-		<p>Version Firefox (R√©cup√©rez la derni√®re version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
+		<p>Version Firefox (RÈcupÈrez la derniËre version et ouvrez le fichier avec Firefox): <a href="http://update.ogsteam.fr/xtense/download.php" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome et Firefox : <a href="http://userscripts.org/scripts/show/112690" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
@@ -381,7 +381,7 @@ function toggle_callback_info() {
 				<label for="spy_autodelete">Effacement automatique des RE trop vieux (configurable depuis l&#039;admin de OGSpy).</label>
 			</p>
 			<p>
-				<span class="chk"><input type="text" size="30" maxlength="40" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" /></span>
+				<span class="chk"><input type="text" size="30" maxlength="30" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" /></span>
 				<label for="universe">Serveur de jeu</label>
 			</p>
 		</div>
@@ -591,15 +591,6 @@ Calendar.setup({
 	<div class="sep"></div>
 	<h2>Changelog</h2>
 	<dl class="changelog">
-	    		<dt>Janvier 2013</dt>
-			<dd>			
-				<div class="version">Module OGSpy 2.4.3</div>
-				<p>
-					<em>Correctif : </em><br />
-					&nbsp;* Support du Statut Admin dans la Galaxie
-					&nbsp;* Correctif lorsque le mod hostile n'est pas install√©.
-				</p>
-			</dd>
     		<dt>Mai 2012</dt>
 			<dd>			
 				<div class="version">Module OGSpy 2.4.2</div>
