@@ -79,10 +79,8 @@ if ($is_ok == true)
 			('xtense_log_ally_list', '1'),
 			('xtense_log_messages', '1'),
 			('xtense_log_reverse', '0'),
-			('xtense_log_ogspy', '1'),
 			('xtense_strict_admin', '0'),
-			('xtense_universe', 'http://uni1.ogame.fr'),
-			('xtense_keep_log', '14'),
+			('xtense_universe', 'http://sxx-fr.ogame.gameforge.com'),
 			('xtense_plugin_root', '0'),
 			('xtense_spy_autodelete', '1')
 		");

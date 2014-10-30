@@ -226,40 +226,20 @@ function add_log($type, $data = null) {
 	}
 	if (!empty($message)) {
 		$dir = date('ymd');
-		
-		if ($server_config['xtense_log_ogspy']) {
-			$file = 'log_'.date('ymd').'.log';
-			if (!file_exists('journal/'.$dir)) @mkdir('journal/'.$dir);
-			if (file_exists('journal/'.$dir)) {
-				@chmod('journal/'.$date, 0777);
-				$fp = @fopen('journal/'.$dir.'/'.$file, 'a+');
-				if ($fp) {
-					fwrite($fp, '/*'.date('d/m/Y H:i:s').'*/'.'[Xtense]'.'['.$data['toolbar'].'] '.$user_data['user_name'].' '.$message."\n");
-					fclose($fp);
-					@chmod('journal/'.$dir.'/'.$file, 0777);
-				}
-			}
-		} else {
-			$file = date('ymd').'log';
-			$fp = @fopen("mod/{$root}/log/".$file, 'a+');
-			if ($fp) {
-				fwrite($fp, date('H:i:s').' | '.$user_data['user_name'].' '.$message."\n");
-				fclose($fp);
-				@chmod("mod/{$root}/log/".$file, 0777);
-			}
-		}
-	}
-	
-	// Verif de la date des fichiers logs
-	if ($server_config['xtense_keep_log'] == 0 || $server_config['xtense_log_ogspy']) return;
-	
-	$since = strtotime('-'.$server_config['xtense_keep_log'].' days');
-	$fp = @opendir("mod/{$root}/log/");
-	while (($file = @readdir($fp)) !== false) {
-		if ($file != '.' && $file != '..' && preg_match('!^([0-9]{2})([0-9]{2})([0-9]{2})\.log$!', $file, $matches)) {
-			if (mktime(0, 0, 1, $matches[3], $matches[2], $matches[1]) < $since) @unlink("mod/{$root}/log/".$file);
-		}
-	}
+
+        $file = 'log_'.date('ymd').'.log';
+        if (!file_exists('journal/'.$dir)) @mkdir('journal/'.$dir);
+        if (file_exists('journal/'.$dir)) {
+            @chmod('journal/'.$date, 0777);
+            $fp = @fopen('journal/'.$dir.'/'.$file, 'a+');
+            if ($fp) {
+                fwrite($fp, '/*'.date('d/m/Y H:i:s').'*/'.'[Xtense]'.'['.$data['toolbar'].'] '.$user_data['user_name'].' '.$message."\n");
+                fclose($fp);
+                @chmod('journal/'.$dir.'/'.$file, 0777);
+            }
+        }
+
+    }
 }
 
 function format_size ($size) {

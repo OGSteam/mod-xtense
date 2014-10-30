@@ -12,7 +12,6 @@ list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT version, root 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
 require_once("mod/{$root}/includes/Check.php");
-$log_dir = "mod/{$root}/log/";
 
 $page = 'infos';
 if (isset($pub_page)) {
@@ -21,7 +20,7 @@ if (isset($pub_page)) {
 	
 	// Pages admin
 	if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && $server_config['xtense_strict_admin'] == 0)) {
-		if ($pub_page == 'config' || $pub_page == 'group' || $pub_page == 'mods' || $pub_page == 'infos' || $pub_page == 'log') $page = $pub_page;
+		if ($pub_page == 'config' || $pub_page == 'group' || $pub_page == 'mods' || $pub_page == 'infos') $page = $pub_page;
 	}
 }
 
@@ -42,17 +41,13 @@ if ($page == 'config') {
 		'log_ranking',
 		'log_ally_list',
 		'log_messages',
-		'log_ogspy',
 		'spy_autodelete'
 	);
 
-	if (isset($pub_universe, $pub_keep_log)) {
+	if (isset($pub_universe)) {
 		$universe = Check::universe($pub_universe);
 		if($universe===false)
 			$universe = 'http://sxx-fr.ogame.gameforge.com';
-		
-		$keep_log = (int)$pub_keep_log;
-		$keep_log = ($keep_log > 360 ? 360 : $keep_log);
 		
 		$replace = '';
 		foreach ($checkboxes as $name) {
@@ -60,9 +55,8 @@ if ($page == 'config') {
 			$replace .= ',("xtense_'.$name.'", "'.$server_config['xtense_'.$name].'")';
 		}
 		
-		$db->sql_query('REPLACE INTO '.TABLE_CONFIG.' (config_name, config_value) VALUES ("xtense_universe", "'.$universe.'"), ("xtense_keep_log", "'.$keep_log.'")'.$replace);
+		$db->sql_query('REPLACE INTO '.TABLE_CONFIG.' (config_name, config_value) VALUES ("xtense_universe", "'.$universe.'"), '.$replace);
 		generate_config_cache();
-		$server_config['xtense_keep_log'] = $keep_log;
 		$server_config['xtense_universe'] = $universe;
 		
 		$update = true;
@@ -166,62 +160,7 @@ if ($page == 'mods') {
 	}
 }
 
-if ($page == 'log') {
-	if (!is_writable($log_dir)) $unwritable =  1;
-	
-	if (isset($pub_purge)) {
-		$fp = @opendir($log_dir);
-		while (($file = readdir($fp)) !== false) {
-			if ($file != '.' && $file != '..' && !is_dir($log_dir.$file) && $file != 'index.html') {
-				if (!@unlink($log_dir.$file))
-					break;
-			}
-		}
-		@closedir($fp);
-		
-		$purge = true;
-	}
-	
-	$size = 0;
-	$nb = 0;
-	$availableLogs = array();
-	
-	$fp = @opendir($log_dir);
-	while (($file = @readdir($fp)) !== false) {
-		if ($file != '.' && $file != '..' && !is_dir($log_dir.$file) && $file != 'index.html') {
-			$size += @filesize($log_dir.$file);
-			$availableLogs[] = substr($file, -4);
-			$nb++;
-		}
-	}
-	closedir($fp);
-	
-	$date = date('d/m/Y');
-	if (isset($pub_date) && preg_match('!^[0-3][0-9]/[01][0-9]/20[0-9]{2}$!Usi', $pub_date))
-		$date = $pub_date;
-	
-	$exp = explode('/', $date);
-	$file = $log_dir.substr($exp[2], 2).$exp[1].$exp[0].'.log';
-	
-	if (file_exists($file)) {
-		if (!is_readable($file)) {
-			$error = 'read';
-		} else {
-			$content = file($file);
-			if (empty($content)) {
-				$no_log = true;
-			} else {
-				if ($server_config['xtense_log_reverse']) $content = array_reverse($content);
-				$content = implode('<br />', $content);
-			}
-		}
-	} else {
-		$no_log = true;
-	}
-	
-	$log_size_moy = format_size(round($size / ($nb == 0 ? 1 : $nb) ,2));
-	$log_size = format_size($size);
-}
+
 
 $php_end = benchmark();
 $php_timing = $php_end - $php_start;
@@ -287,11 +226,6 @@ function toggle_callback_info() {
 				<a href="index.php?action=xtense&amp;page=mods">Mods</a>
 			</div>
 		</li>
-		<li class="log<?php if ($page == 'log') echo ' active'; ?>">
-			<div>
-				<a href="index.php?action=xtense&amp;page=log">Journal</a>
-			</div>
-		</li>
 	<?php } ?>
 		<li class="about<?php if ($page == 'about') echo ' active'; ?>">
 			<div>
@@ -305,7 +239,8 @@ function toggle_callback_info() {
 <?php if ($page == 'infos') { ?>
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
 		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
-		<p>Version Chrome et Firefox : <a href="http://userscripts.org/scripts/show/112690" target="_blank">Module Xtense Grease Monkey</a></p>
+		<p>Version Chrome : <a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank">Module Xtense Chrome Store</a></p>
+                <p>Version Script Grease Monkey : <a href="https://bitbucket.org/darknoon29/tool-xtense-greasemonkey/downloads/xtense.user.js" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
 	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter &agrave; ce serveur :</p>
@@ -369,14 +304,6 @@ function toggle_callback_info() {
 				<label for="strict_admin">Limiter l&#039;administration &agrave; l&#039;admin (et non aux co-admins)</label>
 			</p>
 			<p>
-				<span class="chk"><input type="text" size="2" maxlength="2" id="keep_log" name="keep_log" value="<?php echo $server_config['xtense_keep_log']; ?>" /></span>
-				<label for="keep_log">Dur&eacute;e de conservation des fichiers logs de Xtense (en jours, 0 pour aucune suppression).</label>
-			</p>
-			<p>
-				<span class="chk"><input type="checkbox" id="log_reverse" name="log_reverse"<?php echo ($server_config['xtense_log_reverse'] == 1 ? ' checked="checked"' : '');?> /></span>
-				<label for="log_reverse">Afficher les actions les plus r&eacute;centes en haut dans le journal.</label>
-			</p>
-			<p>
 				<span class="chk"><input type="checkbox" id="spy_autodelete" name="spy_autodelete"<?php echo ($server_config['xtense_spy_autodelete'] == 1 ? ' checked="checked"' : '');?> /></span>
 				<label for="spy_autodelete">Effacement automatique des RE trop vieux (configurable depuis l&#039;admin de OGSpy).</label>
 			</p>
@@ -415,10 +342,6 @@ function toggle_callback_info() {
 					<label for="log_messages">Messages</label>
 				</p>
 				<hr size="1" />
-				<p>
-					<span class="chk"><input type="checkbox" id="log_ogspy" name="log_ogspy"<?php echo ($server_config['xtense_log_ogspy'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_ogspy">Utiliser le journal OGSpy</label>
-				</p>
 			</fieldset>
 		</div>
 		<div class="clear sep"></div>
@@ -528,61 +451,6 @@ function toggle_callback_info() {
 	<?php } ?>
 	</table>
 	<br/>
-	
-<?php } elseif ($page == 'log') { ?>
-<style type="text/css">@import url(mod/<?php echo $root; ?>/js/calendar/theme.css);</style>
-<script type="text/javascript" src="mod/<?php echo $root; ?>/js/calendar/calendar.js" /></script>
-<script type="text/javascript" src="mod/<?php echo $root; ?>/js/calendar/calendar-fr.js" /></script>
-<script type="text/javascript" src="mod/<?php echo $root; ?>/js/calendar/calendar-setup.js" /></script>
-	
-	<?php if (isset($unwritable)) { ?>
-		<p class="error">Le dossier log/ du plugin Xtense n&#039;est pas accessible en &eacute;criture ! Les journaux ne seront pas sauvegard&eacute;s</p>
-	<?php } ?>
-
-	<?php if (isset($purge)) { ?>
-		<?php if ($purge == 0) { ?>
-			<p class="error">Une erreur a eu lieue lors de la suppression des fichiers. Impossible de continuer.</p>
-		<?php } else { ?>
-			<p class="success">Fichiers supprim&eacute;s</p>
-		<?php } ?>
-	<?php } ?>
-	
-	<p>
-		Taille actuellement occup&eacute;e par les fichiers de journalisation : <strong><?php echo $log_size;?></strong> <em>(<?php echo $log_size_moy;?> pour <?php echo $nb;?> fichiers)</em> -
-		<a href="?action=xtense&amp;page=log&amp;purge" onclick="return confirm('Etes-vous s&ucirc;r de vouloir supprimer tous les journaux ?');">Tout supprimer</a>
-	</p>
-	
-	<div class="sep"></div>
-	<form action="?action=xtense&amp;page=log" method="post" name="form" id="form">
-		<label>Date du journal &agrave; visionner : <input type="text" id="date" name="date" size="10" maxlength="10" readonly value="<?php echo $date; ?>" /></label>
-		<button class="submit" type="submit">Voir</button>
-	</form>
-	
-<script type="text/javascript">
-var availableLogs = [<?php if (!empty($availableLogs)) echo "'".implode(',', $availableLogs)."'"; ?>];
-
-Calendar.setup({
-	inputField  : 'date',
-	ifFormat    : '%d/%m/%Y',
-	button      : 'date',
-	showOthers  : true,
-	range		: [2012, 2099],
-	weekNumbers : false
-});
-</script>
-<?php if (isset($error)) { ?>
-	<p class="error">Impossible de lire le fichier du journal : <?php echo $file; ?></p>
-<?php } ?>
-
-	<div class="sep"></div>
-	<p><strong>Historique du <?php echo $date; ?> :</strong></p>
-	<p id="log">
-		<?php if (isset($no_log)) { 
-			echo "Historique vide";
-		} else { 
-			echo $content; 
-		} ?>
-	</p>
 <?php } elseif ($page == 'about') { ?>
 	<p>Xtense par Unibozu</a></p>
 	<p>Forum de support de l'OGSteam : <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Xtense</a></p>
