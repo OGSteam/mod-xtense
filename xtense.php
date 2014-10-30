@@ -132,7 +132,7 @@ $call = new CallbackHandler();
 //nombre de messages
 $io->set(array('new_messages' => 0));
 
-// Xtense : Ajout de la version et du type de barre utilisée par l'utilisateur
+// Xtense : Ajout de la version et du type de barre utilisÃ©e par l'utilisateur
 $db->sql_query("UPDATE " . TABLE_USER . " SET xtense_version='" . $pub_toolbar_version . "', xtense_type='" . $pub_toolbar_type . "' WHERE user_id = ".$user_data['user_id']);
 $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
 
@@ -220,7 +220,7 @@ switch ($page_type){
 				$set = '';
 				foreach ($database['buildings'] as $code) {
 					if(isset(${'pub_'.$code}))
-						$set .= ', '.$code.' = '.${'pub_'.$code};//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+						$set .= ', '.$code.' = '.${'pub_'.$code};//avec la nouvelle version d'Ogame, on n'ÃƒÂ©crase que si on a vraiment 0
 				}
 				
 				$db->sql_query('UPDATE '.TABLE_USER_BUILDING.' SET planet_name = "'.$planet_name.'"'.$set.' WHERE planet_id = '.$home['id'].' AND user_id = '.$user_data['user_id']);
@@ -484,7 +484,7 @@ switch ($page_type){
 			while($value = $db->sql_fetch_assoc($check))
 				$update[$value['row']] = true;
             }
-			// RecupÃ©ration des donnÃ©es
+			// RecupÃƒÂ©ration des donnÃƒÂ©es
 			for ($i = 1; $i < 16; $i++) {
 				if (isset($rows[$i])) {
 					$line = $rows[$i];
@@ -572,7 +572,7 @@ switch ($page_type){
             if (isset($pub_type3)){
                 if(!($pub_type3 >= 4 && $pub_type3 <= 7)) die ("hack");
             }
-            //Vérification Offset
+            //VÃ©rification Offset
             if(($pub_offset-1 % 100) !=0) die("hack");
 			
 			$type1		= $pub_type1;
@@ -753,7 +753,7 @@ switch ($page_type){
 					);
 					$id_rcround[$i] = $db->sql_insertid();
 				}
-				//Ne pas le faire si destruction attaquant ou dÃ©fenseur au 1er tour, ou match nul au 1er tour
+				//Ne pas le faire si destruction attaquant ou dÃƒÂ©fenseur au 1er tour, ou match nul au 1er tour
 				if ($pub_count>1) {
 					$i++;
 					$db->sql_query("INSERT INTO ".TABLE_PARSEDRCROUND." (
@@ -902,7 +902,7 @@ switch ($page_type){
 							'check' => $isAttack,
 							'user' => $user_attack
 		));
-		add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
+		add_log('info', array('toolbar' => $toolbar_info, 'message' => "vÃ©rifie les flottes hostiles de la communautÃ©"));
 	break;
 		
 	case 'messages': //PAGE MESSAGES
@@ -1069,7 +1069,7 @@ switch ($page_type){
                     if (isset($line['coords'], $line['content']) == false) die("hack");
                                       
 					$line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
-                    $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expédition
+                    $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expÃ©dition
 					
 					$expedition = array(
 							'time' => $line['date'],
@@ -1118,7 +1118,7 @@ switch ($page_type){
 							'deuterium' => $line['deuterium']
 					);
 					$call->add('trade_me', $trade_me);
-					add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une de ses livraison effectuée pour " . $line['trader']));
+					add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une de ses livraison effectuÃ©e pour " . $line['trader']));
 				break;
 			}
 			
@@ -1129,15 +1129,15 @@ switch ($page_type){
 		
 	break;
 	
-	case 'android': // Récupération des données pour android		  
+	case 'android': // RÃ©cupÃ©ration des donnÃ©es pour android		  
 		Check::data(isset($pub_action));
 				
 		switch($pub_action){
 			case 'attacks':
 				/*******************************************************
-				 ***  Récuperation des données venant du mod Hostiles ***
+				 ***  RÃ©cuperation des donnÃ©es venant du mod Hostiles ***
 				 ********************************************************/	
-				//On vérifie que le mod Hostile est activé
+				//On vÃ©rifie que le mod Hostile est activÃ©
 				$queryModHostile = "SELECT `active` FROM `".TABLE_MOD."` WHERE `action`='hostiles' AND `active`='1' LIMIT 1";
 				$hostile=array();
 				if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
@@ -1183,9 +1183,9 @@ switch ($page_type){
 				
 			break;
 
-			case 'ally': // Détails alliance
+			case 'ally': // DÃ©tails alliance
 				/*******************************************************
-				 ***  Récuperation des données d'alliance ***
+				 ***  RÃ©cuperation des donnÃ©es d'alliance ***
 				********************************************************/
 				$alliance=array();
 				$queryAllianceName = "SELECT DISTINCT(ally) FROM " . TABLE_UNIVERSE . " WHERE (player = '" . $user_data['user_stat_name'] ."' OR player = '" . $user_data['user_name'] ."') ORDER BY last_update DESC LIMIT 1";
@@ -1202,7 +1202,7 @@ switch ($page_type){
 	
 			case 'spys':
 				/*******************************************************
-				***  Récuperation des données des espionnages ***
+				***  RÃ©cuperation des donnÃ©es des espionnages ***
 				********************************************************/
 						
 				//Gestion des dates
@@ -1210,7 +1210,7 @@ switch ($page_type){
 				$mois = date("m");
 				$annee = date("Y");
 				
-				//Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
+				//Si les dates d'affichage ne sont pas dÃ©finies, on affiche par dÃ©faut les attaques du jours
 				$pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
 				$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
 				
@@ -1251,7 +1251,7 @@ switch ($page_type){
 			
 			case 'rentas':
 				/*******************************************************
-				 ***  Récuperation des données des espionnages ***
+				 ***  RÃ©cuperation des donnÃ©es des espionnages ***
 				 ********************************************************/
 				
 				//Gestion des dates
@@ -1259,7 +1259,7 @@ switch ($page_type){
 				$mois = date("m");
 				$annee = date("Y");
 				
-				//Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
+				//Si les dates d'affichage ne sont pas dÃ©finies, on affiche par dÃ©faut les attaques du jours
 				if($pub_interval=='day'){
 					$pub_date_from = mktime(0, 0, 0, $mois, $date, $annee);
 					$pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
@@ -1307,7 +1307,7 @@ switch ($page_type){
 			case 'server':
 				
 				/***********************************
-				 ***  Construction de la réponse ***
+				 ***  Construction de la rÃ©ponse ***
 				***********************************/
 				//$io->set(array('server' => $server_config['servername'], 'type' => 'android', 'hostile' => $hostile, 'alliance' => $alliance, 'spys' => $spys));
 				$io->set(array('server' => $server_config['servername']));
@@ -1315,7 +1315,7 @@ switch ($page_type){
 			break;
 		}
 		
-		//add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));			}
+		//add_log('info', array('toolbar' => $toolbar_info, 'message' => "vÃ©rifie les flottes hostiles de la communautÃ©"));			}
 	break;
 		
 	default:
