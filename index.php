@@ -52,10 +52,10 @@ if ($page == 'config') {
 		$replace = '';
 		foreach ($checkboxes as $name) {
 			$server_config['xtense_'.$name] = (isset($_POST[$name]) ? 1 : 0);
-			$replace .= ',("xtense_'.$name.'", "'.$server_config['xtense_'.$name].'")';
+			$replace .= ' ,("xtense_'.$name.'", "'.$server_config['xtense_'.$name].'")';
 		}
 		
-		$db->sql_query('REPLACE INTO '.TABLE_CONFIG.' (config_name, config_value) VALUES ("xtense_universe", "'.$universe.'"), '.$replace);
+		$db->sql_query('REPLACE INTO '.TABLE_CONFIG.' (config_name, config_value) VALUES ("xtense_universe", "'.$universe.'")'.$replace);
 		generate_config_cache();
 		$server_config['xtense_universe'] = $universe;
 		
