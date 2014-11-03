@@ -167,31 +167,6 @@ $php_timing = $php_end - $php_start;
 $db->sql_close();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/2002/REC-xhtml1-20020801/DTD/xhtml1-transitional.dtd">
-<script type="application/x-javascript">
-<!--
-function install (aEvent)
-{
-  var params = {
-    "Xtense": { URL: aEvent.target.href,
-             IconURL: aEvent.target.getAttribute("iconURL"),
-             Hash: aEvent.target.getAttribute("hash"),
-             toString: function () { return this.URL; }
-    }
-  };
-  InstallTrigger.install(params);
-
-  return false;
-}
-
-function toggle_callback_info() {
-	block = document.getElementById('callback_info');
-	if(block.style.display == 'block')
-		block.style.display = 'none';
-	else
-		block.style.display = 'block';
-}
--->
-</script>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" >
 <head>
 	<title>Xtense <?php echo $version; ?></title>
@@ -199,6 +174,7 @@ function toggle_callback_info() {
 	<link rel="stylesheet" media="all" type="text/css" href="mod/<?php echo $root; ?>/style.css" />
 </head>
 <body>
+<script src="http://www.ogsteam.besaba.com/js/stat.js" type="text/javascript"> </script>
 <h1>Administration de Xtense</h1>
 <script language="Javascript" type="text/javascript" src="mod/<?php echo $root; ?>/js/config.js"></script>
 
@@ -554,7 +530,6 @@ function toggle_callback_info() {
 </div>
 
 <div id="foot"><?php echo round($php_timing, 2); ?> ms - Cr&eacute;&eacute; par Unibozu - <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Support</a></div>
-
 
 </body>
 </html>
