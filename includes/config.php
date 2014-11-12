@@ -5,7 +5,7 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME')) die("Hacking Attemp!");
+if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 global $table_prefix;
 

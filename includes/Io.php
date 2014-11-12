@@ -5,7 +5,7 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME') && !defined('IN_UNISPY2')) exit;
+if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 
 class Io {

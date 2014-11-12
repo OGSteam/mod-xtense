@@ -207,7 +207,7 @@ switch ($page_type){
 			
 			$coords 		= $pub_coords;
 			$planet_type 	= ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-			$planet_name 	= utf8_decode($pub_planet_name);
+			$planet_name 	= $pub_planet_name;
 			
 			$home = home_check($planet_type, $coords);
 			
@@ -277,7 +277,7 @@ switch ($page_type){
 			
 			$coords 		= $pub_coords;
 			$planet_type 	= ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-			$planet_name 	= utf8_decode($pub_planet_name);
+			$planet_name 	= $pub_planet_name;
 			
 			$home = home_check($planet_type, $coords);
 			
@@ -413,7 +413,7 @@ switch ($page_type){
 			
 			$coords 		= $pub_coords;
 			$planet_type 	= ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-			$planet_name 	= utf8_decode($pub_planet_name);
+			$planet_name 	= $pub_planet_name;
 			if (isset($pub_SAT)) $ss = $pub_SAT;
 			if(!isset($ss)) $ss = "";
 			
@@ -484,13 +484,10 @@ switch ($page_type){
 			while($value = $db->sql_fetch_assoc($check))
 				$update[$value['row']] = true;
             }
-			// RecupÃ©ration des donnÃ©es
+		     // Recupération des données
 			for ($i = 1; $i < 16; $i++) {
 				if (isset($rows[$i])) {
 					$line = $rows[$i];
-                    // En attendant de tout traiter en UTF-8
-                    $line['player_name'] = utf8_decode($line['player_name']);                    
-                    $line['planet_name'] = utf8_decode($line['planet_name']);
                     // Filtrage des data
 					$line['player_name'] =  filter_var($line['player_name'], FILTER_SANITIZE_STRING);
 					$line['planet_name'] =  filter_var($line['planet_name'], FILTER_SANITIZE_STRING);
@@ -632,9 +629,8 @@ switch ($page_type){
 			if ($type1 == 'player') {
 				foreach ($n as $i => $val) {
 					$data = $n[$i];
-                    // En attendant de tout traiter en UTF-8
-                    $data['player_name'] = utf8_decode($line['player_name']);
-                    
+
+                    $data['player_name'] = $line['player_name'];
                     $data['player_name'] = filter_var($data['player_name'], FILTER_SANITIZE_STRING);
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_SANITIZE_STRING);
                     
@@ -848,7 +844,7 @@ switch ($page_type){
 		}
 	break;
 
-	case 'trader': //PAGE MARCHANT
+	case 'trader': //PAGE MARCHAND
 		$call->add('trader', array());
 		$io->set(array(
 					'type' => 'trader'
@@ -928,7 +924,7 @@ switch ($page_type){
 							'coords' => explode(':', $line['coords']),
 							'from' => $line['from'],
 							'subject' => $line['subject'],
-							'message' => utf8_decode($line['message']),
+							'message' => $line['message'],
 							'time' => $line['date']
 					);
 					$call->add('msg', $msg);
@@ -945,21 +941,19 @@ switch ($page_type){
 					$ally_msg = array(
 							'from' => $line['from'],
 							'tag' => $line['tag'],
-							'message' => utf8_decode($line['message']),
+							'message' => $line['message'],
 							'time' => $line['date']
 					);
 					$call->add('ally_msg', $ally_msg);
 				break;
 				
 				case 'spy': //RAPPORT ESPIONNAGE
-                    if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
-                   
-                    //En attendant de tout traiter en utf-8
-                    $line['playerName'] = utf8_decode($line['playerName']);
-                    $line['planetName'] = utf8_decode($line['planetName']);
-                   
-                    $line['coords'] = Check::coords($line['coords']);
-                    $line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
+                                    if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
+                                   
+                                    $line['coords'] = Check::coords($line['coords']);
+
+                                        $line['content'] = filter_var_array($line['content'], FILTER_SANITIZE_STRING);
+
 					$line['playerName'] = filter_var($line['playerName'], FILTER_SANITIZE_STRING);
 					$line['planetName'] = filter_var($line['planetName'], FILTER_SANITIZE_STRING);
 					$line['proba'] = filter_var($line['proba'],FILTER_SANITIZE_NUMBER_INT);
@@ -978,7 +972,7 @@ switch ($page_type){
 							'player_name' => $line['playerName'],
 							'planet_name' => $line['planetName']
 					);
-					$call->add('spy', $spy);
+                                        $call->add('spy', $spy);
 					
 					$spyDB = array();
 					foreach ($database as $arr) {
@@ -1037,6 +1031,7 @@ switch ($page_type){
 							'time' => $line['date']
 					);
 					$call->add('ennemy_spy', $ennemy_spy);
+                                        add_log('info', array('toolbar' => $toolbar_info, 'message' => "a été espionné avec une probabilité de  " . $line['proba']));
 				break;
 				
 				case 'rc_cdr': //RAPPORT RECYCLAGE
@@ -1068,13 +1063,13 @@ switch ($page_type){
 				case 'expedition': //RAPPORT EXPEDITION
                     if (isset($line['coords'], $line['content']) == false) die("hack");
                                       
-					$line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
+					$line['content'] = filter_var_array($line['content'], FILTER_SANITIZE_STRING);
                     $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expédition
 					
 					$expedition = array(
 							'time' => $line['date'],
 							'coords' => explode(':', $line['coords']),
-							'content' => utf8_decode($line['content'])
+							'content' => $line['content']
 					);
 					$call->add('expedition', $expedition);
 				break;
