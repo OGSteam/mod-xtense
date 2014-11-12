@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * @package Xtense 2
+ * @author Unibozu
+ * @licence GNU
+ */
+if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
+
 	require_once("mod/{$root}/includes/Callback.php");
 
 	// Vidange de la table
