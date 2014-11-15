@@ -36,18 +36,18 @@ if ($is_ok == true)
 			`C_recovered` INT( 11 ) NOT NULL ,
 			`sender_id` INT( 11 ) NOT NULL ,
 			PRIMARY KEY ( `id_rec` )
-		)");
+		) DEFAULT CHARSET=utf8;");
+        
+        $db->sql_query("CREATE TABLE IF NOT EXISTS ".TABLE_PARSEDSPYEN." (
+            `spy_id` INT( 255 ) NOT NULL AUTO_INCREMENT ,
+            `dateSpy` INT( 11 ) NOT NULL ,
+            `from` VARCHAR( 9 ) NOT NULL ,
+            `to` VARCHAR( 9 ) NOT NULL ,
+            `proba` INT( 3 ) NOT NULL ,
+            `sender_id` INT( 11 ) NOT NULL ,
+            PRIMARY KEY ( `spy_id` )
+        )DEFAULT CHARSET=utf8;");
 
-		$db->sql_query("CREATE TABLE IF NOT EXISTS ".TABLE_PARSEDSPYEN." (
-			`spy_id` INT( 255 ) NOT NULL AUTO_INCREMENT ,
-			`dateSpy` INT( 11 ) NOT NULL ,
-			`from` VARCHAR( 9 ) NOT NULL ,
-			`to` VARCHAR( 9 ) NOT NULL ,
-			`proba` INT( 3 ) NOT NULL ,
-			`sender_id` INT( 11 ) NOT NULL ,
-			PRIMARY KEY ( `spy_id` )
-		)");	
-		
 		//---- Creation de la table des Callbacks
 		$db->sql_query("CREATE TABLE IF NOT EXISTS `".TABLE_XTENSE_CALLBACKS."` (
 			`id` int(3) NOT NULL auto_increment,
@@ -58,7 +58,7 @@ if ($is_ok == true)
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `mod_id` (`mod_id`,`type`),
 			KEY `active` (`active`)
-			)");
+			) DEFAULT CHARSET=utf8;");
 
 		$db->sql_query("CREATE TABLE IF NOT EXISTS `".TABLE_XTENSE_GROUPS."` (
 			`group_id` int(4) NOT NULL,
@@ -67,7 +67,7 @@ if ($is_ok == true)
 			`empire` tinyint(4) NOT NULL,
 			`messages` tinyint(4) NOT NULL,
 			PRIMARY KEY  (`group_id`)
-			)");
+			) DEFAULT CHARSET=utf8;");
 
 		//---- Creation configuration Xtense
 		$db->sql_query("REPLACE INTO ".TABLE_CONFIG." (config_name, config_value) VALUES

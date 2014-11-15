@@ -12,6 +12,12 @@ global $db,$table_prefix;
 $mod_folder = "xtense";
 $mod_name = "xtense";
 
+$db->sql_query("ALTER TABLE ".TABLE_PARSEDREC." CONVERT TO CHARACTER SET utf8");
+$db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." CONVERT TO CHARACTER SET utf8");
+$db->sql_query("ALTER TABLE ".TABLE_XTENSE_GROUPS." CONVERT TO CHARACTER SET utf8");
+$db->sql_query("ALTER TABLE ".TABLE_PARSEDSPYEN." CONVERT TO CHARACTER SET utf8");
+
+
 $db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE config_name LIKE "xtense_log_ogspy"');
 $db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE config_name LIKE "xtense_keep_log"');
 

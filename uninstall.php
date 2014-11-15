@@ -10,7 +10,7 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 global $de,$table_prefix;
 $mod_uninstall_name = "xtense";
-$mod_uninstall_table = $table_prefix."xtense_groups".','.$table_prefix."xtense_callbacks";
+$mod_uninstall_table = $table_prefix."xtense_groups".','.$table_prefix."xtense_callbacks".','.$table_prefix."parsedRec".','.$table_prefix."parsedSpyEn";
 uninstall_mod ($mod_uninstall_name, $mod_uninstall_table);
 
 require_once("mod/{$root}/includes/config.php");
