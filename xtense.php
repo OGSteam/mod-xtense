@@ -572,14 +572,14 @@ switch ($page_type){
                 }
             }
             //Vérification Offset
-            if(($pub_offset-1 % 100) !=0) die("Erreur Offset");
+            if((($pub_offset-1) % 100) != 0) die("Erreur Offset");
 			
 			$type1		= $pub_type1;
 			$type2 		= $pub_type2;
 			$type3 		= $pub_type3;
 			$time		= (int)$pub_time;
 			$offset 	= (int)$pub_offset;
-			$n 			= (array)$pub_n;
+			$n 		= (array)$pub_n;
 			$total		= 0;
 			$count		= count($n);
 			
@@ -632,7 +632,6 @@ switch ($page_type){
 				foreach ($n as $i => $val) {
 					$data = $n[$i];
 
-                    $data['player_name'] = $line['player_name'];
                     $data['player_name'] = filter_var($data['player_name'], FILTER_SANITIZE_STRING);
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_SANITIZE_STRING);
                     
