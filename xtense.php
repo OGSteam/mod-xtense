@@ -554,7 +554,7 @@ switch ($page_type){
 	break;
 
 	case 'ranking': //PAGE STATS
-    if (isset($pub_type1, $pub_type2, $pub_offset, $pub_n, $pub_time) == false) die("hack");
+    if (isset($pub_type1, $pub_type2, $pub_offset, $pub_n, $pub_time) == false) die("Classement incomplet");
 		
 		if (!$user_data['grant']['ranking']) {
 			$io->set(array(
@@ -564,13 +564,15 @@ switch ($page_type){
 			$io->status(0);
 		} else {
 
-            if ($pub_type1 != ('player' || 'ally')) die ("hack");
-            if ($pub_type2 != ('points' || 'fleet' || 'research' ||'economy')) die ("hack");
+            if ($pub_type1 != ('player' || 'ally')) die ("type 1 non défini");
+            if ($pub_type2 != ('points' || 'fleet' || 'research' ||'economy')) die ("type 2 non défini");
             if (isset($pub_type3)){
-                if(!($pub_type3 >= 4 && $pub_type3 <= 7)) die ("hack");
+                if(!empty($pub_type3)){
+                    if(!($pub_type3 >= 4 && $pub_type3 <= 7 )) die ("type 3 non défini");
+                }
             }
             //Vérification Offset
-            if(($pub_offset-1 % 100) !=0) die("hack");
+            if(($pub_offset-1 % 100) !=0) die("Erreur Offset");
 			
 			$type1		= $pub_type1;
 			$type2 		= $pub_type2;
