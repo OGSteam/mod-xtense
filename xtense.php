@@ -554,7 +554,7 @@ switch ($page_type){
 	break;
 
 	case 'ranking': //PAGE STATS
-    if (isset($pub_type1, $pub_type2, $pub_offset, $pub_n, $pub_time) == false) die("hack");
+    if (isset($pub_type1, $pub_type2, $pub_offset, $pub_n, $pub_time) == false) die("Classement incomplet");
 		
 		if (!$user_data['grant']['ranking']) {
 			$io->set(array(
@@ -564,20 +564,22 @@ switch ($page_type){
 			$io->status(0);
 		} else {
 
-            if ($pub_type1 != ('player' || 'ally')) die ("hack");
-            if ($pub_type2 != ('points' || 'fleet' || 'research' ||'economy')) die ("hack");
+            if ($pub_type1 != ('player' || 'ally')) die ("type 1 non défini");
+            if ($pub_type2 != ('points' || 'fleet' || 'research' ||'economy')) die ("type 2 non défini");
             if (isset($pub_type3)){
-                if(!($pub_type3 >= 4 && $pub_type3 <= 7)) die ("hack");
+                if(!empty($pub_type3)){
+                    if(!($pub_type3 >= 4 && $pub_type3 <= 7 )) die ("type 3 non défini");
+                }
             }
             //Vérification Offset
-            if(($pub_offset-1 % 100) !=0) die("hack");
+            if((($pub_offset-1) % 100) != 0) die("Erreur Offset");
 			
 			$type1		= $pub_type1;
 			$type2 		= $pub_type2;
 			$type3 		= $pub_type3;
 			$time		= (int)$pub_time;
 			$offset 	= (int)$pub_offset;
-			$n 			= (array)$pub_n;
+			$n 		= (array)$pub_n;
 			$total		= 0;
 			$count		= count($n);
 			
@@ -630,7 +632,6 @@ switch ($page_type){
 				foreach ($n as $i => $val) {
 					$data = $n[$i];
 
-                    $data['player_name'] = $line['player_name'];
                     $data['player_name'] = filter_var($data['player_name'], FILTER_SANITIZE_STRING);
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_SANITIZE_STRING);
                     
