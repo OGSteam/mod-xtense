@@ -851,7 +851,7 @@ switch ($page_type){
 					'type' => 'trader'
 			));
 	break;
-	
+	/*
 	case 'hostiles': // Hostiles
 		$line = $pub_data;
 		$line['attacker_name'] = filter_var($line['attacker_name'], FILTER_SANITIZE_STRING);
@@ -901,7 +901,7 @@ switch ($page_type){
 		));
 		add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
 	break;
-		
+	*/	
 	case 'messages': //PAGE MESSAGES
         if (isset($pub_data) == false) die("hack");
 		
