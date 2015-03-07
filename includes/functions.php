@@ -254,7 +254,7 @@ function update_statistic($stats,$value){
 	$request = "update ".TABLE_STATISTIC." set statistic_value = statistic_value + {$value}";
 	$request .= " where statistic_name = '{$stats}'";
 	$db->sql_query($request);
-	if (mysql_affected_rows() == 0) {
+	if ($db->sql_affectedrows() == 0) {
 		$request = "insert ignore into ".TABLE_STATISTIC." values ('{$stats}', '{$value}')";
 		$db->sql_query($request);
 	}	
