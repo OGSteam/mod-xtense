@@ -851,58 +851,52 @@ switch ($page_type){
 					'type' => 'trader'
 			));
 	break;
-	/*
-	case 'hostiles': // Hostiles
-		$line = $pub_data;
-		$line['attacker_name'] = filter_var($line['attacker_name'], FILTER_SANITIZE_STRING);
-		$line['origin_attack_name'] = filter_var($line['origin_attack_name'], FILTER_SANITIZE_STRING);
-		$line['destination_name'] = filter_var($line['destination_name'], FILTER_SANITIZE_STRING);
-		$line['composition'] = filter_var($line['composition'], FILTER_SANITIZE_STRING);
-		
-		$hostile = array('id' => $line['id'],
-						'id_vague' => $line['id_vague'],
-						'player_id' => $line['player_id'],
-						'ally_id' => $line['ally_id'],
-						'arrival_time' => $line['arrival_time'],
-						'destination_name' => $line['destination_name'],
-						'id_vague' => $line['id_vague'],
-						'attacker' => $line['attacker_name'],
-						'origin_planet' => $line['origin_attack_name'],
-						'origin_coords' => $line['origin_attack_coords'],
-						'cible_planet' => $line['destination_name'],
-						'cible_coords' => $line['destination_coords'],
-						'composition_flotte' => $line['composition'],
-						'clean' => $line['clean']
-		);
-		$call->add('hostiles', $hostile);	
-		$io->set(array('function' => 'hostiles',
-					   		'type' => 'hostiles'
-		));
-		add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
-	break;
-		
-	case 'checkhostiles': // Verification des flotttes Hostiles
-		$user_attack="";
-		$query = "SELECT DISTINCT(hos.user_id) AS user_id, user_name "
-				."FROM " . TABLE_USER . " user, ".$table_prefix."hostiles hos "
-				."WHERE user.user_id=hos.user_id";
-		$result = $db->sql_query($query);
-		$isAttack=0;
 
-		while(list($user_id,$user_name)=$db->sql_fetch_row($result)){			
-			$user_attack .= $user_name;
-			$user_attack .= " ";
-			$isAttack=1;
-		}
-		
-		$io->set(array('type' => 'checkhostiles',
-							'check' => $isAttack,
-							'user' => $user_attack
-		));
-		add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
-	break;
-	*/	
-	case 'messages': //PAGE MESSAGES
+    case 'hostiles': // Hostiles
+        $line = $pub_data;
+        $line['attacker_name'] = filter_var($line['attacker_name'], FILTER_SANITIZE_STRING);
+        $line['origin_attack_name'] = filter_var($line['origin_attack_name'], FILTER_SANITIZE_STRING);
+        $line['destination_name'] = filter_var($line['destination_name'], FILTER_SANITIZE_STRING);
+        $line['composition'] = filter_var($line['composition'], FILTER_SANITIZE_STRING);
+
+        $hostile = array('id' => $line['id'],
+            'id_vague' => $line['id_vague'],
+            'player_id' => $line['player_id'],
+            'ally_id' => $line['ally_id'],
+            'arrival_time' => $line['arrival_time'],
+            'destination_name' => $line['destination_name'],
+            'id_vague' => $line['id_vague'],
+            'attacker' => $line['attacker_name'],
+            'origin_planet' => $line['origin_attack_name'],
+            'origin_coords' => $line['origin_attack_coords'],
+            'cible_planet' => $line['destination_name'],
+            'cible_coords' => $line['destination_coords'],
+            'composition_flotte' => $line['composition'],
+            'clean' => $line['clean'],
+            'check' => false
+        );
+        $call->add('hostiles', $hostile);
+        $io->set(array('function' => 'hostiles',
+            'type' => 'hostiles'
+        ));
+        add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
+        break;
+
+    case 'checkhostiles': // Verification des flotttes Hostiles des joueurs de la communauté
+        $hostile = array('is_attack' => false,
+            'user_attack' => null,
+            'check' => true
+        );
+        $call->add('hostiles', $hostile);
+
+        $io->set(array('type' => 'checkhostiles',
+            'check' => $hostile['is_attack'],
+            'user' => $hostile['user_attack']
+        ));
+        add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
+        break;
+
+    case 'messages': //PAGE MESSAGES
         if (isset($pub_data) == false) die("hack");
 		
 		if (!$user_data['grant']['messages']) {
