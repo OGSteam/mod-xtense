@@ -875,11 +875,15 @@ switch ($page_type){
             'clean' => $line['clean'],
             'check' => false
         );
+
         $call->add('hostiles', $hostile);
+
         $io->set(array('function' => 'hostiles',
             'type' => 'hostiles'
         ));
+
         add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
+
         break;
 
     case 'checkhostiles': // Verification des flotttes Hostiles des joueurs de la communauté
@@ -887,12 +891,14 @@ switch ($page_type){
             'user_attack' => null,
             'check' => true
         );
+
         $call->add('hostiles', $hostile);
 
         $io->set(array('type' => 'checkhostiles',
             'check' => $hostile['is_attack'],
             'user' => $hostile['user_attack']
         ));
+
         add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
         break;
 
