@@ -1,1 +1,1 @@
-Je suis un FORK : ne pas m'utiliser comme base de développement !!
+Version de travail Xtense
