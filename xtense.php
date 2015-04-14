@@ -864,6 +864,7 @@ switch ($page_type){
             'player_id' => $line['player_id'],
             'ally_id' => $line['ally_id'],
             'arrival_time' => $line['arrival_time'],
+			'arrival_datetime' => $line['arrival_datetime'],
             'destination_name' => $line['destination_name'],
             'id_vague' => $line['id_vague'],
             'attacker' => $line['attacker_name'],
