@@ -230,7 +230,7 @@ function add_log($type, $data = null) {
         $file = 'log_'.date('ymd').'.log';
         if (!file_exists('journal/'.$dir)) @mkdir('journal/'.$dir);
         if (file_exists('journal/'.$dir)) {
-            @chmod('journal/'.$date, 0777);
+            @chmod('journal/'.$dir, 0777);
             $fp = @fopen('journal/'.$dir.'/'.$file, 'a+');
             if ($fp) {
                 fwrite($fp, '/*'.date('d/m/Y H:i:s').'*/'.'[Xtense]'.'['.$data['toolbar'].'] '.$user_data['user_name'].' '.$message."\n");
@@ -260,70 +260,21 @@ function update_statistic($stats,$value){
 	}
 }
 
-function parse_booster($boosterdata){
+function update_boosters($boosterdata){
 
-    $booster_table = array('booster_m_val', 'booster_m_date', 'booster_c_val', 'booster_c_date', 'booster_d_val', 'booster_d_date', 'extention_p', 'extention_m');
-    
-    foreach($boosterdata as $booster){
-    
-        switch($booster[0]){
-            case "05294270032e5dc968672425ab5611998c409166" : //*_Booster de métal +30%
-                $booster_table['booster_m_val'] = 30;
-                $booster_table['booster_m_date'] = $booster[1];
-            break;
-            case "ba85cc2b8a5d986bbfba6954e2164ef71af95d4a" :  // *_Booster de métal +20% = 
-                $booster_table['booster_m_val'] = 20;
-                $booster_table['booster_m_date'] = $booster[1];
-            break;
-            case "de922af379061263a56d7204d1c395cefcfb7d75" : //  *_Booster de métal +10% = 
-                $booster_table['booster_m_val'] = 10;
-                $booster_table['booster_m_date'] = $booster[1];
-            break;
-            case "118d34e685b5d1472267696d1010a393a59aed03" :  //  *_Booster de cristal +30% = 
-                $booster_table['booster_c_val'] = 30;
-                $booster_table['booster_c_date'] = $booster[1];
-            break;
-            case "422db99aac4ec594d483d8ef7faadc5d40d6f7d3" :  // *_Booster de cristal +20% = 
-                $booster_table['booster_c_val'] = 20;
-                $booster_table['booster_c_date'] = $booster[1];
-            break;
-            case "3c9f85221807b8d593fa5276cdf7af9913c4a35d" :  // *_Booster de cristal +10% = 
-                $booster_table['booster_c_val'] = 10;
-                $booster_table['booster_c_date'] = $booster[1];
-            break;
-            case "5560a1580a0330e8aadf05cb5bfe6bc3200406e2" :  // *_Booster de deutérium +30% = 
-                $booster_table['booster_d_val'] = 30;
-                $booster_table['booster_d_date'] = $booster[1];
-            break;
-            case "e4b78acddfa6fd0234bcb814b676271898b0dbb3" :  // *_Booster de deutérium +20% = 
-                $booster_table['booster_d_val'] = 20;
-                $booster_table['booster_d_date'] =$booster[1];
-            break;
-            case "d9fa5f359e80ff4f4c97545d07c66dbadab1d1be" :  // *_Booster de deutérium +10% = 
-                $booster_table['booster_d_val'] = 10;
-                $booster_table['booster_d_date'] = $booster[1];
-            break;
-            case "16768164989dffd819a373613b5e1a52e226a5b0" :  // *_Extension planétaire +4  = 
-                $booster_table['extention_p'] = 4;
-            break;
-            case "0e41524dc46225dca21c9119f2fb735fd7ea5cb3" :  // *_Extension planétaire +9  = 
-                $booster_table['extention_p'] = 9;
-            break;
-            case "04e58444d6d0beb57b3e998edc34c60f8318825a" :  // *_Extension planétaire +15 = 
-                $booster_table['extention_p'] = 15;
-            break;
-            case "be67e009a5894f19bbf3b0c9d9b072d49040a2cc" :  // *_Extension lunaire +2 =
-                $booster_table['extention_m'] = 2;
-            break;
-            case "c21ff33ba8f0a7eadb6b7d1135763366f0c4b8bf" :  // *_Extension lunaire +4 = 
-                $booster_table['extention_m'] = 4;
-            break;
-            case "05ee9654bd11a261f1ff0e5d0e49121b5e7e4401" :  // *_Extension lunaire +6 =
-                $booster_table['extention_m'] = 6;
-            break;
-            default:
-            
-        }
-    }
-    return $booster_table;
+	$boosters = booster_decode();
+
+	foreach($boosterdata as $booster) {
+		if(!booster_is_uuid($booster[0])) {
+			log_("mod","Booster Inconnu");
+
+		} else {
+			if(!isset($booster[1]))
+				$boosters = booster_uuid($boosters, $booster[0]);
+			else
+				$boosters = booster_uuid($boosters, $booster[0], booster_lire_date($booster[1]));
+
+		}
+	}/*$booster_table = array('booster_m_val', 'booster_m_date', 'booster_c_val', 'booster_c_date', 'booster_d_val', 'booster_d_date', 'extention_p', 'extention_m');*/
+	return $boosters;
 }
