@@ -155,10 +155,11 @@ switch ($page_type){
 			$temperature_min	= (int)$pub_temperature_min;
 			$temperature_max	= (int)$pub_temperature_max;
 			$ressources			= $pub_ressources;
+            $ogame_timestamp    = $pub_ogame_timestamp;
 
 			$home = home_check($planet_type, $coords);
 			if(isset($pub_boostExt)){
-                $boosters = update_boosters($pub_boostExt); /*Merge des différents boosters*/
+                $boosters = update_boosters($pub_boostExt, $ogame_timestamp); /*Merge des différents boosters*/
                 $boosters = booster_encode($boosters); /*Conversion de l'array boosters en string*/
 			}else
                 $boosters = booster_encodev(0,0,0,0,0,0,0,0); /* si aucun booster détecté*/

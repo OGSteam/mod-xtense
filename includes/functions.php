@@ -260,19 +260,18 @@ function update_statistic($stats,$value){
 	}
 }
 
-function update_boosters($boosterdata){
+function update_boosters($boosterdata, $current_time ){
 
 	$boosters = booster_decode();
 
 	foreach($boosterdata as $booster) {
 		if(!booster_is_uuid($booster[0])) {
 			log_("mod","Booster Inconnu");
-
 		} else {
 			if(!isset($booster[1]))
 				$boosters = booster_uuid($boosters, $booster[0]);
 			else
-				$boosters = booster_uuid($boosters, $booster[0], booster_lire_date($booster[1]));
+				$boosters = booster_uuid($boosters, $booster[0], booster_lire_date($booster[1]) + $current_time);
 
 		}
 	}/*$booster_table = array('booster_m_val', 'booster_m_date', 'booster_c_val', 'booster_c_date', 'booster_d_val', 'booster_d_date', 'extention_p', 'extention_m');*/
