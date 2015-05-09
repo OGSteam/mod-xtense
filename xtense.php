@@ -137,8 +137,8 @@ $db->sql_query("UPDATE " . TABLE_USER . " SET xtense_version='" . $pub_toolbar_v
 $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
 
 switch ($page_type){
-	case 'overview': //PAGE OVERVIEW
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources, $pub_boostExt) == false) die("hack");
+	case 'overview': {//PAGE OVERVIEW
+        if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources) == false) die("hack");
 		if (!$user_data['grant']['empire']) {
 			$io->set(array(
 					'type' => 'grant',
@@ -155,22 +155,24 @@ switch ($page_type){
 			$temperature_min	= (int)$pub_temperature_min;
 			$temperature_max	= (int)$pub_temperature_max;
 			$ressources			= $pub_ressources;
-			$boosters           = $pub_boostExt;
-			
-			$home = home_check($planet_type, $coords);
-			$boosters = parse_booster($boosters);
 
-			
-			if ($home[0] == 'full') {
+			$home = home_check($planet_type, $coords);
+			if(isset($pub_boostExt)){
+                $boosters = update_boosters($pub_boostExt); /*Merge des différents boosters*/
+                $boosters = booster_encode($boosters); /*Conversion de l'array boosters en string*/
+			}else
+                $boosters = booster_encodev(0,0,0,0,0,0,0,0); /* si aucun booster détecté*/
+
+            if ($home[0] == 'full') {
 				$io->set(array(
 						'type' => 'home full'
 				));
 				$io->status(0);
 			} else {
 				if ($home[0] == 'update') {
-					$db->sql_query('UPDATE '.TABLE_USER_BUILDING.' SET planet_name = "'.$planet_name.'", `fields` = '.$fields.', temperature_min = '.$temperature_min.', temperature_max = '.$temperature_max.'  WHERE planet_id = '.$home['id'].' AND user_id = '.$user_data['user_id']);
+					$db->sql_query('UPDATE '.TABLE_USER_BUILDING.' SET planet_name = "'.$planet_name.'", `fields` = '.$fields.', boosters = "'.$boosters.'", temperature_min = '.$temperature_min.', temperature_max = '.$temperature_max.'  WHERE planet_id = '.$home['id'].' AND user_id = '.$user_data['user_id']);
 				} else {
-					$db->sql_query('INSERT INTO '.TABLE_USER_BUILDING.' (user_id, planet_id, coordinates, planet_name, fields, temperature_min, temperature_max, boosters) VALUES ('.$user_data['user_id'].', '.$home['id'].', "'.$coords.'", "'.$planet_name.'", '.$fields.', '.$pub_temperature_min.', '.$pub_temperature_max.', '.booster_encode($boosters).')');
+					$db->sql_query('INSERT INTO '.TABLE_USER_BUILDING.' (user_id, planet_id, coordinates, planet_name, fields, boosters, temperature_min, temperature_max) VALUES ('.$user_data['user_id'].', '.$home['id'].', "'.$coords.'", "'.$planet_name.'", '.$fields.', "'.$boosters.'", '.$pub_temperature_min.', '.$pub_temperature_max.')');
 				}
 				
 				$io->set(array(
@@ -192,6 +194,7 @@ switch ($page_type){
 			
 			add_log('overview', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
 		}
+    }
 	break;
 
 	case 'buildings': //PAGE BATIMENTS
