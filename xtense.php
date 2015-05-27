@@ -1071,7 +1071,7 @@ switch ($page_type){
 				case 'expedition': //RAPPORT EXPEDITION
                     if (isset($line['coords'], $line['content']) == false) die("hack");
                                       
-					$line['content'] = filter_var_array($line['content'], FILTER_SANITIZE_STRING);
+					$line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
                     $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expédition
 					
 					$expedition = array(
