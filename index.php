@@ -216,7 +216,7 @@ $db->sql_close();
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
 		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome : <a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank">Module Xtense Chrome Store</a></p>
-                <p>Version Script Grease Monkey : <a href="https://bitbucket.org/darknoon29/tool-xtense-greasemonkey/downloads/xtense.user.js" target="_blank">Module Xtense Grease Monkey</a></p>
+                <p>Script Grease Monkey (xtense.user.js): <a href="https://bitbucket.org/darknoon29/tool-xtense-greasemonkey/downloads" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
 	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter &agrave; ce serveur :</p>
