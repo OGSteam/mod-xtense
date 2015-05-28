@@ -435,6 +435,26 @@ $db->sql_close();
 	<div class="sep"></div>
 	<h2>Changelog</h2>
 	<dl class="changelog">
+        <dt>Mai 2015</dt>
+        <dd>
+            <div class="version">Module OGSpy 2.6.1</div>
+            <p>
+                <em>Correctif:</em><br/>
+                 * Remontée des expéditions (Correctif fait par Vodinos)<br/>
+                 * Lien Xtense GM<br/>
+            </p>
+        </dd>
+		<dt>Mai 2015</dt>
+		<dd>
+			<div class="version">Module OGSpy 2.6.0</div>
+			<p>
+				<em>Ajouts:</em><br/>
+				&nbsp;* Passage en UTF-8<br/>
+				&nbsp;* Revue des contrôles de sécurité<br/>
+                &nbsp;* Gestion des boosters<br/>
+                &nbsp;* Callback android et hostiles<br/>
+			</p>
+		</dd>
 	    		<dt>Janvier 2013</dt>
 			<dd>			
 				<div class="version">Module OGSpy 2.4.3</div>
