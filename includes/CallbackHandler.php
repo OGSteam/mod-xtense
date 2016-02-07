@@ -25,12 +25,12 @@ class CallbackHandler {
 			$this->types[] = $type;
 		}
 	}
-	
+
 	/**
 	 * Appels des fonctions des mods
 	 *
-	 * @param string $type
-	 * @param array $params
+	 * @internal param string $type
+	 * @internal param array $params
 	 */
 	public function apply() {
 		global $io, $db, $get_dev, $server_config;

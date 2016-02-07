@@ -47,7 +47,7 @@ if ($page == 'config') {
 	if (isset($pub_universe)) {
 		$universe = Check::universe($pub_universe);
 		if($universe===false)
-			$universe = 'http://sxx-fr.ogame.gameforge.com';
+			$universe = 'https://sxx-fr.ogame.gameforge.com';
 		
 		$replace = '';
 		foreach ($checkboxes as $name) {
@@ -148,8 +148,6 @@ if ($page == 'mods') {
 		'ranking_ally_fleet' => 'Statistiques (flotte) des alliances',
 		'ranking_ally_points' => 'Statistiques (points) des alliances',
 		'ranking_ally_research' => 'Statistiques (recherches) des alliances',
-		'trade' => 'Livraisons Alliées',
-		'trade_me' => 'Mes livraisons',
 		'hostiles' => 'Flottes Hostiles'
 	);
 	
@@ -216,7 +214,6 @@ $db->sql_close();
 	<h2>T&eacute;l&eacute;chargement de la barre</h2>
 		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome : <a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank">Module Xtense Chrome Store</a></p>
-                <p>Script Grease Monkey (xtense.user.js): <a href="https://bitbucket.org/darknoon29/tool-xtense-greasemonkey/downloads" target="_blank">Module Xtense Grease Monkey</a></p>
 	<h2>Informations</h2>
 	
 	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter &agrave; ce serveur :</p>
@@ -435,6 +432,15 @@ $db->sql_close();
 	<div class="sep"></div>
 	<h2>Changelog</h2>
 	<dl class="changelog">
+		<dt>Février 2016</dt>
+        <div class="version">Module OGSpy 2.6.2</div>
+        <p>
+            <em>Correctif:</em><br/>
+            * Support Ogame SSL<br/>
+            * Lien Xtense GM Supprimé<br/>
+        </p>
+        <dd>
+        </dd>
         <dt>Mai 2015</dt>
         <dd>
             <div class="version">Module OGSpy 2.6.1</div>
