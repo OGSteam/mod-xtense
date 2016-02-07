@@ -865,14 +865,13 @@ switch ($page_type){
         $line['destination_name'] = filter_var($line['destination_name'], FILTER_SANITIZE_STRING);
         $line['composition'] = filter_var($line['composition'], FILTER_SANITIZE_STRING);
 
-        $hostile = array('id' => $line['id'],
+		$hostile = array('id' => $line['id'],
             'id_vague' => $line['id_vague'],
             'player_id' => $line['player_id'],
             'ally_id' => $line['ally_id'],
             'arrival_time' => $line['arrival_time'],
 			'arrival_datetime' => $line['arrival_datetime'],
             'destination_name' => $line['destination_name'],
-            'id_vague' => $line['id_vague'],
             'attacker' => $line['attacker_name'],
             'origin_planet' => $line['origin_attack_name'],
             'origin_coords' => $line['origin_attack_coords'],
@@ -1039,7 +1038,7 @@ switch ($page_type){
 							'time' => $line['date']
 					);
 					$call->add('ennemy_spy', $ennemy_spy);
-                                        add_log('info', array('toolbar' => $toolbar_info, 'message' => "a été espionné avec une probabilité de  " . $line['proba']));
+                    add_log('info', array('toolbar' => $toolbar_info, 'message' => "a été espionné avec une probabilité de  " . $line['proba']));
 				break;
 				
 				case 'rc_cdr': //RAPPORT RECYCLAGE

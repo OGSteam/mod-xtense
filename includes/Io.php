@@ -130,7 +130,7 @@ class Io {
 				echo "    Exception Stacktrace\n";
 				$stacktrace = str_replace("\n", "\n      ", $e->getTraceAsString());
 				if(isset($db_password)) {
-					$stacktrace = str_replace($db_passord, "*****", $stacktrace);
+					$stacktrace = str_replace($db_password, "*****", $stacktrace);
 				}
 				echo "      ".$stacktrace;
 			}

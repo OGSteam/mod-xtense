@@ -23,7 +23,7 @@ abstract class Check {
 	}
 	static function universe($str) {
 		$universe = false;
-		if (preg_match('!([a-z0-9-]+[A-Z.]+.ogame.gameforge.com)(\\/|$)!Ui', $str, $matches)) $universe = 'http://'.strtolower($matches[1]);
+		if (preg_match('!([a-z0-9-]+[A-Z.]+.ogame.gameforge.com)(\\/|$)!Ui', $str, $matches)) $universe = 'https://'.strtolower($matches[1]);
 		return $universe;
 	}
 	
