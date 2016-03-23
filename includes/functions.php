@@ -24,7 +24,7 @@ function install_callbacks ($action, $data, $version = null) {
 	if ($version != null && version_compare($version, MOD_VERSION, '<=')) return false;
 	
 	$query = $db->sql_query('SELECT id FROM '.TABLE_MOD.' WHERE action = "'.$action.'"');
-	list($mod_id) = mysql_fetch_row($query);
+	list($mod_id) = $db->sql_fetch_row($query);
 	
 	$replace = array();
 	foreach ($data as $k => $call) {
