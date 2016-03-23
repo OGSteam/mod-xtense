@@ -12,6 +12,8 @@ list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT version, root 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
 require_once("mod/{$root}/includes/Check.php");
+require_once("mod/{$root}/lang/".$ui_lang."/lang_xtense.php");
+
 
 $page = 'infos';
 if (isset($pub_page)) {
@@ -172,7 +174,6 @@ $db->sql_close();
 	<link rel="stylesheet" media="all" type="text/css" href="mod/<?php echo $root; ?>/style.css" />
 </head>
 <body>
-<script src="http://www.ogsteam.besaba.com/js/stat.js" type="text/javascript"> </script>
 <h1>Administration de Xtense</h1>
 <script language="Javascript" type="text/javascript" src="mod/<?php echo $root; ?>/js/config.js"></script>
 
@@ -211,12 +212,12 @@ $db->sql_close();
 	<div id="content">
 	
 <?php if ($page == 'infos') { ?>
-	<h2>T&eacute;l&eacute;chargement de la barre</h2>
+	<h2>Téléchargement de la barre</h2>
 		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
 		<p>Version Chrome : <a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank">Module Xtense Chrome Store</a></p>
 	<h2>Informations</h2>
 	
-	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter &agrave; ce serveur :</p>
+	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter à ce serveur :</p>
 	<p><label for="url"><strong>URL de l&#039;univers</strong></label></p>
 	<p class="c">
 		<input type="text" class="infos" id="url" name="url" value="<?php echo $server_config['xtense_universe']; ?>" onclick="this.select();" readonly />
@@ -225,27 +226,27 @@ $db->sql_close();
 	<p class="c">
 		<input type="text" class="infos" id="plugin" name="plugin" value="<?php echo $plugin_url; ?>" onclick="this.select();" readonly />
 	</p>
-	<p>Vous devez &eacute;galement mettre votre pseudo et votre mot de passe de connexion &agrave; OGSpy</p>
+	<p>Vous devez également mettre votre pseudo et votre mot de passe de connexion à OGSpy</p>
 	
 <?php } elseif ($page == 'config') { ?>
 	
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise &agrave; jour effectu&eacute;e</p>
+		<p class="success">Mise à jour effectuée</p>
 	<?php } ?>
 	
 	<?php if (isset($action)) { ?>
 			<?php if ($action == 'repair') { ?>
-				<p class="success">L&#039;espace personnel a &eacute;t&eacute; correctement r&eacute;par&eacute;</p>
+				<p class="success">L&#039;espace personnel a été correctement réparé</p>
 			<?php } elseif ($action == 'install_callbacks') { ?>
-				<p class="success" name="callback_sumary">Les appels ont &eacute;t&eacute; install&eacute;s. <?php echo $installed_callbacks; ?> appel(s) install&eacute;(s) pour un total de <?php echo $total_callbacks; ?> appels disponibles.
+				<p class="success" name="callback_sumary">Les appels ont été installés. (<?php echo $installed_callbacks; ?> / <?php echo $total_callbacks; ?>).
 			<?php if(!empty($callInstall['errors'])) { ?>
 				<label for="callback_sumary">
-					<button type="button" onclick="toggle_callback_info();" id="callback_button">D&eacute;tails des erreurs</button>
+					<button type="button" onclick="toggle_callback_info();" id="callback_button">Détails des erreurs</button>
 				</label>
 				<span id="callback_info">
 					<h2>Liste des liens</h2>
 					<?php if (!empty($callInstall['success'])) { ?>
-						<p><em>Voici la liste des liens correctement install&eacute;s</em></p>
+						<p><em>Voici la liste des liens correctement installés</em></p>
 						<ul>
 							<?php foreach ($callInstall['success'] as $reason) { ?>
 								<li><?php echo $reason; ?></li>
@@ -253,7 +254,7 @@ $db->sql_close();
 						</ul>
 					<?php } ?>
 					<?php if (!empty($callInstall['errors'])) { ?>
-						<p><em>Certains liens n&#039;ont pas p&ucirc; &ecirc;tre automatiquement install&eacute;s</em></p>
+						<p><em>Certains liens n&#039;ont pas pu être automatiquement installés</em></p>
 						<ul>
 						<?php foreach ($callInstall['errors'] as $reason) { ?>
 							<li><?php echo $reason; ?></li>
@@ -274,7 +275,7 @@ $db->sql_close();
 			</p>
 			<p>
 				<span class="chk"><input type="checkbox" id="strict_admin" name="strict_admin"<?php echo ($server_config['xtense_strict_admin'] == 1 ? ' checked="checked"' : '');?> onclick="if (this.checked && <?php echo (int)($user_data['user_coadmin'] && !$user_data['user_admin']);?>) alert('Vous &ecirc;tes co-admin, si vous cochez cette option vous ne pourrez plus acceder &agrave; l&#039;administration de Xtense');" /></span>
-				<label for="strict_admin">Limiter l&#039;administration &agrave; l&#039;admin (et non aux co-admins)</label>
+				<label for="strict_admin">Limiter l&#039;administration à l&#039;admin (et non aux co-admins)</label>
 			</p>
 			<p>
 				<span class="chk"><input type="checkbox" id="spy_autodelete" name="spy_autodelete"<?php echo ($server_config['xtense_spy_autodelete'] == 1 ? ' checked="checked"' : '');?> /></span>
@@ -288,11 +289,11 @@ $db->sql_close();
 		
 		<div>
 			<fieldset>
-				<legend>Journaliser les requ&ecirc;tes</legend>
+				<legend>Journaliser les requêtes</legend>
 				
 				<p>
 					<span class="chk"><input type="checkbox" id="log_system" name="log_system"<?php echo ($server_config['xtense_log_system'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_system">Syst&egrave;mes solaires</label>
+					<label for="log_system">Systèmes solaires</label>
 				</p>
 				<p>
 					<span class="chk"><input type="checkbox" id="log_spy" name="log_spy"<?php echo ($server_config['xtense_log_spy'] == 1 ? ' checked="checked"' : '');?> /></span>
@@ -343,10 +344,10 @@ $db->sql_close();
 	var groups_id = [<?php echo implode(', ', $groups_id); ?>];
 </script>
 
-	<p>Vous pouvez d&eacute;finir pour chaque groupe de OGSpy les acc&egrave;s qu&#039;ont les utilisateurs &agrave; Xtense.</p>
+	<p>Vous pouvez définir pour chaque groupe de OGSpy les accès qu&#039;ont les utilisateurs à Xtense.</p>
 	
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise &agrave; jour effectu&eacute;e</p>
+		<p class="success">Mise à jour effectuée</p>
 	<?php } ?>
 	
 	<p style="text-align:right;" class="p10"><span onclick="set_all(true);" style="cursor:pointer;">Tout cocher</span> / <span onclick="set_all(false);" style="cursor:pointer;">Tout decocher</span></p>
@@ -356,7 +357,7 @@ $db->sql_close();
 	<table width="100%">
 		<tr>
 			<th>Nom</th>
-			<th width="12%" class="c">Syst&egrave;mes</th>
+			<th width="12%" class="c">Systèmes</th>
 			<th width="12%" class="c">Classement</th>
 			<th width="12%" class="c"><acronym title="Pages Batiments, Recherches, Defenses.. et Empire">Empire</acronym></th>
 			<th width="12%" class="c">Messages</th>
@@ -390,9 +391,9 @@ $db->sql_close();
 	
 <?php } elseif ($page == 'mods') { ?>
 
-	<p>Liste des mods li&eacute;s au plugin Xtense. Ces liens permettent aux mods de r&eacute;cuperer les donn&eacute;es envoy&eacute;es par Xtense 2. Vous pouvez ici activer ou desactiver ces liaisons.</p><br/>
+	<p>Liste des mods liés au plugin Xtense. Ces liens permettent aux mods de récuperer les données envoyées par Xtense. Vous pouvez ici activer ou desactiver ces liaisons.</p><br/>
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise &agrave; jour effectu&eacute;e</p>
+		<p class="success">Mise à jour effectuée</p>
 	<?php } ?>
 	
 	<form action="?action=xtense&amp;page=mods" method="post" name="form" id="form">
@@ -401,14 +402,14 @@ $db->sql_close();
 		<tr>
 			<th class="c">#</th>
 			<th>Nom/version du Mod</th>
-			<th width="40%">Type de donn&eacute;es</th>
+			<th width="40%">Type de données</th>
 			<th width="17%" class="c">Status du mod</th>
 			<th width="17%" class="c">Status du lien</th>
 			<th class="c" width="10"></th>
 		</tr>
 	<?php if (empty($callbacks)) { ?>
 		<tr>
-			<td class="c" colspan="5"><em>Aucun lien enregistr&eacute; dans la base de donn&eacute;es</em></td>
+			<td class="c" colspan="5"><em>Aucun lien enregistré dans la base de données</em></td>
 		</tr>
 	<?php } ?>
 	
@@ -417,8 +418,8 @@ $db->sql_close();
 			<td><?php echo $l['id']; ?></td>
 			<td><?php echo $l['title']; ?> (<?php echo $l['version']; ?>)</td>
 			<td><?php echo $l['type']; ?></td>
-			<td class="c"><?php echo ($l['active'] == 1 ? 'Activ&eacute;' : 'D&eacute;sactiv&eacute;'); ?></td>
-			<td class="c"><?php echo ($l['callback_active'] == 1 ? 'Activ&eacute;' : 'D&eacute;sactiv&eacute;'); ?></td>
+			<td class="c"><?php echo ($l['active'] == 1 ? 'Activé' : 'Désactivé'); ?></td>
+			<td class="c"><?php echo ($l['callback_active'] == 1 ? 'Activé;' : 'Désactivé'); ?></td>
 			<td><a href="index.php?action=xtense&amp;page=mods&amp;toggle=<?php echo $l['id']; ?>&amp;state=<?php echo $l['callback_active']==1?0:1; ?>" title="<?php echo ($l['callback_active'] == 1 ? 'D&eacute;sactiver' : 'Activer'); ?> l'appel"><?php icon($l['callback_active'] == 1 ? 'reset' : 'valid'); ?></a></td>
 		</tr>
 	<?php } ?>
@@ -427,7 +428,7 @@ $db->sql_close();
 <?php } elseif ($page == 'about') { ?>
 	<p>Xtense par Unibozu</a></p>
 	<p>Forum de support de l'OGSteam : <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Xtense</a></p>
-	<p>Set d'ic&ocirc;nes "Silk icons" par <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
+	<p>Set d'icônes "Silk icons" par <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
 	
 	<div class="sep"></div>
 	<h2>Changelog</h2>
@@ -555,7 +556,7 @@ $db->sql_close();
 	</div>
 </div>
 
-<div id="foot"><?php echo round($php_timing, 2); ?> ms - Cr&eacute;&eacute; par Unibozu - <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Support</a></div>
+<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Support</a></div>
 
 </body>
 </html>
