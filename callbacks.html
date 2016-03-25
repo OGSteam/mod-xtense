@@ -189,7 +189,7 @@ pre {color:#666; font-family:"Courier New";}
 		
 		<h2 id="I">I. Introduction</h2>
 		<p>
-			Introduits dans Xtense 2, les appels (nommés Callbacks en anglais) sont l'envoi des données reçues par Xtense aux mods de OGSpy. A chaque réception de données par le mod Xtense, il appellera les mods enregistrés pour leur envoyer les données.<br />
+			Introduits dans Xtense 2, les appels (nommés Callbacks en anglais) sont l'envoi des données reçues par Xtense aux mods de OGSpy. A chaque réception de données par le mod Xtense, il appellera les mods enregistrés pour leur envoyer les données.<br>
 			Lors de cet appel, Xtense inclut un fichier spécial du mod, dans lequel il exécutera une fonction définie par l'appel.
 		</p>
 		
@@ -218,7 +218,7 @@ pre {color:#666; font-family:"Courier New";}
 		
 		<h3 id="III.1">1. Structure des fichiers</h3>
 		<p>
-			Lors des appels, Xtense inclura le fichier <strong>_xtense.php</strong> qui doit être dans le dossier de votre mod.<br />
+			Lors des appels, Xtense inclura le fichier <strong>_xtense.php</strong> qui doit être dans le dossier de votre mod.<br>
 			Ce fichier doit respecter une certaine hiérarchie :
 		</p>
 		<ul>
@@ -236,7 +236,7 @@ pre {color:#666; font-family:"Courier New";}
 			<li><span class="php-var">$server_config</span> : Contient toutes les directives de configuration de l'OGSpy contenues dans la table <em>ogspy_config</em></li>
 			<li><span class="php-var">$user</span> : Tableau avec les informations sur l'utilisateur actuellement connecté (pseudo, id, grand [tableau des droits pour Xtense (valeur 0 ou 1), index: system, ranking, empire, messages])</li>
 			<li><span class="php-var">$db</span> : Instance de la classe MySQL utilisée dans Xtense</li>
-			<li><span class="php-var">$database</span> : Tableau contenant les codes MySQL de l'espace personnel des joueurs<br /><em>Structure</em>
+			<li><span class="php-var">$database</span> : Tableau contenant les codes MySQL de l'espace personnel des joueurs<br><em>Structure</em>
 <pre><span class="php-var">$database</span> = <span class="php-keyword2"><span class="php-keyword1">array</span></span>(
     <span class="php-quote">'buildings'</span> =&gt; <span class="php-keyword2"><span class="php-keyword1">array</span></span>(<span class="php-quote">'M'</span>, <span class="php-quote">'C'</span>, <span class="php-quote">'D'</span>, <span class="php-quote">'CES'</span>, <span class="php-quote">'CEF'</span>, <span class="php-quote">'UdR'</span>, <span class="php-quote">'UdN'</span>, <span class="php-quote">'CSp'</span>, <span class="php-quote">'HM'</span>, <span class="php-quote">'HC'</span>, <span class="php-quote">'HD'</span>, <span class="php-quote">'Lab'</span>, <span class="php-quote">'Ter'</span>, 
 <span class="php-quote">'Silo'</span>, <span class="php-quote">'BaLu'</span>, <span class="php-quote">'Pha'</span>, <span class="php-quote">'PoSa'</span>),
@@ -407,7 +407,7 @@ pre {color:#666; font-family:"Courier New";}
 						<div class="ident">
 							<span class="php-keyword1">array</span>
 							<div class="ident">
-								[name] (<span class="php-keyword1">string</span>)<br />
+								[name] (<span class="php-keyword1">string</span>)<br>
 								[ally] (<span class="php-keyword1">string</span>)
 							</div>
 						</div>
@@ -427,26 +427,26 @@ pre {color:#666; font-family:"Courier New";}
 		<td class="right">
 			<span class="php-keyword1">array</span>
 			<div class="ident">
-				[galaxy] (<span class="php-keyword1">int</span>)<br />
-				[system] (<span class="php-keyword1">int</span>)<br />
+				[galaxy] (<span class="php-keyword1">int</span>)<br>
+				[system] (<span class="php-keyword1">int</span>)<br>
 				[data] (<span class="php-keyword1">array</span> <span class="php-var">#15</span>)
 				<div class="ident">
 					<span class="php-keyword1">array</span>
 					<div class="ident">
-						[planet_name] (<span class="php-keyword1">string</span>)<br />
-						[moon] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span> <span class="ogame">Ogame</span><br />
-						[player_name] (<span class="php-keyword1">string</span>)<br />
-						[status] (<span class="php-keyword1">string</span>)<br />
-						[ally_tag] (<span class="php-keyword1">string</span>)<br />
+						[planet_name] (<span class="php-keyword1">string</span>)<br>
+						[moon] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span> <span class="ogame">Ogame</span><br>
+						[player_name] (<span class="php-keyword1">string</span>)<br>
+						[status] (<span class="php-keyword1">string</span>)<br>
+						[ally_tag] (<span class="php-keyword1">string</span>)<br>
 						[debris] (<span class="php-keyword1">array</span>)
 						<div class="ident">
-							[metal] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br />
-							[cristal] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br />
-							[titanium] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br />
-							[carbon] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br />
-							[tritium] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br />
+							[metal] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br>
+							[cristal] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br>
+							[titanium] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br>
+							[carbon] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br>
+							[tritium] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br>
 						</div>
-						[activity] (<span class="php-keyword1">string</span>) <span class="php-comment">au format du jeu, * ou 37mn par exemple</span> <span class="ogame">Ogame</span><br />
+						[activity] (<span class="php-keyword1">string</span>) <span class="php-comment">au format du jeu, * ou 37mn par exemple</span> <span class="ogame">Ogame</span><br>
 					</div>
 				</div>
 
@@ -461,11 +461,11 @@ pre {color:#666; font-family:"Courier New";}
 				<div class="ident">
 					[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
-					[content] (<span class="php-keyword1">string</span><br />
+					[content] (<span class="php-keyword1">string</span><br>
 					[time] (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -479,17 +479,17 @@ pre {color:#666; font-family:"Courier New";}
 				<div class="ident">
 					[from] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
 					[to] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
-					[proba] (<span class="php-keyword1">int</span>)<br />
+					[proba] (<span class="php-keyword1">int</span>)<br>
 					[time] (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -509,17 +509,17 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				<span class="php-keyword1">array</span>
 				<div class="ident">
-					[nombre] (<span class="php-keyword1">int</span>)<br />
+					[nombre] (<span class="php-keyword1">int</span>)<br>
 					[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
-					[M_reco] (<span class="php-keyword1">int</span>) <span class="php-comment">Métal récupéré</span> <br />
-					[C_reco] (<span class="php-keyword1">int</span>) <span class="php-comment">Cristal récupéré</span> <br />
-					[M_total] (<span class="php-keyword1">int</span>) <span class="php-comment">Metal dans le CdR</span> <br />
-					[C_total] (<span class="php-keyword1">int</span>) <span class="php-comment">Cristal dans le CdR</span> <br />
+					[M_reco] (<span class="php-keyword1">int</span>) <span class="php-comment">Métal récupéré</span> <br>
+					[C_reco] (<span class="php-keyword1">int</span>) <span class="php-comment">Cristal récupéré</span> <br>
+					[M_total] (<span class="php-keyword1">int</span>) <span class="php-comment">Metal dans le CdR</span> <br>
+					[C_total] (<span class="php-keyword1">int</span>) <span class="php-comment">Cristal dans le CdR</span> <br>
 					[time] (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -533,13 +533,13 @@ pre {color:#666; font-family:"Courier New";}
 				<div class="ident">
 					[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
-					[from] (<span class="php-keyword1">string</span>)<br />
-					[subject] (<span class="php-keyword1">string</span>)<br />
-					[message] (<span class="php-keyword1">string</span>)<br />
+					[from] (<span class="php-keyword1">string</span>)<br>
+					[subject] (<span class="php-keyword1">string</span>)<br>
+					[message] (<span class="php-keyword1">string</span>)<br>
 					[time] (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -551,9 +551,9 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				<span class="php-keyword1">array</span>
 				<div class="ident">
-					[from] (<span class="php-keyword1">string</span>)<br />
-					[tag] (<span class="php-keyword1">string</span>)<br />
-					[message] (<span class="php-keyword1">string</span>)<br />
+					[from] (<span class="php-keyword1">string</span>)<br>
+					[tag] (<span class="php-keyword1">string</span>)<br>
+					[message] (<span class="php-keyword1">string</span>)<br>
 					[time] (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -567,11 +567,11 @@ pre {color:#666; font-family:"Courier New";}
 				<div class="ident">
 					[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 					<div class="ident">
-						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+						[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+						[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 						[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 					</div>
-					[content] (<span class="php-keyword1">string</span>)<br />
+					[content] (<span class="php-keyword1">string</span>)<br>
 					[time] (<span class="php-keyword1">int</span>
 				</div>
 			</div>
@@ -581,14 +581,14 @@ pre {color:#666; font-family:"Courier New";}
 		<td class="right">
 			<span class="php-keyword1">array</span>
 			<div class="ident">
-				[tag] (<span class="php-keyword1">string</span>)<br />
+				[tag] (<span class="php-keyword1">string</span>)<br>
 				[list] (<span class="php-keyword1">array</span> <span class="php-var">#~</span>)
 				<div class="ident">
 					<span class="php-keyword1">array</span>
 					<div class="ident">
-						[pseudo] (<span class="php-keyword1">string</span>)<br />
-						[points] (<span class="php-keyword1">int</span>)<br />
-						[coords] (<span class="php-keyword1">string</span>)<br />
+						[pseudo] (<span class="php-keyword1">string</span>)<br>
+						[points] (<span class="php-keyword1">int</span>)<br>
+						[coords] (<span class="php-keyword1">string</span>)<br>
 						[rang] (<span class="php-keyword1">string</span>)
 					</div>
 				</div>
@@ -601,13 +601,13 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 				<div class="ident">
-					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 					[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 				</div>
-				[planet_name] (<span class="php-keyword1">string</span>)<br />
-				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br />
-				[fields] (<span class="php-keyword1">int</span>) <span class="php-comment">cases max de la planète</span><br />
+				[planet_name] (<span class="php-keyword1">string</span>)<br>
+				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br>
+				[fields] (<span class="php-keyword1">int</span>) <span class="php-comment">cases max de la planète</span><br>
 				[temp] (<span class="php-keyword1">int</span>) <span class="php-comment">température max</span>
 			</div>
 		</td></tr>
@@ -618,15 +618,15 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 				<div class="ident">
-					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 					[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 				</div>
-				[planet_name] (<span class="php-keyword1">string</span>)<br />
-				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br />
+				[planet_name] (<span class="php-keyword1">string</span>)<br>
+				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br>
 				[buildings] (<span class="php-keyword1">array</span>)
 				<div class="ident">
-					<span class="php-comment">Tableau associatif contenant en index le code des batiments présents sur la planète ainsi que leur niveau. Comme tel : </span><br />
+					<span class="php-comment">Tableau associatif contenant en index le code des batiments présents sur la planète ainsi que leur niveau. Comme tel : </span><br>
 					[code] => niveau (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -638,7 +638,7 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				[research] (<span class="php-keyword1">array</span>)
 				<div class="ident">
-					<span class="php-comment">Tableau associatif contenant en index le code des recherches présentes sur la planète ainsi que leur niveau. Comme tel : </span><br />
+					<span class="php-comment">Tableau associatif contenant en index le code des recherches présentes sur la planète ainsi que leur niveau. Comme tel : </span><br>
 					[code] => niveau (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -650,15 +650,15 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 				<div class="ident">
-					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 					[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 				</div>
-				[planet_name] (<span class="php-keyword1">string</span>)<br />
-				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br />
+				[planet_name] (<span class="php-keyword1">string</span>)<br>
+				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br>
 				[fleet] (<span class="php-keyword1">array</span>)
 				<div class="ident">
-					<span class="php-comment">Tableau associatif contenant en index le code des vaisseaux présents sur la planète ainsi que leur nombre. Comme tel : </span><br />
+					<span class="php-comment">Tableau associatif contenant en index le code des vaisseaux présents sur la planète ainsi que leur nombre. Comme tel : </span><br>
 					[code] => nombre (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
@@ -670,54 +670,54 @@ pre {color:#666; font-family:"Courier New";}
 			<div class="ident">
 				[coords] (<span class="php-keyword1">array</span> <span class="php-var">#3</span>)
 				<div class="ident">
-					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br />
-					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br />
+					[0] (<span class="php-keyword1">int</span>) <span class="php-comment">galaxie</span><br>
+					[1] (<span class="php-keyword1">int</span>) <span class="php-comment">système</span><br>
 					[2] (<span class="php-keyword1">int</span>) <span class="php-comment">ligne</span>
 				</div>
-				[planet_name] (<span class="php-keyword1">string</span>)<br />
-				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br />
+				[planet_name] (<span class="php-keyword1">string</span>)<br>
+				[planet_type] (<span class="php-keyword1">int</span>) <span class="php-comment">défini par les constantes TYPE_PLANET ou TYPE_MOON</span><br>
 				[defense] (<span class="php-keyword1">array</span>)
 				<div class="ident">
-					<span class="php-comment">Tableau associatif contenant en index le code des defenses présentes sur la planète ainsi que leur nombre. Comme tel : </span><br />
+					<span class="php-comment">Tableau associatif contenant en index le code des defenses présentes sur la planète ainsi que leur nombre. Comme tel : </span><br>
 					[code] => nombre (<span class="php-keyword1">int</span>)
 				</div>
 			</div>
 		</td></tr>
 		
-		<tr><td class="left">ranking_ally_points<br />ranking_ally_fleet<br />ranking_ally_research</td>
+		<tr><td class="left">ranking_ally_points<br>ranking_ally_fleet<br>ranking_ally_research</td>
 		<td class="right">
 			<span class="php-keyword1">array</span>
 			<div class="ident">
-				[offset] (<span class="php-keyword1">int</span>)<br />
-				[time] (<span class="php-keyword1">int</span>)<br />
+				[offset] (<span class="php-keyword1">int</span>)<br>
+				[time] (<span class="php-keyword1">int</span>)<br>
 				[data] (<span class="php-keyword1">array</span> <span class="php-var"><span class="php-var">#1-100</span></span>)
 				<div class="ident">
 					<span class="php-keyword1">array</span>
 					<div class="ident">
-						[ally_tag] (<span class="php-keyword1">string</span>)<br />
-						[members] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br />
-						[points] (<span class="php-keyword1">int</span>)<br />
-						[mean] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br />
+						[ally_tag] (<span class="php-keyword1">string</span>)<br>
+						[members] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br>
+						[points] (<span class="php-keyword1">int</span>)<br>
+						[mean] (<span class="php-keyword1">int</span>) <span class="ogame">Ogame</span><br>
 						[ally_id] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span>
 					</div>
 				</div>
 			</div>
 		</td></tr>
 		
-		<tr><td class="left">ranking_player_points<br />ranking_player_fleet<br />ranking_player_research</td>
+		<tr><td class="left">ranking_player_points<br>ranking_player_fleet<br>ranking_player_research</td>
 		<td class="right">
 			<span class="php-keyword1">array</span>
 			<div class="ident">
-				[offset] (<span class="php-keyword1">int</span>)<br />
-				[time] (<span class="php-keyword1">int</span>)<br />
+				[offset] (<span class="php-keyword1">int</span>)<br>
+				[time] (<span class="php-keyword1">int</span>)<br>
 				[data] (<span class="php-keyword1">array</span> <span class="php-var">#1-100</span>)
 				<div class="ident">
 					<span class="php-keyword1">array</span>
 					<div class="ident">
-						[player_name] (<span class="php-keyword1">string</span>)<br />
-						[ally_tag] (<span class="php-keyword1">string</span>)<br />
-						[points] (<span class="php-keyword1">int</span>)<br />
-						[player_id] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br />
+						[player_name] (<span class="php-keyword1">string</span>)<br>
+						[ally_tag] (<span class="php-keyword1">string</span>)<br>
+						[points] (<span class="php-keyword1">int</span>)<br>
+						[player_id] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span><br>
 						[ally_id] (<span class="php-keyword1">int</span>) <span class="eunivers">E-Univers</span>
 					</div>
 				</div>
