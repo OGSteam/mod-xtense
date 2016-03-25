@@ -2,9 +2,9 @@
 
 ## Module OGSpy 2.6.2 ##
 
-Correctif:
-            * Support Ogame SSL
-            * Lien Xtense GM Supprimé
+### Correctif ###
+* Support Ogame SSL
+* Lien Xtense GM Supprimé
 
 ## Module OGSpy 2.6.1 ##
 Correctif:
