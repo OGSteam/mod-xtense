@@ -9,6 +9,15 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT version, root FROM ".TABLE_MOD." WHERE action = 'xtense'"));
 
+//Language File
+if (!isset($ui_lang)) { // Checks the ui_lang value from parameters file
+	if (isset($pub_lang)) {
+		$ui_lang = $pub_lang; //This value is used during installation
+	} else
+		$ui_lang = "fr";
+	//If no language is available in id.php file we take fr by default
+}
+
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
 require_once("mod/{$root}/includes/Check.php");
