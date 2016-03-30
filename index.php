@@ -49,7 +49,7 @@ if ($page == 'config') {
 	if (isset($pub_universe)) {
 		$universe = Check::universe($pub_universe);
 		if($universe===false)
-			$universe = 'https://sxx-fr.ogame.gameforge.com';
+			$universe = 'https://sxx-yy.ogame.gameforge.com';
 		
 		$replace = '';
 		foreach ($checkboxes as $name) {
@@ -167,44 +167,44 @@ $php_timing = $php_end - $php_start;
 $db->sql_close();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/2002/REC-xhtml1-20020801/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" >
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo($lang['MOD_XTENSE_LANG']); ?>" lang="<?php echo($lang['MOD_XTENSE_LANG']); ?>" >
 <head>
-	<title>Xtense <?php echo $version; ?></title>
+	<title><?php echo $lang['MOD_XTENSE_TITLE']." ".$version; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link rel="stylesheet" media="all" type="text/css" href="mod/<?php echo $root; ?>/style.css" />
 </head>
 <body>
-<h1>Administration de Xtense</h1>
+<h1><?php echo($lang['MOD_XTENSE_ADMINTITLE']); ?></h1>
 <script language="Javascript" type="text/javascript" src="mod/<?php echo $root; ?>/js/config.js"></script>
 
 <div id="wrapper">
 	<ul id="menu">
 		<li class="infos<?php if ($page == 'infos') echo ' active'; ?>">
 			<div>
-				<a href="index.php?action=xtense&amp;page=infos">Informations</a>
+				<a href="index.php?action=xtense&amp;page=infos"><?php echo($lang['MOD_XTENSE_INFORMATIONS']); ?></a>
 			</div>
 		</li>
 		
 	<?php if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && $server_config['xtense_strict_admin'] == 0)) { ?>
 		<li class="config<?php if ($page == 'config') echo ' active'; ?>">
 			<div>
-				<a href="index.php?action=xtense&amp;page=config">Configuration</a>
+				<a href="index.php?action=xtense&amp;page=config"><?php echo($lang['MOD_XTENSE_CONFIGURATION']); ?></a>
 			</div>
 		</li>
 		<li class="user<?php if ($page == 'group') echo ' active'; ?>">
 			<div>
-				<a href="index.php?action=xtense&amp;page=group">Autorisations</a>
+				<a href="index.php?action=xtense&amp;page=group"><?php echo($lang['MOD_XTENSE_PERMISSIONS']); ?></a>
 			</div>
 		</li>
 		<li class="mods<?php if ($page == 'mods') echo ' active'; ?>">
 			<div>
-				<a href="index.php?action=xtense&amp;page=mods">Mods</a>
+				<a href="index.php?action=xtense&amp;page=mods"><?php echo($lang['MOD_XTENSE_MODS']); ?></a>
 			</div>
 		</li>
 	<?php } ?>
 		<li class="about<?php if ($page == 'about') echo ' active'; ?>">
 			<div>
-				<a href="index.php?action=xtense&amp;page=about">A propos</a>
+				<a href="index.php?action=xtense&amp;page=about"><?php echo($lang['MOD_XTENSE_ABOUT']); ?></a>
 			</div>
 		</li>
 	</ul>
@@ -212,41 +212,41 @@ $db->sql_close();
 	<div id="content">
 	
 <?php if ($page == 'infos') { ?>
-	<h2>Téléchargement de la barre</h2>
-		<p>Version Firefox (Récupérez la dernière version et ouvrez le fichier avec Firefox): <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank">Module Xtense</a></p>
-		<p>Version Chrome : <a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank">Module Xtense Chrome Store</a></p>
-	<h2>Informations</h2>
+	<h2><?php echo($lang['MOD_XTENSE_DOWNLOAD']); ?></h2>
+		<p><?php echo($lang['MOD_XTENSE_FIREFOX']); ?> <a href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads" target="_blank"><?php echo($lang['MOD_XTENSE_FIREFOX_LINK']); ?></a></p>
+		<p><?php echo($lang['MOD_XTENSE_CHROME']); ?><a href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr" target="_blank"><?php echo($lang['MOD_XTENSE_CHROME_LINK']); ?></a></p>
+	<h2><?php echo($lang['MOD_XTENSE_INFORMATIONS']); ?></h2>
 	
-	<p>Voici les informations que vous devez rentrer dans le plugin Xtense pour vous connecter à ce serveur :</p>
-	<p><label for="url"><strong>URL de l&#039;univers</strong></label></p>
+	<p><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?> :</p>
+	<p><label for="url"><strong><?php echo($lang['MOD_XTENSE_URL_UNIVERSE']); ?></strong></label></p>
 	<p class="c">
 		<input type="text" class="infos" id="url" name="url" value="<?php echo $server_config['xtense_universe']; ?>" onclick="this.select();" readonly />
 	</p>
-	<p><label for="plugin"><strong>URL plugin OGSpy</strong></label></p>
+	<p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></label></p>
 	<p class="c">
 		<input type="text" class="infos" id="plugin" name="plugin" value="<?php echo $plugin_url; ?>" onclick="this.select();" readonly />
 	</p>
-	<p>Vous devez également mettre votre pseudo et votre mot de passe de connexion à OGSpy</p>
+	<p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
 	
 <?php } elseif ($page == 'config') { ?>
 	
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise à jour effectuée</p>
+		<p class="success"><?php echo($lang['MOD_XTENSE_UPDATE_DONE']); ?></p>
 	<?php } ?>
 	
 	<?php if (isset($action)) { ?>
 			<?php if ($action == 'repair') { ?>
-				<p class="success">L&#039;espace personnel a été correctement réparé</p>
+				<p class="success"><?php echo($lang['MOD_XTENSE_REPAIR_DONE']); ?></p>
 			<?php } elseif ($action == 'install_callbacks') { ?>
-				<p class="success" name="callback_sumary">Les appels ont été installés. (<?php echo $installed_callbacks; ?> / <?php echo $total_callbacks; ?>).
+				<p class="success" name="callback_sumary"><?php echo($lang['MOD_XTENSE_CALLBACK_SUMMARY']." (". $installed_callbacks); ?> / <?php echo $total_callbacks; ?>).
 			<?php if(!empty($callInstall['errors'])) { ?>
 				<label for="callback_sumary">
-					<button type="button" onclick="toggle_callback_info();" id="callback_button">Détails des erreurs</button>
+					<button type="button" onclick="toggle_callback_info();" id="callback_button"><?php echo($lang['MOD_XTENSE_ERROR_DETAILS']); ?></button>
 				</label>
 				<span id="callback_info">
-					<h2>Liste des liens</h2>
+					<h2><?php echo($lang['MOD_XTENSE_CALLBACK_LIST']); ?></h2>
 					<?php if (!empty($callInstall['success'])) { ?>
-						<p><em>Voici la liste des liens correctement installés</em></p>
+						<p><em><?php echo($lang['MOD_XTENSE_INSTALLED_CALLBACKS']); ?></em></p>
 						<ul>
 							<?php foreach ($callInstall['success'] as $reason) { ?>
 								<li><?php echo $reason; ?></li>
@@ -254,7 +254,7 @@ $db->sql_close();
 						</ul>
 					<?php } ?>
 					<?php if (!empty($callInstall['errors'])) { ?>
-						<p><em>Certains liens n&#039;ont pas pu être automatiquement installés</em></p>
+						<p><em><?php echo($lang['MOD_XTENSE_WRONG_CALLBACKS']); ?></em></p>
 						<ul>
 						<?php foreach ($callInstall['errors'] as $reason) { ?>
 							<li><?php echo $reason; ?></li>
@@ -271,69 +271,69 @@ $db->sql_close();
 		<div class="col">
 			<p>
 				<span class="chk"><input type="checkbox" id="allow_connections" name="allow_connections"<?php echo ($server_config['xtense_allow_connections'] == 1 ? ' checked="checked"' : '');?> /></span>
-				<label for="allow_connections">Autoriser les connexions au plugin</label>
+				<label for="allow_connections"><?php echo($lang['MOD_XTENSE_ALLOW_CONNECTIONS']); ?></label>
 			</p>
 			<p>
 				<span class="chk"><input type="checkbox" id="strict_admin" name="strict_admin"<?php echo ($server_config['xtense_strict_admin'] == 1 ? ' checked="checked"' : '');?> onclick="if (this.checked && <?php echo (int)($user_data['user_coadmin'] && !$user_data['user_admin']);?>) alert('Vous &ecirc;tes co-admin, si vous cochez cette option vous ne pourrez plus acceder &agrave; l&#039;administration de Xtense');" /></span>
-				<label for="strict_admin">Limiter l&#039;administration à l&#039;admin (et non aux co-admins)</label>
+				<label for="strict_admin"><?php echo($lang['MOD_XTENSE_ALLOW_ADMIN_ONLY']); ?></label>
 			</p>
 			<p>
 				<span class="chk"><input type="checkbox" id="spy_autodelete" name="spy_autodelete"<?php echo ($server_config['xtense_spy_autodelete'] == 1 ? ' checked="checked"' : '');?> /></span>
-				<label for="spy_autodelete">Effacement automatique des RE trop vieux (configurable depuis l&#039;admin de OGSpy).</label>
+				<label for="spy_autodelete"><?php echo($lang['MOD_XTENSE_SPYREPORTS_AUTODELETE']); ?></label>
 			</p>
 			<p>
 				<span class="chk"><input type="text" size="30" maxlength="40" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" /></span>
-				<label for="universe">Serveur de jeu</label>
+				<label for="universe"><?php echo($lang['MOD_XTENSE_SERVER_NAME']); ?></label>
 			</p>
 		</div>
 		
 		<div>
 			<fieldset>
-				<legend>Journaliser les requêtes</legend>
+				<legend><?php echo($lang['MOD_XTENSE_LOGS']); ?></legend>
 				
 				<p>
 					<span class="chk"><input type="checkbox" id="log_system" name="log_system"<?php echo ($server_config['xtense_log_system'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_system">Systèmes solaires</label>
+					<label for="log_system"><?php echo($lang['MOD_XTENSE_SOLARSYSTEMS']); ?></label>
 				</p>
 				<p>
 					<span class="chk"><input type="checkbox" id="log_spy" name="log_spy"<?php echo ($server_config['xtense_log_spy'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_spy">Rapports d&#039;espionnage</label>
+					<label for="log_spy"><?php echo($lang['MOD_XTENSE_SPYREPORTS']); ?></label>
 				</p>
 				<p>
-					<span class="chk"><input type="checkbox" id="log_empire" name="log_empire"<?php echo ($server_config['xtense_log_empire'] == 1 ? ' checked="checked"' : '');?> onclick='if (this.checked) {if (!confirm("Attention ! La journalisation des pages des empires des joueurs n&#039;est pas forcement necessaire. Elle prend rapidement beaucoup de place dans les logs !<br>Etes-vous s&ucirc;r de vouloir l&#039;activer ?")) this.checked = false;}' /></span>
-					<label for="log_empire">Empire (Pages Empire, Batiments, Recherche...)</label>
+					<span class="chk"><input type="checkbox" id="log_empire" name="log_empire"<?php echo ($server_config['xtense_log_empire'] == 1 ? ' checked="checked"' : '');?> /></span>
+					<label for="log_empire"><?php echo($lang['MOD_XTENSE_EMPIRE']); ?></label>
 				</p>
 				<p>
 					<span class="chk"><input type="checkbox" id="log_ranking" name="log_ranking"<?php echo ($server_config['xtense_log_ranking'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_ranking">Classements</label>
+					<label for="log_ranking"><?php echo($lang['MOD_XTENSE_RANKINGS']); ?></label>
 				</p>
 				<p>
 					<span class="chk"><input type="checkbox" id="log_ally_list" name="log_ally_list"<?php echo ($server_config['xtense_log_ally_list'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_ally_list">Liste des joueurs d&#039;alliance</label>
+					<label for="log_ally_list"><?php echo($lang['MOD_XTENSE_ALLIANCE_LIST']); ?></label>
 				</p>
 				<p>
 					<span class="chk"><input type="checkbox" id="log_messages" name="log_messages"<?php echo ($server_config['xtense_log_messages'] == 1 ? ' checked="checked"' : '');?> /></span>
-					<label for="log_messages">Messages</label>
+					<label for="log_messages"><?php echo($lang['MOD_XTENSE_MESSAGES']); ?></label>
 				</p>
 				<hr size="1" />
 			</fieldset>
 		</div>
 		<div class="clear sep"></div>
 		<div id="actions">
-			<h2>Actions</h2>
+			<h2><?php echo($lang['MOD_XTENSE_ACTIONS']); ?></h2>
 			<p>
 				<a href="?action=xtense&amp;page=config&amp;do=repair" class="action" title="Effectuer cette action">&nbsp;</a>
-				R&eacute;parer les espaces personnels (en cas de probl&egrave;mes avec un espace personnel plein)
+				<?php echo($lang['MOD_XTENSE_REPAIR_EMPIRE']); ?>
 			</p>
 			
 			<p>
 				<a href="?action=xtense&amp;page=config&amp;do=install_callbacks" class="action" title="Effectuer cette action">&nbsp;</a>
-				Installer les appels de tous les mods install&eacute;s et activ&eacute;s
+				<?php echo($lang['MOD_XTENSE_INSTALL_CALLBACKS']); ?>
 			</p>
 		</div>
 		<div class="sep"></div>
 		
-		<p class="center"><button type="submit" class="submit">Envoyer</button> <button type="reset" class="reset">Annuler</button></p>
+		<p class="center"><button type="submit" class="submit"><?php echo($lang['MOD_XTENSE_SEND']); ?></button> <button type="reset" class="reset"><?php echo($lang['MOD_XTENSE_CANCEL']); ?></button></p>
 		
 		</form>
 		
@@ -344,23 +344,23 @@ $db->sql_close();
 	var groups_id = [<?php echo implode(', ', $groups_id); ?>];
 </script>
 
-	<p>Vous pouvez définir pour chaque groupe de OGSpy les accès qu&#039;ont les utilisateurs à Xtense.</p>
+	<p><?php echo($lang['MOD_XTENSE_GROUPS_DEFINITION']); ?></p>
 	
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise à jour effectuée</p>
+		<p class="success"><?php echo($lang['MOD_XTENSE_UPDATE_DONE']); ?></p>
 	<?php } ?>
 	
-	<p style="text-align:right;" class="p10"><span onclick="set_all(true);" style="cursor:pointer;">Tout cocher</span> / <span onclick="set_all(false);" style="cursor:pointer;">Tout decocher</span></p>
+	<p style="text-align:right;" class="p10"><span onclick="set_all(true);" style="cursor:pointer;"><?php echo($lang['MOD_XTENSE_TICKALL']); ?></span> / <span onclick="set_all(false);" style="cursor:pointer;"><?php echo($lang['MOD_XTENSE_UNTICKALL']); ?></span></p>
 	
 	<form action="?action=xtense&amp;page=group" method="post" name="form" id="form">
 	<input type="hidden" name="groups_id" id="groups_id" value="<?php echo implode('-', $groups_id); ?>" />
 	<table width="100%">
 		<tr>
-			<th>Nom</th>
-			<th width="12%" class="c">Systèmes</th>
-			<th width="12%" class="c">Classement</th>
-			<th width="12%" class="c"><acronym title="Pages Batiments, Recherches, Defenses.. et Empire">Empire</acronym></th>
-			<th width="12%" class="c">Messages</th>
+			<th><?php echo($lang['MOD_XTENSE_NAME']); ?></th>
+			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_SOLARSYSTEMS']); ?></th>
+			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_RANKINGS']); ?></th>
+			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_EMPIRE']); ?></th>
+			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_MESSAGES']); ?></th>
 			<th width="20" class="c"></th>
 		</tr>
 	<?php foreach ($groups as $l) { ?>
@@ -386,14 +386,14 @@ $db->sql_close();
 	</table>
 	
 	<div class="sep"></div>
-	<p class="center"><button class="submit" type="submit">Envoyer</button> <button class="reset" type="reset">Annuler</button></p>
+	<p class="center"><button class="submit" type="submit"><?php echo($lang['MOD_XTENSE_SEND']); ?></button> <button class="reset" type="reset"><?php echo($lang['MOD_XTENSE_CANCEL']); ?></button></p>
 	</form>
 	
 <?php } elseif ($page == 'mods') { ?>
 
-	<p>Liste des mods liés au plugin Xtense. Ces liens permettent aux mods de récuperer les données envoyées par Xtense. Vous pouvez ici activer ou desactiver ces liaisons.</p><br/>
+	<p><?php echo($lang['MOD_XTENSE_CALLBACK_LIST_DESC']); ?></p><br/>
 	<?php if (isset($update)) { ?>
-		<p class="success">Mise à jour effectuée</p>
+		<p class="success"><?php echo($lang['MOD_XTENSE_UPDATE_DONE']); ?></p>
 	<?php } ?>
 	
 	<form action="?action=xtense&amp;page=mods" method="post" name="form" id="form">
@@ -401,15 +401,15 @@ $db->sql_close();
 	<table width="100%">
 		<tr>
 			<th class="c">#</th>
-			<th>Nom/version du Mod</th>
-			<th width="40%">Type de données</th>
-			<th width="17%" class="c">Status du mod</th>
-			<th width="17%" class="c">Status du lien</th>
+			<th><?php echo($lang['MOD_XTENSE_CALLBACK_MODNAME']); ?></th>
+			<th width="40%"><?php echo($lang['MOD_XTENSE_CALLBACK_DATATYPE']); ?>/th>
+			<th width="17%" class="c"><?php echo($lang['MOD_XTENSE_CALLBACK_STATUSMOD']); ?></th>
+			<th width="17%" class="c"><?php echo($lang['MOD_XTENSE_CALLBACK_STATUSLINK']); ?></th>
 			<th class="c" width="10"></th>
 		</tr>
 	<?php if (empty($callbacks)) { ?>
 		<tr>
-			<td class="c" colspan="5"><em>Aucun lien enregistré dans la base de données</em></td>
+			<td class="c" colspan="5"><em><?php echo($lang['MOD_XTENSE_CALLBACK_NONE']); ?></em></td>
 		</tr>
 	<?php } ?>
 	
@@ -418,27 +418,27 @@ $db->sql_close();
 			<td><?php echo $l['id']; ?></td>
 			<td><?php echo $l['title']; ?> (<?php echo $l['version']; ?>)</td>
 			<td><?php echo $l['type']; ?></td>
-			<td class="c"><?php echo ($l['active'] == 1 ? 'Activé' : 'Désactivé'); ?></td>
-			<td class="c"><?php echo ($l['callback_active'] == 1 ? 'Activé;' : 'Désactivé'); ?></td>
-			<td><a href="index.php?action=xtense&amp;page=mods&amp;toggle=<?php echo $l['id']; ?>&amp;state=<?php echo $l['callback_active']==1?0:1; ?>" title="<?php echo ($l['callback_active'] == 1 ? 'D&eacute;sactiver' : 'Activer'); ?> l'appel"><?php icon($l['callback_active'] == 1 ? 'reset' : 'valid'); ?></a></td>
+			<td class="c"><?php echo ($l['active'] == 1 ? $lang['MOD_XTENSE_ENABLED'] : $lang['MOD_XTENSE_DISABLED']); ?></td>
+			<td class="c"><?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_ENABLED'] : $lang['MOD_XTENSE_DISABLED']); ?></td>
+			<td><a href="index.php?action=xtense&amp;page=mods&amp;toggle=<?php echo $l['id']; ?>&amp;state=<?php echo $l['callback_active']==1?0:1; ?>" title="<?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_DISABLED'] : $lang['MOD_XTENSE_ENABLED']); ?> l'appel"><?php icon($l['callback_active'] == 1 ? 'reset' : 'valid'); ?></a></td>
 		</tr>
 	<?php } ?>
 	</table>
 	<br/>
 <?php } elseif ($page == 'about') { ?>
-	<p>Xtense par Unibozu</a></p>
-	<p>Forum de support de l'OGSteam : <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Xtense</a></p>
-	<p>Set d'icônes "Silk icons" par <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
+	<p><?php echo($lang['MOD_XTENSE_AUTHOR']); ?></a></p>
+	<p><?php echo($lang['MOD_XTENSE_FORUM']); ?> : <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank"><?php echo($lang['MOD_XTENSE_TITLE']); ?></a></p>
+	<p><?php echo($lang['MOD_XTENSE_ICONS']); ?> "Silk icons" <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
 	
 	<div class="sep"></div>
-	<h2>Changelog</h2>
-	<p><a href="https://bitbucket.org/ogsteam/mod-xtense/overview">Liste des modifications</a></p>
+	<h2><?php echo($lang['MOD_XTENSE_CHANGELOG']); ?></h2>
+	<p><a href="https://bitbucket.org/ogsteam/mod-xtense/overview"><?php echo($lang['MOD_XTENSE_CHANGELOG_LINK']); ?></a></p>
 
 <?php } ?>
 	</div>
 </div>
 
-<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank">Support</a></div>
+<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="http://www.ogsteam.fr/" onclick="return winOpen(this);" target="_blank"><?php echo($lang['MOD_XTENSE_SUPPPORT']); ?></a></div>
 
 </body>
 </html>
