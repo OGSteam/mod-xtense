@@ -12,7 +12,7 @@
 
 /* index.php */
 
-$lang['MOD_XTENSE_LANG'] = "fr";
+$lang['MOD_XTENSE_LANG'] = "en";
 $lang['MOD_XTENSE_TITLE'] = "Xtense";
 $lang['MOD_XTENSE_ADMINTITLE'] = "Administration de Xtense";
 $lang['MOD_XTENSE_INFORMATIONS'] = "Informations";
@@ -44,14 +44,14 @@ $lang['MOD_XTENSE_LOGS'] = "Journaliser les requêtes";
 $lang['MOD_XTENSE_SOLARSYSTEMS'] = "Systèmes solaires";
 $lang['MOD_XTENSE_SPYREPORTS'] = "Rapports d\'espionnage";
 $lang['MOD_XTENSE_EMPIRE'] = "Empire (Pages Empire, Batiments, Recherche...)";
-$lang['MOD_XTENSE_RANKINGS'] = "Classements";
+$lang['MOD_XTENSE_RANKINGS'] = "Rankings";
 $lang['MOD_XTENSE_ALLIANCE_LIST'] = "Liste des joueurs d\'alliance";
 $lang['MOD_XTENSE_MESSAGES'] = "Messages";
 $lang['MOD_XTENSE_ACTIONS'] = "Actions";
 $lang['MOD_XTENSE_REPAIR_EMPIRE'] = "Réparer les espaces personnels (en cas de problèmes avec un espace personnel plein)";
 $lang['MOD_XTENSE_INSTALL_CALLBACKS'] = "Installer les appels de tous les mods installés et activés";
-$lang['MOD_XTENSE_SEND'] = "Envoyer";
-$lang['MOD_XTENSE_CANCEL'] = "Annuler";
+$lang['MOD_XTENSE_SEND'] = "Send";
+$lang['MOD_XTENSE_CANCEL'] = "Cancel";
 $lang['MOD_XTENSE_GROUPS_DEFINITION'] = "Vous pouvez définir pour chaque groupe de OGSpy les accès qu\'ont les utilisateurs à Xtense.";
 $lang['MOD_XTENSE_UPDATE_DONE'] = "Mise à jour effectuée";
 $lang['MOD_XTENSE_TICKALL'] = "Tout cocher";
