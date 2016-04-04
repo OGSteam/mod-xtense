@@ -166,7 +166,7 @@ function check_coords($coords, $exp = 0) {
 
 function icon($name) {
 	global $root;
-	echo "<img src='mod/{$root}/tpl/icons/{$name}.png' class='icon' align='absmiddle' />";
+	echo "<img src='mod/xtense/tpl/icons/{$name}.png' class='icon' align='absmiddle' />";
 }
 
 function get_microtime() {
