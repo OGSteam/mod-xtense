@@ -365,7 +365,7 @@ $db->sql_close();
 	<input type="hidden" name="groups_id" id="groups_id" value="<?php echo implode('-', $groups_id); ?>" />
 	<table width="100%">
 		<tr>
-			<th><?php echo($lang['MOD_XTENSE_NAME']); ?></th>
+			<th><?php echo($lang['MOD_XTENSE_TITLE']); ?></th>
 			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_SOLARSYSTEMS']); ?></th>
 			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_RANKINGS']); ?></th>
 			<th width="12%" class="c"><?php echo($lang['MOD_XTENSE_EMPIRE']); ?></th>
@@ -427,9 +427,9 @@ $db->sql_close();
 			<td><?php echo $l['id']; ?></td>
 			<td><?php echo $l['title']; ?> (<?php echo $l['version']; ?>)</td>
 			<td><?php echo $l['type']; ?></td>
-			<td class="c"><?php echo ($l['active'] == 1 ? $lang['MOD_XTENSE_ENABLED'] : $lang['MOD_XTENSE_DISABLED']); ?></td>
-			<td class="c"><?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_ENABLED'] : $lang['MOD_XTENSE_DISABLED']); ?></td>
-			<td><a href="index.php?action=xtense&amp;page=mods&amp;toggle=<?php echo $l['id']; ?>&amp;state=<?php echo $l['callback_active']==1?0:1; ?>" title="<?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_DISABLED'] : $lang['MOD_XTENSE_ENABLED']); ?> l'appel"><?php icon($l['callback_active'] == 1 ? 'reset' : 'valid'); ?></a></td>
+			<td class="c"><?php echo ($l['active'] == 1 ? $lang['MOD_XTENSE_CALLBACK_ENABLED'] : $lang['MOD_XTENSE_CALLBACK_DISABLED']); ?></td>
+			<td class="c"><?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_CALLBACK_ENABLED'] : $lang['MOD_XTENSE_CALLBACK_DISABLED']); ?></td>
+			<td><a href="index.php?action=xtense&amp;page=mods&amp;toggle=<?php echo $l['id']; ?>&amp;state=<?php echo $l['callback_active']==1?0:1; ?>" title="<?php echo ($l['callback_active'] == 1 ? $lang['MOD_XTENSE_CALLBACK_DISABLED'] : $lang['MOD_XTENSE_CALLBACK_ENABLED']); ?> l'appel"><?php icon($l['callback_active'] == 1 ? 'reset' : 'valid'); ?></a></td>
 		</tr>
 	<?php } ?>
 	</table>
