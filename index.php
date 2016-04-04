@@ -411,7 +411,7 @@ $db->sql_close();
 		<tr>
 			<th class="c">#</th>
 			<th><?php echo($lang['MOD_XTENSE_CALLBACK_MODNAME']); ?></th>
-			<th width="40%"><?php echo($lang['MOD_XTENSE_CALLBACK_DATATYPE']); ?>/th>
+			<th width="40%"><?php echo($lang['MOD_XTENSE_CALLBACK_DATATYPE']); ?></th>
 			<th width="17%" class="c"><?php echo($lang['MOD_XTENSE_CALLBACK_STATUSMOD']); ?></th>
 			<th width="17%" class="c"><?php echo($lang['MOD_XTENSE_CALLBACK_STATUSLINK']); ?></th>
 			<th class="c" width="10"></th>
