@@ -136,6 +136,8 @@ $io->set(array('new_messages' => 0));
 $db->sql_query("UPDATE " . TABLE_USER . " SET xtense_version='" . $pub_toolbar_version . "', xtense_type='" . $pub_toolbar_type . "' WHERE user_id = " . $user_data['user_id']);
 $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
 
+if($pub_toolbar_type == 'FF') $io->set_legacy_format_on();
+
 switch ($page_type) {
     case 'overview': {//PAGE OVERVIEW
         if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources) == false) die("hack");
