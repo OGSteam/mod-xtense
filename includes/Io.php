@@ -26,6 +26,8 @@ class Io
     const NORMAL = 3;
     const SUCCESS = 4;
 
+    protected $legacy_format = false;
+
     public function __construct()
     {
         $args['status'] = 1;
@@ -53,46 +55,53 @@ class Io
         $this->args = array();
     }
 
+    public function set_legacy_format_on()
+    {
+        $this->legacy_format = true; //Pour activer le format non JSON (Toolbar Firefox)
+    }
+
     protected function parse($value)
     {
-        $data = json_encode($value);
-        return $data;
-        $str = '';
-        /*
-        $str = '';
-        if (is_numeric($value)) $str .= $value;
-        elseif (is_null($value)) $str .= 'NULL';
-        elseif (is_bool($value)) $str .= ($value ? 'true' : 'false');
-        elseif (is_array($value)) {
-            $str .= '[';
-            $max = count($value)-1;
-            $i = 0;
 
-            foreach ($value as $v) {
-                $str .= $this->parse($v);
-                if ($i < $max) $str .= ',';
-                $i++;
-            }
+        if ($this->legacy_format != true) {
+            $data = json_encode($value);
+            return $data;
+            
+        } else {
 
-            $str .= ']';
+            $str = '';
+            if (is_numeric($value)) $str .= $value;
+            elseif (is_null($value)) $str .= 'NULL';
+            elseif (is_bool($value)) $str .= ($value ? 'true' : 'false');
+            elseif (is_array($value)) {
+                $str .= '[';
+                $max = count($value) - 1;
+                $i = 0;
+
+                foreach ($value as $v) {
+                    $str .= $this->parse($v);
+                    if ($i < $max) $str .= ',';
+                    $i++;
+                }
+
+                $str .= ']';
+            } elseif (is_object($value)) {
+                $str .= '{';
+                $vars = get_object_vars($value);
+                $max = count($vars) - 1;
+                $i = 0;
+
+                foreach ($vars as $k => $v) {
+                    $str .= '"' . $k . '": ' . $this->parse($v);
+                    if ($i < $max) $str .= ',';
+                    $i++;
+                }
+
+                $str .= '}';
+            } else $str .= '"' . str_replace("\n", '\\n', str_replace('"', '\\"', $value)) . '"';
+
+            return $str;
         }
-        elseif (is_object($value)) {
-            $str .= '{';
-            $vars = get_object_vars($value);
-            $max = count($vars)-1;
-            $i = 0;
-
-            foreach ($vars as $k => $v) {
-                $str .= '"'.$k.'": '.$this->parse($v);
-                if ($i < $max) $str .= ',';
-                $i ++;
-            }
-
-            $str .= '}';
-        }
-        else $str .= '"'.str_replace("\n", '\\n', str_replace('"', '\\"',$value)).'"';
-
-        return $str;*/
     }
 
     public function status($status)
