@@ -112,7 +112,13 @@ class Io
     public function send($status = null, $exit = false)
     {
         if (!is_null($status)) $this->status($status);
-        echo $this->parse((object)$this->args);
+
+        if ($this->legacy_format != true) {
+            echo $this->parse((object)$this->args);
+        }
+        else{
+            echo "(".$this->parse((object)$this->args).")";
+        }
         if ($exit) exit;
     }
 
