@@ -15,9 +15,7 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
 
-define('DEBUG', isset($pub_debug) && $_SERVER['REMOTE_ADDR'] == '127.0.0.1');
-if (DEBUG) header('Content-type: text/plain');
-
+header("Access-Control-Allow-Origin: chrome-extension://dcidgnchkomjhbcdojjagfefhaciikdb");
 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
