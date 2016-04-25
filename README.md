@@ -1,5 +1,16 @@
 # Change Log #
 
+
+## Module OGSpy 2.6.6 ##
+
+### Nouveau ###
+* Support JSON pour les échanges avec Xtense Web Extension
+* Support internationalisation
+* Clarification de la configuration à effectuer (Page 1)
+
+### Correctif ###
+* Correctif Mauvais lien vers serveur OGSpy (Manquait Https)
+
 ## Module OGSpy 2.6.2 ##
 
 ### Correctif ###
