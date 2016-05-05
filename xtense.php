@@ -838,7 +838,7 @@ switch ($page_type) {
                 'type' => 'rc',
             ));
 
-            add_log('rc');
+            add_log('rc', array('toolbar' => $toolbar_info));
         }
         break;
 
