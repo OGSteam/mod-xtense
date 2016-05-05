@@ -110,9 +110,11 @@ if (!$db->sql_numrows($query)) {
 $query = $db->sql_query("SELECT system, ranking, empire, messages FROM " . TABLE_USER_GROUP . " u LEFT JOIN " . TABLE_GROUP . " g ON g.group_id = u.group_id LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.group_id = g.group_id WHERE u.user_id = '" . $user_data['user_id'] . "'");
 $user_data['grant'] = $db->sql_fetch_assoc($query);
 
+if($pub_toolbar_type == 'FF') $io->set_legacy_format_on();
 
 // Si Xtense demande la verification du serveur, renvoi des droits de l'utilisateur
 if (isset($pub_server_check)) {
+
     $io->set(array(
         'version' => $server_config['version'],
         'servername' => $server_config['servername'],
@@ -133,8 +135,6 @@ $io->set(array('new_messages' => 0));
 // Xtense : Ajout de la version et du type de barre utilisée par l'utilisateur
 $db->sql_query("UPDATE " . TABLE_USER . " SET xtense_version='" . $pub_toolbar_version . "', xtense_type='" . $pub_toolbar_type . "' WHERE user_id = " . $user_data['user_id']);
 $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
-
-if($pub_toolbar_type == 'FF') $io->set_legacy_format_on();
 
 switch ($page_type) {
     case 'overview': {//PAGE OVERVIEW
