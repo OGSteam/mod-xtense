@@ -8,6 +8,9 @@
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 
+/**
+ * Class Io
+ */
 class Io
 {
     /**
@@ -26,12 +29,19 @@ class Io
     const NORMAL = 3;
     const SUCCESS = 4;
 
+    /**
+     * Io constructor.
+     */
     public function __construct()
     {
         $args['status'] = 1;
         $this->names = array(self::WARNING => 'warning', self::ERROR => 'error', self::SUCCESS => 'success');
     }
 
+    /**
+     * @param      $name
+     * @param null $value
+     */
     public function set($name, $value = null)
     {
         if (is_array($name)) foreach ($name as $n => $v) $this->set($n, $v);
@@ -43,6 +53,9 @@ class Io
         }
     }
 
+    /**
+     * @param $name
+     */
     public function del($name)
     {
         unset($this->args[$name]);
@@ -53,17 +66,28 @@ class Io
         $this->args = array();
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
     protected function parse($value)
     {
         $data = json_encode($value);
         return $data;
     }
 
+    /**
+     * @param $status
+     */
     public function status($status)
     {
         $this->args['status'] = $status;
     }
 
+    /**
+     * @param null $status
+     * @param bool $exit
+     */
     public function send($status = null, $exit = false)
     {
         if (!is_null($status)) $this->status($status);
@@ -73,6 +97,10 @@ class Io
         if ($exit) exit;
     }
 
+    /**
+     * @param     $call
+     * @param int $status
+     */
     public function append_call($call, $status = self::SUCCESS)
     {
         if (in_array($call['id'], $this->calls)) return;
@@ -88,6 +116,11 @@ class Io
         array_push($this->args['calls']->{$this->names[$status]}, $call['title']);
     }
 
+    /**
+     * @param      $message
+     * @param int  $type
+     * @param null $callback
+     */
     public function append_call_message($message, $type = self::SUCCESS, $callback = null)
     {
         global $call;
@@ -98,6 +131,11 @@ class Io
         );
     }
 
+    /**
+     * @param                 $call
+     * @param                 $message
+     * @param \Exception|null $e
+     */
     public function append_call_error($call, $message, Exception $e = null)
     {
         $this->append_call($call, self::ERROR);

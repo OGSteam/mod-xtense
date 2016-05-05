@@ -46,4 +46,4 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 	        $db->sql_query('REPLACE INTO '.TABLE_XTENSE_CALLBACKS.' (mod_id, function, type, active) VALUES '.implode(', ', $insert)); 
 	} 
 	return $callInstall; 
-?>
+

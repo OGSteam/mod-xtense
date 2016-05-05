@@ -37,19 +37,39 @@ function install_callbacks ($action, $data, $version = null) {
 	return $db->sql_affectedrows();
 }
 
+/**
+ * @param $string
+ * @return mixed
+ */
 function js_compatibility($string){
 	return str_replace('<br>','\n',(htmlspecialchars_decode($string)));
 }
 
+/**
+ * @param $date
+ * @return int
+ */
 function parseOgameDate($date) {
 	preg_match('!([0-9]+)-([0-9]+) ([0-9]+):([0-9]+):([0-9]+)!i', $date, $parts);
 	return mktime($parts[3], $parts[4], $parts[5], $parts[1], $parts[2], date('Y') - ($parts[1] == 12 && date('n') == 1 ? 1 : 0));
 }
 
+/**
+ * @param $str
+ * @return int
+ */
 function clean_nb($str) {
 	return (int)str_replace('.', '', $str);
 }
 
+/**
+ * @param $no
+ * @param $str
+ * @param $file
+ * @param $line
+ * @return bool
+ * @throws \Exception
+ */
 function error_handler($no, $str, $file, $line) {
 	global $call;
 	
@@ -57,8 +77,6 @@ function error_handler($no, $str, $file, $line) {
 		global $io;
 		
 		throw new Exception('Erreur PHP lors de l\'execution'."\n".' '.$file.' @ '.$line.' : "'.$str.'"');
-		//$io->append_call_error($call->currentCallback, 'Erreur PHP lors de l\'execution'."\n".' '.$file.':'.$line.' : "'.$str.'"');
-		return !DEBUG;
 	}
 	
 	return false;
@@ -155,6 +173,11 @@ function home_check($type, $coords) {
 	}
 }
 
+/**
+ * @param     $coords
+ * @param int $exp
+ * @return bool
+ */
 function check_coords($coords, $exp = 0) {
 	global $server_config;
 	if (!preg_match('!^([0-9]{1,2}):([0-9]{1,3}):([0-9]{1,2})$!Usi', $coords, $match)) return false;
@@ -164,17 +187,27 @@ function check_coords($coords, $exp = 0) {
 	//return true;
 }
 
+/**
+ * @param $name
+ */
 function icon($name) {
 	global $root;
 	echo "<img src='mod/xtense/img/icons/{$name}.png' class='icon' align='absmiddle' />";
 }
 
+/**
+ * @return float
+ */
 function get_microtime() {
 	$t = explode(' ', microtime());
 	return ((float)$t[1] + (float)$t[0]);
 }
 
 
+/**
+ * @param      $type
+ * @param null $data
+ */
 function add_log($type, $data = null) {
 	global $server_config, $user_data, $root;
 	$message = '';
@@ -242,6 +275,10 @@ function add_log($type, $data = null) {
     }
 }
 
+/**
+ * @param $size
+ * @return string
+ */
 function format_size ($size) {
 	if ($size < 1024) $size .= ' octets';
 	elseif ($size < 1024*1024) $size = round($size/1024, 2).' Ko';
@@ -249,7 +286,11 @@ function format_size ($size) {
 	return $size;
 }
 
-function update_statistic($stats,$value){
+/**
+ * @param $stats
+ * @param $value
+ */
+function update_statistic($stats, $value){
 	global $db;
 	$request = "update ".TABLE_STATISTIC." set statistic_value = statistic_value + {$value}";
 	$request .= " where statistic_name = '{$stats}'";
@@ -260,6 +301,11 @@ function update_statistic($stats,$value){
 	}
 }
 
+/**
+ * @param $boosterdata
+ * @param $current_time
+ * @return null|\tableau
+ */
 function update_boosters($boosterdata, $current_time ){
 
 	$boosters = booster_decode();

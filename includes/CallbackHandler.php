@@ -17,7 +17,11 @@ class CallbackHandler {
 	private $types = array();
 	private $included = array();
 	public $currentCallback = false;
-	
+
+	/**
+	 * @param $type
+	 * @param $params
+     */
 	public function add($type, $params) {
 		if (empty($params)) return;
 		$this->calls[$type][] = $params;
@@ -29,8 +33,6 @@ class CallbackHandler {
 	/**
 	 * Appels des fonctions des mods
 	 *
-	 * @internal param string $type
-	 * @internal param array $params
 	 */
 	public function apply() {
 		global $io, $db, $get_dev, $server_config;

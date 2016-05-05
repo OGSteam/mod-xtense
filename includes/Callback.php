@@ -10,7 +10,12 @@ abstract class Callback {
 	protected $root = '';
 	
 	private static $instances = array();
-	
+
+	/**
+	 * @param $root
+	 * @return mixed
+	 * @throws \Exception
+     */
 	public static function load($root) {
 		if (isset(self::$instances[$root])) return self::$instances[$root];
 		if (!file_exists('mod/'.$root.'/_xtense.php')) throw new Exception('Le fichier de lien n&#039;existe pas');
@@ -30,11 +35,17 @@ abstract class Callback {
 		
 		return $call;
 	}
-	
+
+	/**
+	 * @return mixed
+     */
 	final public function validVersion() {
 		return version_compare(PLUGIN_VERSION, $this->version, '>=');
 	}
-	
+
+	/**
+	 * @param $root
+     */
 	final public function setRoot($root) {
 		$this->root = $root;
 	}

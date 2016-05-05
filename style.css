@@ -69,8 +69,7 @@ p.error {
 	color: #A00;
 	font-weight: bold;
 	letter-spacing: 2px;
-	padding: 5px;
-	padding-left: 25px;
+	padding: 5px 5px 5px 25px;
 	margin: 10px;
 	border: 1px solid #A00;
 }
@@ -80,8 +79,7 @@ p.success {
 	color: #11A98E;
 	font-weight: bold;
 	letter-spacing: 2px;
-	padding: 5px;
-	padding-left: 25px;
+	padding: 5px 5px 5px 25px;
 	margin: 10px;
 	border: 1px solid #11A98E;
 }
@@ -91,14 +89,13 @@ p.info {
 	color: #066;
 	font-weight: bold;
 	letter-spacing: 2px;
-	padding: 5px;
-	padding-left: 25px;
+	padding: 5px 5px 5px 25px;
 	margin: 10px;
 	border: 1px solid #0AA;
 }
 
 button {
-	letter-spacing: 1.2px;
+	letter-spacing: 1.2pt;
 	margin-left: 4px;
 	border: 1px solid #DDD;
 	color: #000;
@@ -206,8 +203,7 @@ dl.changelog dd div.version {
 	text-decoration: none;
 	letter-spacing: 2px;
 	padding: 5px;
-	padding-left: 5px;
-	border: none;
+	border-style: none;
 }
 
 #callback_button {

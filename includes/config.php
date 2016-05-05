@@ -40,4 +40,4 @@ $callbackTypesNames = array(
 	'ranking_ally_points' , 'ranking_ally_research' , 'trade' , 'trade_me' , 'hostiles'
 );
 
-?>
+

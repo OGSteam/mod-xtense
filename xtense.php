@@ -1370,4 +1370,4 @@ $io->set('execution', str_replace(',', '.', round((get_microtime() - $start_time
 $io->send();
 $db->sql_close();
 
-?>
+

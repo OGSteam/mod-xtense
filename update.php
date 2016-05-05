@@ -23,4 +23,3 @@ $db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE config_name LIKE "xtense_keep
 
 update_mod($mod_folder, $mod_name);
 
-?>
