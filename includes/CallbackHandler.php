@@ -50,7 +50,7 @@ class CallbackHandler {
 					
 					if (!method_exists($instance, $call['function']) || !is_callable(array($instance, $call['function']))) throw new Exception('Invalid method "'.$call['function'].'"');
 					
-					$execReturn = $instance->$call['function']($params);
+					$execReturn = $instance->{$call['function']}($params);
 					
 					$io->append_call($call, $execReturn);
 				} catch (Mysql_Exception $e) {
