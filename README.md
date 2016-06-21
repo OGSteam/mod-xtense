@@ -1,5 +1,13 @@
 # Change Log #
 
+## Module OGSpy 2.6.8 ##
+
+## Nouveau ##
+* Supression compatibilité Ancienne extension Firefox
+* Requiert Module Navigateur 2.7.1.X
+
+### Correctif ###
+* Correctifs callback qui empêchait la remontée pour certains mods (Aerue)
 
 ## Module OGSpy 2.6.6 ##
 
