@@ -141,7 +141,7 @@ class Io
         $this->append_call($call, self::ERROR);
         $this->append_call_message($message, self::ERROR, $call);
 
-        if (DEBUG) {
+
             echo "* CALL ERROR ({$call['root']}):\n  $message\n";
 
             if ($e !== null) {
@@ -154,6 +154,6 @@ class Io
             }
 
             echo "\n\n";
-        }
+
     }
 }
