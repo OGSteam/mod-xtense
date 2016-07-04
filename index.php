@@ -181,11 +181,10 @@ $db->sql_close();
     </ul>
 
     <div id="content">
-
         <?php if ($page == 'infos') { ?>
             <h2><?php echo($lang['MOD_XTENSE_DOWNLOAD']); ?></h2><br>
             <p><?php echo($lang['MOD_XTENSE_FIREFOX']); ?> : <a
-                    href="https://addons.mozilla.org/xtense-we"
+                    href="https://addons.mozilla.org/fr/firefox/addon/xtense-we/"
                     target="_blank"><?php echo($lang['MOD_XTENSE_FIREFOX_LINK']); ?></a></p>
             <p><?php echo($lang['MOD_XTENSE_CHROME']); ?> : <a
                     href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr"
