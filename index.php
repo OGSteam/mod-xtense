@@ -36,7 +36,7 @@ if (isset($pub_page)) {
 }
 
 if ($page == 'infos') {
-    $plugin_url = 'https://' . $_SERVER['HTTP_HOST'] . substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], '/') + 1) . ($server_config['xtense_plugin_root'] == 1 ? '' : "mod/{$root}/") . 'xtense.php';
+    $plugin_url = 'https://' . $_SERVER['HTTP_HOST'] . substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], '/') + 1);
 }
 
 if ($page == 'config') {
@@ -185,7 +185,7 @@ $db->sql_close();
         <?php if ($page == 'infos') { ?>
             <h2><?php echo($lang['MOD_XTENSE_DOWNLOAD']); ?></h2><br>
             <p><?php echo($lang['MOD_XTENSE_FIREFOX']); ?> : <a
-                    href="https://bitbucket.org/Jedinight/xtense-for-firefox/downloads"
+                    href="https://addons.mozilla.org/xtense-we"
                     target="_blank"><?php echo($lang['MOD_XTENSE_FIREFOX_LINK']); ?></a></p>
             <p><?php echo($lang['MOD_XTENSE_CHROME']); ?> : <a
                     href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr"
