@@ -7,13 +7,13 @@
 
 ## Module OGSpy 2.6.9 ##
 
-## Nouveau ##
+### Nouveau ###
 * Lien vers le mod Xtense depuis le Navigateur simplifié (Suppression de "/mod/xtense/xtense.php")
 * Mise à jour des liens vers les Extensions navigateurs
 
 ## Module OGSpy 2.6.8 ##
 
-## Nouveau ##
+### Nouveau ###
 * Supression compatibilité Ancienne extension Firefox
 * Requiert Module Navigateur 2.7.1.X
 
