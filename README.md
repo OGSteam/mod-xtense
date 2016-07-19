@@ -1,5 +1,16 @@
 # Change Log #
 
+## Module OGSpy 2.7.0 ##
+
+### Correctif ###
+* Remontée incorrecte de l'erreur lorsqu'un utilisateur n'a pas les droits de remonter un type de données.
+
+## Module OGSpy 2.6.9 ##
+
+## Nouveau ##
+* Lien vers le mod Xtense depuis le Navigateur simplifié (Suppression de "/mod/xtense/xtense.php")
+* Mise à jour des liens vers les Extensions navigateurs
+
 ## Module OGSpy 2.6.8 ##
 
 ## Nouveau ##
