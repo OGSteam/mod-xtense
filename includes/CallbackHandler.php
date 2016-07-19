@@ -5,7 +5,7 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME') && !defined('IN_UNISPY2')) exit;
+if (!defined('IN_SPYOGAME')) exit;
 
 /**
  * Gestion des fonctions de callback des plugins OGSpyw
@@ -53,7 +53,7 @@ class CallbackHandler {
 					$execReturn = $instance->{$call['function']}($params);
 					
 					$io->append_call($call, $execReturn);
-				} catch (Mysql_Exception $e) {
+				} catch (mysqli_sql_exception $e) {
 					$io->append_call_error($call, 'Erreur MySQL lors de l\'execution'."\n".$e->getFile().' @ '.$e->getLine()."\n".$e->getMessage());
 				} catch (Exception $e) {
 					$io->append_call_error($call, $e->getMessage(), $e);
