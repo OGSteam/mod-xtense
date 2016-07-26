@@ -14,6 +14,8 @@ pages:
     - Configuration: user-guide/configuration.md
     - Deploying Your Docs: user-guide/deploying-your-docs.md
     - Custom Themes: user-guide/custom-themes.md
+- Dev Guide:
+    - Xtense CallBacks: dev-guide/xtense_callbacks.md
 - About:
     - Release Notes: about/release-notes.md
     - Contributing: about/contributing.md
