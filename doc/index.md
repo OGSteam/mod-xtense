@@ -2,8 +2,6 @@
 
 Project documentation with&nbsp;Markdown.
 
----
-
 ## Overview
 
 Xtense est le module permettant de récupérer les données depuis le Jeu.
@@ -17,8 +15,6 @@ A compléter.
 A compléter
 
 ## Getting help
-
-Pour obtenir de l'aide :
 
 [Forum]: https://www.ogsteam.fr/
 
