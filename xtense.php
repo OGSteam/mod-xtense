@@ -145,7 +145,7 @@ switch ($page_type) {
         if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources) == false) die("hack");
         if (!$user_data['grant']['empire']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'empire'
             ));
             $io->status(0);
@@ -208,7 +208,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'empire'
             ));
             $io->status(0);
@@ -280,7 +280,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'empire'
             ));
             $io->status(0);
@@ -363,7 +363,7 @@ switch ($page_type) {
         
         if (!$user_data['grant']['empire']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'empire'
             ));
             $io->status(0);
@@ -420,7 +420,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'empire'
             ));
             $io->status(0);
@@ -484,7 +484,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['system']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'system'
             ));
             $io->status(0);
@@ -576,7 +576,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['ranking']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'ranking'
             ));
             $io->status(0);
@@ -756,7 +756,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['messages']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'messages'
             ));
             $io->status(0);
@@ -848,7 +848,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['ranking']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'ranking'
             ));
             $io->status(0);
@@ -952,7 +952,7 @@ switch ($page_type) {
 
         if (!$user_data['grant']['messages']) {
             $io->set(array(
-                'type' => 'grant',
+                'type' => 'plugin grant',
                 'access' => 'messages'
             ));
             $io->status(0);
