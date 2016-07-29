@@ -182,6 +182,7 @@ $db->sql_close();
 
     <div id="content">
         <?php if ($page == 'infos') { ?>
+            <p><?php echo($lang['MOD_XTENSE_DESCRIPTION']); ?></p><br>
             <h2><?php echo($lang['MOD_XTENSE_DOWNLOAD']); ?></h2><br>
             <p><?php echo($lang['MOD_XTENSE_FIREFOX']); ?> : <a
                     href="https://addons.mozilla.org/fr/firefox/addon/xtense-we/"
@@ -189,22 +190,26 @@ $db->sql_close();
             <p><?php echo($lang['MOD_XTENSE_CHROME']); ?> : <a
                     href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr"
                     target="_blank"><?php echo($lang['MOD_XTENSE_CHROME_LINK']); ?></a></p><br>
-            <p><a href="http://wiki.ogsteam.fr/doku.php?id=ogspy:documentationxtense"
-                  target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
-            <h2><?php echo($lang['MOD_XTENSE_INFORMATIONS']); ?></h2>
 
-            <p><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?> :</p>
-            <p><label for="url"><strong><?php echo($lang['MOD_XTENSE_URL_UNIVERSE']); ?></strong></label></p>
-            <p class="c">
-                <input type="text" class="infos" id="url" name="url"
-                       value="<?php echo $server_config['xtense_universe']; ?>" onclick="this.select();" readonly/>
-            </p>
+            <h2><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?></h2>
+            <br>
             <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></label></p>
             <p class="c">
                 <input type="text" class="infos" id="plugin" name="plugin" value="<?php echo $plugin_url; ?>"
                        onclick="this.select();" readonly/>
+            </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_USER']); ?></strong></label></p>
+            <p class="c">
+                <input type="text" class="infos" id="plugin" name="name" value="<?php echo $user_data["user_name"]; ?>"
+                       onclick="this.select();" readonly/>
+            </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
+            <p class="c">
+                <input type="text" class="infos" id="plugin" name="password" value="<?php echo '**********' ?>"
+                       onclick="this.select();" readonly/>
             </p>
             <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
+            <br>
+            <p><a href="http://wiki.ogsteam.fr/doku.php?id=ogspy:documentationxtense"
+                  target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
 
         <?php } elseif ($page == 'config') { ?>
 
@@ -307,7 +312,6 @@ $db->sql_close();
                                                      name="log_messages"<?php echo($server_config['xtense_log_messages'] == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_messages"><?php echo($lang['MOD_XTENSE_MESSAGES']); ?></label>
                         </p>
-                        <hr size="1"/>
                     </fieldset>
                 </div>
                 <div class="clear sep"></div>

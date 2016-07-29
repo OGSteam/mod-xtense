@@ -4,7 +4,8 @@
 
 Introduits dans Xtense 2, les appels (nommés Callbacks en anglais) sont l'envoi des données reçues par Xtense aux mods de OGSpy. A chaque réception de données par le mod Xtense, il appellera les mods enregistrés pour leur envoyer les données.
 Lors de cet appel, Xtense inclut un fichier spécial du mod, dans lequel il exécutera une fonction définie par l'appel.
-II. Enregistrement
+
+##Enregistrement de la Callback
 
 L'enregistrement est nécessaire pour recevoir des appels. A chaque enregistrement correspond un type d'appel et une fonction, vous ne pouvez pas définir pour un même appel plusieurs types de données à renvoyer.
 
@@ -20,7 +21,7 @@ Structure de la table MySQL stockant ces appels:
 Le champ `id` possédant une auto incrémentation, il ne faut pas le mettre dans la requête tout comme le champ `active` qui est par défaut à 1.
 Lors d'un ajout, vérifiez si un enregistrement identique n'existe pas déjà dans la table.
 
-Exemple
+Exemple:
 
     INSERT INTO ogspy_xtense_callbacks (mod_id, function, type) VALUES (1, 'prout_galaxy_import', 'system')
 
@@ -84,179 +85,173 @@ Voici une liste de tous les types d'appels que vous pouvez utiliser:
 ###Sommaire des paramètres
 
 La liste ci-dessous représente une vue "raccourcie" de la variable contenant les données envoyée aux fonctions d'appel.
-La syntaxe est un peu particulière, tous les index ayant un type "array #" sont des tableaux avec des index numériques. Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau avec X lignes, soit une plage qui signifie que la taille du tableau varie suivant cette plage. Un index avec un type "array" est un tableau avec comme index des chaînes de caractères.
+La syntaxe est un peu particulière, tous les index ayant un type "array #" sont des tableaux avec des index numériques.
+Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau avec X lignes, soit une plage notifiée comme {1,n}.
 
-###Exemple
+### Code d'appel et données retournée
 
-| Code PHP  | Equivalent  |
-|-----------|-------------|
-|   |   |
-
-Code PHP	Equivalent
-
-array
-[data] (array #2)
-array
-[name] (string)
-[ally] (string)
-Code d'appels	Données envoyées
-system	array
+* system:
+    (array #4)
     [galaxy] (int)
     [system] (int)
-    [data] (array #15)
-array
-    [planet_name] (string)
-    [moon] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON Ogame
-    [player_name] (string)
-    [status] (string)
-    [ally_tag] (string)
-    [debris] (array)
-    [metal] (int) Ogame
-    [cristal] (int) Ogame
+    [data] (array #8)
+        [planet_name] (string)
+        [moon] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON Ogame
+        [player_name] (string)
+        [status] (string)
+        [ally_tag] (string)
+        [debris] (array)
+        [metal] (int) Ogame
+        [cristal] (int) Ogame
     [activity] (string) au format du jeu, * ou 37mn par exemple Ogame
 
-spy	array #~
-array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[content] (string
-[time] (int)
-ennemy_spy	array #~
-array
-[from] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[to] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[proba] (int)
-[time] (int)
-rc	array
-[content] (string) le contenu brut de la page du RC, entre les balises <body>
-rc_cdr	array #~
-array
-[nombre] (int)
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[M_reco] (int) Métal récupéré 
-[C_reco] (int) Cristal récupéré 
-[M_total] (int) Metal dans le CdR 
-[C_total] (int) Cristal dans le CdR 
-[time] (int)
-msg	array #~
-array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[from] (string)
-[subject] (string)
-[message] (string)
-[time] (int)
-ally_msg	array #~
-array
-[from] (string)
-[tag] (string)
-[message] (string)
-[time] (int)
-expedition	array #~
-array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[content] (string)
-[time] (int
-ally_list	array
-[tag] (string)
-[list] (array #~)
-array
-[pseudo] (string)
-[points] (int)
-[coords] (string)
-[rang] (string)
-overview	array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[planet_name] (string)
-[planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-[fields] (int) cases max de la planète
-[temp] (int) température max
-buildings	array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[planet_name] (string)
-[planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-[buildings] (array)
-Tableau associatif contenant en index le code des batiments présents sur la planète ainsi que leur niveau. Comme tel : 
-[code] => niveau (int)
-research	array
-[research] (array)
-Tableau associatif contenant en index le code des recherches présentes sur la planète ainsi que leur niveau. Comme tel : 
-[code] => niveau (int)
-fleet	array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[planet_name] (string)
-[planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-[fleet] (array)
-Tableau associatif contenant en index le code des vaisseaux présents sur la planète ainsi que leur nombre. Comme tel : 
-[code] => nombre (int)
-defense	array
-[coords] (array #3)
-[0] (int) galaxie
-[1] (int) système
-[2] (int) ligne
-[planet_name] (string)
-[planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-[defense] (array)
-Tableau associatif contenant en index le code des defenses présentes sur la planète ainsi que leur nombre. Comme tel : 
-[code] => nombre (int)
-ranking_ally_points
-ranking_ally_fleet
-ranking_ally_research	array
-[offset] (int)
-[time] (int)
-[data] (array #1-100)
-array
-[ally_tag] (string)
-[members] (int) Ogame
-[points] (int)
-[mean] (int) Ogame
-[ally_id] (int) E-Univers
-ranking_player_points
-ranking_player_fleet
-ranking_player_research	array
-[offset] (int)
-[time] (int)
-[data] (array #1-100)
-array
-[player_name] (string)
-[ally_tag] (string)
-[points] (int)
-[player_id] (int) E-Univers
-[ally_id] (int) E-Univers
+* spy:
+    (array #3)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [content] (string)
+    [time] (int)
 
-##Fonctions usuelles
+* ennemy_spy:
+    (array #3)
+    [from] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [to] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [proba] (int)
 
-Le fichier de fonctions de xtense étant inclut vous pouvez avoir accès à ces fonctions. Voici quelques unes qui pourraient vous être utiles
-quote ( string $str )
-Une amélioration de add_slashes. Cette fonction rajoute des antislash si les magic_quotes_gpc ne sont pas activées. A utiliser pour chaque requête MySQL.
-dump ( mixed $var [, mixed $var [, $... ]] )
-Amélioration de la fonction var_dump() pour les renvois de Xtense. Elle formate les données pour qu'elles soient affichables depuis la fenêtre de debug
-get_microtime ()
-Retourne le timestamp UNIX courant avec les millisecondes
-check_coords ( string $coords [, int $expedition] )
-Cette fonction renvoi true ou false si les coordonnées sont correctes (prend en charge la config OGSpy pour le nombre de systèmes et de galaxies). Si $expedition est à 1 elle vérifie si les coordonnées sont celles d'une expédition
+* rc
+    (array #1)
+    [content] (string) le contenu brut de la page du RC, entre les balises <body>
+
+* rc_cdr
+    (array #7)
+    [nombre] (int)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [M_reco] (int) Métal récupéré
+    [C_reco] (int) Cristal récupéré
+    [M_total] (int) Metal dans le CdR
+    [C_total] (int) Cristal dans le CdR
+    [time] (int)
+
+* msg
+    (array #5)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [from] (string)
+    [subject] (string)
+    [message] (string)
+    [time] (int)
+
+* ally_msg
+    (array #4)
+    [from] (string)
+    [tag] (string)
+    [message] (string)
+    [time] (int)
+
+* expedition
+    (array #3)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [content] (string)
+    [time] (int)
+
+* ally_list
+    (array #2)
+    [tag] (string)
+    [list] (array #4{1,n} )
+        [pseudo] (string)
+        [points] (int)
+        [coords] (string)
+        [rang] (string)
+
+
+* overview
+    (array #5)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [fields] (int) cases max de la planète
+    [temp] (int) température max
+
+* buildings
+    (array #4)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [buildings] (array {1,n})
+        Tableau associatif contenant en index le code des batiments présents sur la planète ainsi que leur niveau.
+        [code] => niveau (int)
+
+* research
+    array
+    [research] (array {1,n})
+        Tableau associatif contenant en index le code des recherches présentes sur la planète ainsi que leur niveau.
+        [code] => niveau (int)
+
+* fleet
+
+    (array #4)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [fleet] (array {1,n})
+        Tableau associatif contenant en index le code des vaisseaux présents sur la planète ainsi que leur nombre.
+        [code] => nombre (int)
+
+* defense
+    array
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [defense] (array {1,n})
+        Tableau associatif contenant en index le code des defenses présentes sur la planète ainsi que leur nombre.
+        [code] => nombre (int)
+
+
+* ranking_ally_points / ranking_ally_fleet / ranking_ally_research
+
+    (array #3)
+    [offset] (int)
+    [time] (int)
+    [data] (array {1,100})
+        [ally_tag] (string)
+        [members] (int) Ogame
+        [points] (int)
+        [mean] (int) Ogame
+
+* ranking_player_points / ranking_player_fleet / ranking_player_research
+    (array #3)
+    [offset] (int)
+    [time] (int)
+    [data] (array {1,100})
+        [player_name] (string)
+        [ally_tag] (string)
+        [points] (int)
+
