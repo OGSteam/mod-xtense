@@ -1,5 +1,11 @@
 # Change Log #
 
+## Module OGSpy 2.7.1 ##
+
+### Nouveau ###
+* Documentation au format MkDocs
+* Amélioration de la page principale du module pour une meilleure explication de la configuration à réaliser.
+
 ## Module OGSpy 2.7.0 ##
 
 ### Correctif ###
