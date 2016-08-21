@@ -53,7 +53,7 @@ if ($is_ok == true)
 			`id` int(3) NOT NULL auto_increment,
 			`mod_id` int(3) NOT NULL,
 			`function` varchar(30) NOT NULL,
-			`type` enum('overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy','ennemy_spy','hostiles','rc','rc_cdr', 'msg', 'ally_msg', 'expedition', 'trade', 'trade_me','ranking_player_fleet','ranking_player_points','ranking_player_research','ranking_ally_fleet','ranking_ally_points','ranking_ally_research','hostiles') NOT NULL,
+			`type` enum('overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy','ennemy_spy','rc','rc_cdr', 'msg', 'ally_msg', 'expedition', 'ranking', 'trade', 'trade_me','hostiles') NOT NULL,
 			`active` tinyint(1) NOT NULL default '1',
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `mod_id` (`mod_id`,`type`),
