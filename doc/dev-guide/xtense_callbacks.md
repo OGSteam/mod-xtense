@@ -75,12 +75,7 @@ Voici une liste de tous les types d'appels que vous pouvez utiliser:
 * research
 * fleet
 * defense
-* ranking_player_points
-* ranking_player_fleet
-* ranking_player_research
-* ranking_ally_points
-* ranking_ally_fleet
-* ranking_ally_research
+* ranking
 
 ###Sommaire des paramètres
 
@@ -88,100 +83,13 @@ La liste ci-dessous représente une vue "raccourcie" de la variable contenant le
 La syntaxe est un peu particulière, tous les index ayant un type "array #" sont des tableaux avec des index numériques.
 Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau avec X lignes, soit une plage notifiée comme {1,n}.
 
-### Code d'appel et données retournée
+### Code d'appel et données retournées
 
-* system:
-    (array #4)
-    [galaxy] (int)
-    [system] (int)
-    [data] (array #8)
-        [planet_name] (string)
-        [moon] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON Ogame
-        [player_name] (string)
-        [status] (string)
-        [ally_tag] (string)
-        [debris] (array)
-        [metal] (int) Ogame
-        [cristal] (int) Ogame
-    [activity] (string) au format du jeu, * ou 37mn par exemple Ogame
-
-* spy:
-    (array #3)
-    [coords] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [content] (string)
-    [time] (int)
-
-* ennemy_spy:
-    (array #3)
-    [from] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [to] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [proba] (int)
-
-* rc
-    (array #1)
-    [content] (string) le contenu brut de la page du RC, entre les balises <body>
-
-* rc_cdr
-    (array #7)
-    [nombre] (int)
-    [coords] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [M_reco] (int) Métal récupéré
-    [C_reco] (int) Cristal récupéré
-    [M_total] (int) Metal dans le CdR
-    [C_total] (int) Cristal dans le CdR
-    [time] (int)
-
-* msg
-    (array #5)
-    [coords] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [from] (string)
-    [subject] (string)
-    [message] (string)
-    [time] (int)
-
-* ally_msg
-    (array #4)
-    [from] (string)
-    [tag] (string)
-    [message] (string)
-    [time] (int)
-
-* expedition
-    (array #3)
-    [coords] (array #3)
-        [0] (int) galaxie
-        [1] (int) système
-        [2] (int) ligne
-    [content] (string)
-    [time] (int)
-
-* ally_list
-    (array #2)
-    [tag] (string)
-    [list] (array #4{1,n} )
-        [pseudo] (string)
-        [points] (int)
-        [coords] (string)
-        [rang] (string)
-
+## Pages
 
 * overview
-    (array #5)
+```
+    (array #9)
     [coords] (array #3)
         [0] (int) galaxie
         [1] (int) système
@@ -189,9 +97,23 @@ Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau ave
     [planet_name] (string)
     [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
     [fields] (int) cases max de la planète
-    [temp] (int) température max
-
+    [temperature_min] (int) température min
+    [temperature_max] (int) température max
+    [ressources] (array #5)
+        [metal] (int)
+        [cristal] (int)
+        [deut] (int)
+        [antimater] (int)
+        [energy] (int)
+    [ogame_timestamp] (int) Game time
+    [boostExt] (array #2)
+        [uuid] (int)
+        [temps] (int)
+```
 * buildings
+
+Mine Page:
+```
     (array #4)
     [coords] (array #3)
         [0] (int) galaxie
@@ -199,59 +121,312 @@ Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau ave
         [2] (int) ligne
     [planet_name] (string)
     [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-    [buildings] (array {1,n})
-        Tableau associatif contenant en index le code des batiments présents sur la planète ainsi que leur niveau.
-        [code] => niveau (int)
-
+    [M] => niveau (int)
+    [C] => niveau (int)
+    [D] => niveau (int)
+    [CES] => niveau (int)
+    [CEF] => niveau (int)
+    [SAT] => niveau (int)
+    [HM] => niveau (int)
+    [HC] => niveau (int)
+    [HD] => niveau (int)
+```
+Installations Page:
+```
+    (array #13)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [UdR] => niveau (int)
+    [CSp] => niveau (int)
+    [Lab] => niveau (int)
+    [DdR] => niveau (int)
+    [Silo] => niveau (int)
+    [UdN] => niveau (int)
+    [Ter] => niveau (int)
+    [BaLu] => niveau (int) // For Moon Only
+    [Pha] => niveau (int) // For Moon Only
+    [PoSa] => niveau (int) // For Moon Only
+```
 * research
-    array
-    [research] (array {1,n})
-        Tableau associatif contenant en index le code des recherches présentes sur la planète ainsi que leur niveau.
-        [code] => niveau (int)
-
+```
+    (array #19)
+    [coords] (array #3)
+        [0] (int) galaxie
+        [1] (int) système
+        [2] (int) ligne
+    [planet_name] (string)
+    [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
+    [NRJ] => niveau (int)
+    [Laser] => niveau (int)
+    [Ions] => niveau (int)
+    [Hyp] => niveau (int)
+    [Plasma] => niveau (int)
+    [RC] => niveau (int)
+    [RI] => niveau (int)
+    [PH] => niveau (int)
+    [Esp] => niveau (int)
+    [Ordi] => niveau (int)
+    [Astrophysique] => niveau (int)
+    [RRI] => niveau (int)
+    [Graviton] => niveau (int)
+    [Armes] => niveau (int)
+    [Bouclier] => niveau (int)
+    [Protection] => niveau (int)
+```
 * fleet
-
-    (array #4)
+```
+    (array #16)
     [coords] (array #3)
         [0] (int) galaxie
         [1] (int) système
         [2] (int) ligne
     [planet_name] (string)
     [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-    [fleet] (array {1,n})
-        Tableau associatif contenant en index le code des vaisseaux présents sur la planète ainsi que leur nombre.
-        [code] => nombre (int)
-
+    [CLE] => (int)
+    [CLO] => (int)
+    [CR] => (int)
+    [VB] => (int)
+    [TRA] => (int)
+    [BMD] => (int)
+    [DST] => (int)
+    [EDLM] => (int)
+    [PT] => (int)
+    [GT] => (int)
+    [VC] => (int)
+    [REC] => (int)
+    [SE] => (int)
+```
 * defense
-    array
+```
+    (array #16)
     [coords] (array #3)
         [0] (int) galaxie
         [1] (int) système
         [2] (int) ligne
     [planet_name] (string)
     [planet_type] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON
-    [defense] (array {1,n})
-        Tableau associatif contenant en index le code des defenses présentes sur la planète ainsi que leur nombre.
-        [code] => nombre (int)
-
-
-* ranking_ally_points / ranking_ally_fleet / ranking_ally_research
-
+    [LM] => (int)
+    [LLE] => (int)
+    [LLO] => (int)
+    [CG] => (int)
+    [AI] => (int)
+    [LP] => (int)
+    [PB] => (int)
+    [GB] => (int)
+    [MIC] => (int)
+    [MIP] => (int)
+```
+* ranking
+```
     (array #3)
     [offset] (int)
+    [type1] (int) Ally or Player
+    [type2] (int) Type Points Buildings Research Fleet
+    [type3] (int) Sub Type for fleets
     [time] (int)
-    [data] (array {1,100})
-        [ally_tag] (string)
-        [members] (int) Ogame
-        [points] (int)
-        [mean] (int) Ogame
-
-* ranking_player_points / ranking_player_fleet / ranking_player_research
-    (array #3)
-    [offset] (int)
-    [time] (int)
-    [data] (array {1,100})
+    [n] (array {1,100}) For players
+        [player_id] (int)
         [player_name] (string)
+        [ally_id] (int)        
         [ally_tag] (string)
         [points] (int)
+        [nb_spacecraft] (int)
+or
+    [n] (array {1,100}) For alliance
+        [ally_id] (int)
+        [ally_tag] (string)
+        [members] (int)        
+        [points] (int)
+        [mean] (int)
+```
+* system
+```
+    (array #3)
+    [galaxy] (int)
+    [system] (int)
+    [row] (array #12)
+        [player_id] (int)
+        [planet_name] (string)
+        [planet_id] (int)
+        [moon_id] (int)
+        [moon] (int) défini par les constantes TYPE_PLANET ou TYPE_MOON Ogame
+        [player_name] (string)
+        [status] (string)
+        [ally_id] (int)
+        [ally_tag] (string)
+        [debris] (array #2)
+            [metal] (int) Ogame
+            [cristal] (int) Ogame
+        [activity] (string) au format du jeu, * ou 37mn par exemple Ogame
+        [activityMoon] (string) au format du jeu, * ou 37mn par exemple Ogame
+```
+* ally_list
+```
+    (array #2)
+    [tag] (string)
+    [n] (array #4{1,n} )
+        [pseudo] (string)
+        [points] (int)
+        [coords] (string)
+        [rang] (string)
+```
+##Messages
 
+* rc
+```
+    (array #)
+    [date] (int)
+    [win] {D,A,N}
+    [count] (int) Nb rounds
+    [result]
+        [a_lost] (int)
+        [d_lost] (int)
+        [win_metal] (int) galaxie
+        [win_cristal] (int) système
+        [win_deut] (int) ligne
+        [deb_metal] (int) ligne
+        [deb_cristal] (int) ligne
+    [moon] (int)
+    [moonprob] (int)
+    [rounds]
+        [rnd][n][a_nb]
+        [rnd][n][a_shoot]
+        [rnd][n][d_bcl]
+        [rnd][n][d_nb]
+        [rnd][n][d_shoot]
+        [rnd][n][a_bcl]
+    [n]
+        [player] (string)
+        [coords] (string)
+        [type] A /D (Attacker or Defender)
+        [weapons]
+            [arm] (int)
+            [bcl] (int)
+            [coq] (int)
+        [content] ???????? // A compléter au debugger
+    [rawdata]
+        [xxxxxxx]  // A compléter au debugger
+    [ogapilnk]
+```
+* rc_cdr
+```
+    (array #7)
+    [nombre] (int) // Nb recycleurs
+    [coords] (string)
+    [M_recovered] (int) Métal récupéré
+    [C_recovered] (int) Cristal récupéré
+    [M_total] (int) Metal dans le CdR
+    [C_total] (int) Cristal dans le CdR
+    [date] (int)
+```
+* expedition
+```
+    (array #3)
+    [coords] (string)
+    [content] (string)
+    [time] (int)
+```
+* ally_msg
+```
+    (array #4)
+    [from] (string)
+    [tag] (string)
+    [message] (string)
+```
+* msg (player_msg)
+```
+    (array #4)
+    [from] (string)
+    [coords] (string)
+    [subject] (string)
+    [message] (string)
+```
+* spy:
+```
+    (array #3)
+    [planetName] (string)
+    [coords] (string)
+    [content] (string)
+    [time] (int)
+    ['metal'] (int)
+    ['cristal'] (int)
+    ['deuterium'] (int)
+    ['energie'] (int)
+    //buildings
+     ['M'] (int) Level
+     ['C'] (int) Level
+     ['D'] (int) Level
+     ['CES'] (int) Level
+     ['CEF'] (int) Level
+     ['UdR'] (int) Level
+     ['UdN'] (int) Level
+     ['CSp'] (int) Level
+     ['Sat'] (int) Level
+     ['HM'] (int) Level
+     ['HC'] (int) Level
+     ['HD'] (int) Level
+     ['CM'] (int) Level
+     ['CC'] (int) Level
+     ['CD'] (int) Level
+     ['Lab'] (int) Level
+     ['Ter'] (int) Level
+     ['DdR'] (int) Level
+     ['Silo'] (int) Level
+     ['BaLu'] (int) Level
+     ['Pha'] (int) Level
+     ['PoSa'
+      // researchs
+     ['Esp'] (int) Level
+     ['Ordi'] (int) Level
+     ['Armes'] (int) Level
+     ['Bouclier'] (int) Level
+     ['Protection'] (int) Level
+     ['NRJ'] (int) Level
+     ['Hyp'] (int) Level
+     ['RC'] (int) Level
+     ['RI'] (int) Level
+     ['PH'] (int) Level
+     ['Laser'] (int) Level
+     ['Ions'] (int) Level
+     ['Plasma'] (int) Level
+     ['RRI'] (int) Level
+     ['Astrophysique'] (int) Level
+     ['Graviton'
+//    fleets
+     ['PT'] (int) Level
+     ['GT'] (int) Level
+     ['CLE'] (int) Level
+     ['CLO'] (int) Level
+     ['CR'] (int) Level
+     ['VB'] (int) Level
+     ['VC'] (int) Level
+     ['REC'] (int) Level
+     ['SE'] (int) Level
+     ['BMD'] (int) Level
+     ['SAT'] (int) Level
+     ['DST'] (int) Level
+     ['EDLM'] (int) Level
+     ['TRA'
+// defense'
+     ['LM'] (int) Level
+     ['LLE'] (int) Level
+     ['LLO'] (int) Level
+     ['CG'] (int) Level
+     ['AI'] (int) Level
+     ['LP'] (int) Level
+     ['PB'] (int) Level
+     ['GB'] (int) Level
+     ['MIC'] (int) Level
+     ['MIP'] (int) Level
+```
+* ennemy_spy:
+```
+    (array #3)
+    [from] (string)
+    [to] (string)
+    [proba] (int)
+```
