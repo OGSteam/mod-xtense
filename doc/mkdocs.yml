@@ -1,0 +1,30 @@
+
+site_name: Xtense
+site_url: https://www.ogsteam.fr
+site_description: Xtense Developper Documentation
+site_author: MkDocs Team
+
+repo_url: https://bitbucket.org/ogsteam/mod-xtense
+
+pages:
+- Home: index.md
+- User Guide:
+    - Writing Your Docs: user-guide/writing-your-docs.md
+    - Styling Your Docs: user-guide/styling-your-docs.md
+    - Configuration: user-guide/configuration.md
+    - Deploying Your Docs: user-guide/deploying-your-docs.md
+    - Custom Themes: user-guide/custom-themes.md
+- Dev Guide:
+    - Xtense CallBacks: dev-guide/xtense_callbacks.md
+- About:
+    - Release Notes: about/release-notes.md
+    - Contributing: about/contributing.md
+    - License: about/license.md
+
+markdown_extensions:
+    - toc:
+        permalink: 
+    - admonition:
+
+copyright: Copyright &copy; 2016 <a href="/release-notes/">DarkNoon</a>, Maintained by the OGSTeam</a>.
+google_analytics: ['', 'ogsteam.fr']
