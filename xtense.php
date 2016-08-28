@@ -10,6 +10,7 @@ define('IN_XTENSE', true);
 
 date_default_timezone_set(date_default_timezone_get());
 
+$currentFolder = getcwd();
 if (preg_match('#mod#', getcwd())) chdir('../../');
 $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_replace('#\/mod\/(.*)\/#', '/', $_SERVER['SCRIPT_FILENAME']));
 include("common.php");
@@ -21,7 +22,6 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 }else{
     header("Access-Control-Allow-Origin: *");
 }
-
 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
@@ -742,7 +742,6 @@ switch ($page_type) {
         break;
 
     case 'rc': //PAGE RC
-
         if (isset($pub_date, $pub_win, $pub_count, $pub_result, $pub_moon, $pub_n, $pub_rawdata) == false) die("hack");
 
         if (!isset($pub_rounds)) $pub_rounds = Array(1 => Array(
@@ -815,6 +814,10 @@ switch ($page_type) {
 
                     if (array_key_exists('content', $n)) {
                         foreach ($n['content'] as $field => $value) {
+                            // Cas des attaques d'aliens
+                            if($n['type'] == "A" && $field == 'SAT')
+                                continue;
+
                             $fields .= ", `{$field}`";
                             $values .= ", '{$value}'";
                         }
