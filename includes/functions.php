@@ -5,6 +5,9 @@
  * @licence GNU
  */
 
+
+namespace Ogsteam\Ogspy;
+
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 /**
@@ -17,22 +20,22 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
  */
 function install_callbacks ($action, $data, $version = null) {
 	global $db, $table_prefix;
-	
+
 	define('XTENSE_LITE_CONFIG', 1);
 	require_once('mod/xtense/includes/config.php');
-	
+
 	if ($version != null && version_compare($version, MOD_VERSION, '<=')) return false;
-	
+
 	$query = $db->sql_query('SELECT id FROM '.TABLE_MOD.' WHERE action = "'.$action.'"');
 	list($mod_id) = $db->sql_fetch_row($query);
-	
+
 	$replace = array();
 	foreach ($data as $k => $call) {
 		if (!isset($call['function'], $call['type'])) return false;
-		if (!isset($call['active'])) $call['active'] = 1; 
+		if (!isset($call['active'])) $call['active'] = 1;
 		$replace[] = '('.$mod_id.', "'.$call['function'].'", "'.$call['type'].'", '.$call['active'].')';
 	}
-	
+
 	$db->sql_query('INSERT IGNORE INTO '.TABLE_XTENSE_CALLBACKS.' (mod_id, function, type, active) VALUES '.implode(',', $replace));
 	return $db->sql_affectedrows();
 }
@@ -63,23 +66,23 @@ function clean_nb($str) {
 }
 
 /**
- * @param $no
- * @param $str
- * @param $file
- * @param $line
+ * @param $errno
+ * @param $errstr
+ * @param $errfile
+ * @param $errline
  * @return bool
  * @throws \Exception
  */
-function error_handler($no, $str, $file, $line) {
+function xtense_error_handler($errno, $errstr, $errfile, $errline) {
 	global $call;
-	
+
 	if ($call->currentCallback !== false) {
 		global $io;
-		
-		throw new Exception('Erreur PHP lors de l\'execution'."\n".' '.$file.' @ '.$line.' : "'.$str.'"');
+
+		throw new Exception('Erreur PHP '.$errno.' lors de l\'execution'."\n".' '.$errfile.' @ '.$errline.' : "'.$errstr.'"');
 	}
-	
-	return false;
+
+	return true;
 }
 
 /**
@@ -127,12 +130,12 @@ function quote($str) {
 
 function home_check($type, $coords) {
 	global $db, $user_data;
-	
+
 	$empty_planets 	= array(101=>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
 	$empty_moons 	= array(201=>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
 	$planets = $moons = array();
 	$offset = ($type == TYPE_PLANET ? 100 : 200);
-	
+
 	$query = $db->sql_query("SELECT planet_id, coordinates FROM ".TABLE_USER_BUILDING." WHERE user_id = ".$user_data['user_id']." ORDER BY planet_id ASC");
 	while ($data = $db->sql_fetch_assoc($query)) {
 		if ($data['planet_id'] < 200) {
@@ -151,18 +154,18 @@ function home_check($type, $coords) {
 				if (isset($moons[$id+100])) return array('update', 'id' => $id+100);
 				else return array('add', 'id' => $id+100);
 			}
-			
+
 			return array('update', 'id' => $id);
 		}
 	}
-	
+
 	// Si une lune correspond a la planete, on place la planete sous la lune
 	foreach ($moons as $id => $m) {
 		if ($m == $coords) {
 			return array($type == TYPE_PLANET ? 'add' : 'update', 'id' => $id-200+$offset);
 		}
 	}
-	
+
 	if ($type == TYPE_PLANET) {
 		if (count($empty_planets) == 0) return array('full');
 		foreach ($empty_planets as $p) return array('add', 'id' => $p+$offset);
@@ -214,7 +217,7 @@ function add_log($type, $data = null) {
 	if(!isset($data['toolbar'])) {$data['toolbar'] = "";}
 	if ($type == 'buildings' || $type == 'overview' || $type == 'defense' || $type == 'research' || $type == 'fleet'||$type == 'info') {
 		if (!$server_config['xtense_log_empire']) return;
-		
+
 		if ($type == 'buildings') 	$message = 'envoie les batiments de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'overview') 	$message = 'envoie les informations de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'defense') 	$message = 'envoie les defenses de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
@@ -222,30 +225,30 @@ function add_log($type, $data = null) {
 		if ($type == 'fleet') 		$message = 'envoie la flotte de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'info')		$message = $data['message'];
 	}
-	
+
 	if ($type == 'system') {
 		if (!$server_config['xtense_log_system']) return;
-		
+
 		$message = 'envoie le système solaire '.$data['coords'];
 	}
-	
+
 	if ($type == 'ranking') {
 		if (!$server_config['xtense_log_ranking']) return;
-		
+
 		$message = 'envoie le classement '.$data['type2'].' des '.$data['type1'].' ('.$data['offset'].'-'.($data['offset']+99).') : '.date('H', $data['time']).'h';
 	}
-	
+
 	if ($type == 'ally_list') {
 		$message = 'envoie la liste des membres de l\'alliance '.$data['tag'];
 	}
-	
+
 	if ($type == 'rc') {
 		$message = 'envoie un rapport de combat';
 	}
-	
+
 	if ($type == 'messages') {
 		$message = 'envoie sa page de messages';
-		
+
 		$extra = array();
 		if (array_key_exists('msg', $data)) $extra[] = 'messages : '.$data['msg'];
 		if (array_key_exists('ally_msg', $data)) $extra[] = $data['ally_msg'].' messages d\'alliance';
@@ -254,7 +257,7 @@ function add_log($type, $data = null) {
 		if (array_key_exists('expedition', $data)) $extra[] = $data['expedition'].' rapports d\'expedition';
 		if (array_key_exists('added_spy', $data)) $extra[] = ' Rapport d\'espionnage ajouté : '.$data['added_spy_coords'];
 		if (array_key_exists('ignored_spy', $data)) $extra[] = $data['ignored_spy'].' rapports d\'espionnage ignorés';
-		
+
 		if (!empty($extra)) $message .= ' ('.implode(', ', $extra).')';
 	}
 	if (!empty($message)) {

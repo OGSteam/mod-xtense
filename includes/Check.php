@@ -5,6 +5,8 @@
  * @licence GNU
  */
 
+namespace Ogsteam\Ogspy;
+
 abstract class Check {
 
 	/**
