@@ -19,7 +19,7 @@ list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FR
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Max-Age: 86400');    // cache for 1 day
-}else{
+} else {
     header("Access-Control-Allow-Origin: *");
 }
 
@@ -360,7 +360,7 @@ switch ($page_type) {
         if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
 
         $coords = $pub_coords;
-        
+
         if (!$user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -742,6 +742,7 @@ switch ($page_type) {
         break;
 
     case 'rc': //PAGE RC
+    case 'rc_shared':
         if (isset($pub_date, $pub_win, $pub_count, $pub_result, $pub_moon, $pub_n, $pub_rawdata) == false) die("hack");
 
         if (!isset($pub_rounds)) $pub_rounds = Array(1 => Array(
@@ -815,7 +816,7 @@ switch ($page_type) {
                     if (array_key_exists('content', $n)) {
                         foreach ($n['content'] as $field => $value) {
                             // Cas des attaques d'aliens
-                            if($n['type'] == "A" && $field == 'SAT')
+                            if ($n['type'] == "A" && $field == 'SAT')
                                 continue;
 
                             $fields .= ", `{$field}`";
@@ -838,10 +839,10 @@ switch ($page_type) {
             }
 
             $io->set(array(
-                'type' => 'rc',
+                'type' => $page_type,
             ));
 
-            add_log('rc', array('toolbar' => $toolbar_info));
+            add_log($page_type, array('toolbar' => $toolbar_info));
         }
         break;
 
@@ -997,6 +998,7 @@ switch ($page_type) {
                     break;
 
                 case 'spy': //RAPPORT ESPIONNAGE
+                case 'spy_shared':
                     if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
 
                     $line['coords'] = Check::coords($line['coords']);
@@ -1021,7 +1023,7 @@ switch ($page_type) {
                         'player_name' => $line['playerName'],
                         'planet_name' => $line['planetName']
                     );
-                    $call->add('spy', $spy);
+                    $call->add($line['type'], $spy);
 
                     $spyDB = array();
                     foreach ($database as $arr) {
@@ -1110,6 +1112,8 @@ switch ($page_type) {
                     break;
 
                 case 'expedition': //RAPPORT EXPEDITION
+                case 'expedition_shared':
+
                     if (isset($line['coords'], $line['content']) == false) die("hack");
 
                     $line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
@@ -1120,7 +1124,7 @@ switch ($page_type) {
                         'coords' => explode(':', $line['coords']),
                         'content' => $line['content']
                     );
-                    $call->add('expedition', $expedition);
+                    $call->add($line['type'], $expedition);
                     break;
 
                 case 'trade': // LIVRAISONS AMIES
