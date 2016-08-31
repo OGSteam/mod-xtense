@@ -9,11 +9,13 @@
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 global $db,$table_prefix;
 
+define("TABLE_XTENSE_CALLBACKS", $table_prefix . "xtense_callbacks");
+
 $mod_folder = "xtense";
 $mod_name = "xtense";
 
 $db->sql_query("ALTER TABLE ".$table_prefix."parsedRec"." CONVERT TO CHARACTER SET utf8");
-$db->sql_query("ALTER TABLE ".$table_prefix."xtense_callbacks"." CONVERT TO CHARACTER SET utf8");
+$db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." CONVERT TO CHARACTER SET utf8");
 $db->sql_query("ALTER TABLE ".$table_prefix."xtense_groups"." CONVERT TO CHARACTER SET utf8");
 $db->sql_query("ALTER TABLE ".$table_prefix."parsedSpyEn"." CONVERT TO CHARACTER SET utf8");
 
@@ -25,7 +27,7 @@ $result = $db->sql_query("SELECT `version` FROM ".TABLE_MOD." WHERE `title` = 'x
 list($version) = $db->sql_fetch_row($result);
 
 if(version_compare($version, '2.7.2', '<')){
-    $db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." MODIFY `type` enum('overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy', 'spy_shared', 'ennemy_spy','rc', 'rc_shared','rc_cdr', 'msg', 'ally_msg', 'expedition','expedition_shared', 'ranking', 'trade', 'trade_me','hostiles') NOT NULL";
+    $db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." MODIFY `type` enum('overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy', 'spy_shared', 'ennemy_spy','rc', 'rc_shared','rc_cdr', 'msg', 'ally_msg', 'expedition','expedition_shared', 'ranking', 'trade', 'trade_me','hostiles') NOT NULL");
 }
 
 update_mod($mod_folder, $mod_name);
