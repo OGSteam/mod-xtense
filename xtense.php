@@ -827,8 +827,13 @@ switch ($page_type) {
                     $db->sql_query("INSERT INTO " . (($n['type'] == "D") ? TABLE_ROUND_DEFENSE : TABLE_ROUND_ATTACK) . " (
                             `id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`" . $fields . "
                         ) VALUE (
-                            '" . $id_rcround[$j] . "', '" . $n['player'] . "', '" . $n['coords'] . "', '" . $n['weapons']['arm'] . "', '" . $n['weapons']['bcl'] . "', '" . $n['weapons']['coq'] . "'" . $values . "
-                        )"
+                         '" . $id_rcround[$j] . "', '"
+                        . $n['player'] . "', '"
+                        . $n['coords'] . "', '"
+                        . (isset($n['weapons']['arm']) ? $n['weapons']['arm'] : "0" ). "', '"
+                        . (isset($n['weapons']['bcl']) ? $n['weapons']['bcl'] : "0") . "', '"
+                        . (isset($n['weapons']['coq']) ? $n['weapons']['coq'] : "0") . "'"
+                        . $values . ")"
                     );
 
                     if ($n['type'] == "D") {
