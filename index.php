@@ -202,7 +202,6 @@ $db->sql_close();
                 <input type="text" class="infos" id="plugin" name="password" value="<?php echo '**********' ?>"
                        onclick="this.select();" readonly/>
             </p>
-            <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
             <br>
             <p><a href="http://wiki.ogsteam.fr/doku.php?id=ogspy:documentationxtense"
                   target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
