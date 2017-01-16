@@ -11,7 +11,11 @@ namespace Ogsteam\Ogspy;
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 global $table_prefix;
-$mod_uninstall_table = $table_prefix."xtense_groups".','.$table_prefix."xtense_callbacks".','.$table_prefix."parsedRec".','.$table_prefix."parsedSpyEn";
+$mod_uninstall_table = array(
+    $table_prefix."xtense_groups",
+    $table_prefix."xtense_callbacks",
+    $table_prefix."parsedrec",
+    $table_prefix."parsedspyen");
 
 mod_remove_tables($mod_uninstall_table);
 
