@@ -779,7 +779,7 @@ switch ($page_type) {
                 }
                 $nbRounds = count($jsonObj->combatRounds)-1;
                 $moon = (int)($jsonObj->moon->genesis);
-                $coordinates = $jsonObj->coordinates->galaxy + ':' +$jsonObj->coordinates->system + ':' + $jsonObj->coordinates->position;
+                $coordinates = "{$jsonObj->coordinates->galaxy}:{$jsonObj->coordinates->system}:{$jsonObj->coordinates->position}";
 
                 $db->sql_query("INSERT INTO " . TABLE_PARSEDRC . " (
                         `dateRC`, `coordinates`, `nb_rounds`, `victoire`, `pertes_A`, `pertes_D`, `gain_M`, `gain_C`, `gain_D`, `debris_M`, `debris_C`, `lune`
