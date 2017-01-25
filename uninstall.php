@@ -6,15 +6,30 @@
  * @licence GNU
  */
 
+namespace Ogsteam\Ogspy;
+
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
-global $de,$table_prefix;
-$mod_uninstall_name = "xtense";
-$mod_uninstall_table = $table_prefix."xtense_groups".','.$table_prefix."xtense_callbacks".','.$table_prefix."parsedRec".','.$table_prefix."parsedSpyEn";
-uninstall_mod ($mod_uninstall_name, $mod_uninstall_table);
+global $table_prefix;
+$mod_uninstall_table = array(
+    $table_prefix."xtense_groups",
+    $table_prefix."xtense_callbacks",
+    $table_prefix."parsedrec",
+    $table_prefix."parsedspyen");
 
-require_once("mod/{$root}/includes/config.php");
+mod_remove_tables($mod_uninstall_table);
 
-$db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE config_name LIKE "xtense_%"');
+mod_del_option('xtense_allow_connections');
+mod_del_option('xtense_log_empire');
+mod_del_option('xtense_log_ranking');
+mod_del_option('xtense_log_spy');
+mod_del_option('xtense_log_system');
+mod_del_option('xtense_log_ally_list');
+mod_del_option('xtense_log_messages');
+mod_del_option('xtense_log_reverse');
+mod_del_option('xtense_strict_admin');
+mod_del_option('xtense_universe');
+mod_del_option('xtense_spy_autodelete');
+
 generate_config_cache();
 

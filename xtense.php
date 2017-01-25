@@ -12,6 +12,7 @@ define('IN_XTENSE', true);
 
 date_default_timezone_set(date_default_timezone_get());
 
+$currentFolder = getcwd();
 if (preg_match('#mod#', getcwd())) chdir('../../');
 $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_replace('#\/mod\/(.*)\/#', '/', $_SERVER['SCRIPT_FILENAME']));
 include("common.php");
@@ -20,7 +21,7 @@ list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FR
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Max-Age: 86400');    // cache for 1 day
-}else{
+} else {
     header("Access-Control-Allow-Origin: *");
 }
 
@@ -31,6 +32,7 @@ require("mod/{$root}/includes/CallbackHandler.php");
 require("mod/{$root}/includes/Callback.php");
 require("mod/{$root}/includes/Io.php");
 require("mod/{$root}/includes/Check.php");
+
 
 $start_time = get_microtime();
 
@@ -361,7 +363,7 @@ switch ($page_type) {
         if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
 
         $coords = $pub_coords;
-        
+
         if (!$user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -743,7 +745,7 @@ switch ($page_type) {
         break;
 
     case 'rc': //PAGE RC
-
+    case 'rc_shared':
         if (isset($pub_date, $pub_win, $pub_count, $pub_result, $pub_moon, $pub_n, $pub_rawdata) == false) die("hack");
 
         if (!isset($pub_rounds)) $pub_rounds = Array(1 => Array(
@@ -816,6 +818,10 @@ switch ($page_type) {
 
                     if (array_key_exists('content', $n)) {
                         foreach ($n['content'] as $field => $value) {
+                            // Cas des attaques d'aliens
+                            if ($n['type'] == "A" && $field == 'SAT')
+                                continue;
+
                             $fields .= ", `{$field}`";
                             $values .= ", '{$value}'";
                         }
@@ -824,8 +830,13 @@ switch ($page_type) {
                     $db->sql_query("INSERT INTO " . (($n['type'] == "D") ? TABLE_ROUND_DEFENSE : TABLE_ROUND_ATTACK) . " (
                             `id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`" . $fields . "
                         ) VALUE (
-                            '" . $id_rcround[$j] . "', '" . $n['player'] . "', '" . $n['coords'] . "', '" . $n['weapons']['arm'] . "', '" . $n['weapons']['bcl'] . "', '" . $n['weapons']['coq'] . "'" . $values . "
-                        )"
+                         '" . $id_rcround[$j] . "', '"
+                        . $n['player'] . "', '"
+                        . $n['coords'] . "', '"
+                        . (isset($n['weapons']['arm']) ? $n['weapons']['arm'] : "0" ). "', '"
+                        . (isset($n['weapons']['bcl']) ? $n['weapons']['bcl'] : "0") . "', '"
+                        . (isset($n['weapons']['coq']) ? $n['weapons']['coq'] : "0") . "'"
+                        . $values . ")"
                     );
 
                     if ($n['type'] == "D") {
@@ -836,10 +847,10 @@ switch ($page_type) {
             }
 
             $io->set(array(
-                'type' => 'rc',
+                'type' => $page_type,
             ));
 
-            add_log('rc', array('toolbar' => $toolbar_info));
+            add_log($page_type, array('toolbar' => $toolbar_info));
         }
         break;
 
@@ -995,6 +1006,7 @@ switch ($page_type) {
                     break;
 
                 case 'spy': //RAPPORT ESPIONNAGE
+                case 'spy_shared':
                     if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
 
                     $line['coords'] = Check::coords($line['coords']);
@@ -1019,7 +1031,7 @@ switch ($page_type) {
                         'player_name' => $line['playerName'],
                         'planet_name' => $line['planetName']
                     );
-                    $call->add('spy', $spy);
+                    $call->add($line['type'], $spy);
 
                     $spyDB = array();
                     foreach ($database as $arr) {
@@ -1108,6 +1120,8 @@ switch ($page_type) {
                     break;
 
                 case 'expedition': //RAPPORT EXPEDITION
+                case 'expedition_shared':
+
                     if (isset($line['coords'], $line['content']) == false) die("hack");
 
                     $line['content'] = filter_var($line['content'], FILTER_SANITIZE_STRING);
@@ -1118,7 +1132,7 @@ switch ($page_type) {
                         'coords' => explode(':', $line['coords']),
                         'content' => $line['content']
                     );
-                    $call->add('expedition', $expedition);
+                    $call->add($line['type'], $expedition);
                     break;
 
                 case 'trade': // LIVRAISONS AMIES
@@ -1171,195 +1185,7 @@ switch ($page_type) {
 
         break;
 
-    case 'android': // Récupération des données pour android
-        Check::data(isset($pub_action));
-
-        switch ($pub_action) {
-            case 'attacks':
-                /*******************************************************
-                 ***  Récuperation des données venant du mod Hostiles ***
-                 ********************************************************/
-                //On vérifie que le mod Hostile est activé
-                $queryModHostile = "SELECT `active` FROM `" . TABLE_MOD . "` WHERE `action`='hostiles' AND `active`='1' LIMIT 1";
-                $hostile = array();
-                if ($db->sql_numrows($db->sql_query($queryModHostile)) > 0) {
-                    $isAttack = 0;
-                    $user_attack = "";
-
-                    $queryHostile = "SELECT hos.user_id AS user_id, user.user_name, hos.id_attack " .
-                        "FROM " . TABLE_USER . " user " .
-                        "INNER JOIN " . $table_prefix . "hostiles hos ON user.user_id = hos.user_id";
-
-                    $resultHostile = $db->sql_query($queryHostile);
-                    $nb_attaques = $db->sql_numrows($resultHostile);
-
-                    $i = 1;
-                    $datas = array();
-                    //while(list($user_id,$user_name,$id_attack)=$db->sql_fetch_row($resultHostile)){
-                    if ($nb_attaques > 0) {
-                        $queryHostileAttack = "SELECT hosattks.*, usr.user_stat_name, hos.arrival_time " .
-                            "FROM " . $table_prefix . "hostiles hos " .
-                            "INNER JOIN " . TABLE_USER . " usr ON usr.user_id = hos.user_id " .
-                            "INNER JOIN " . $table_prefix . "hostiles_attacks hosattks ON hosattks.id_attack = hos.id_attack ";
-                        $resultHostileUser = $db->sql_query($queryHostileAttack);
-
-                        //$io->set(array('queryHostileAttack' => $queryHostileAttack));
-                        $compo = array();
-                        while (list($id, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $user_stat_name, $arrival_time) = $db->sql_fetch_row($resultHostileUser)) {
-                            $queryCompo = "SELECT type_ship, nb_ship " .
-                                "FROM " . $table_prefix . "hostiles_composition " .
-                                "WHERE id_attack = '" . $id . "' AND id_vague = " . $id_vague . "";
-                            $resultCompo = $db->sql_query($queryCompo);
-
-                            while (list($sheep, $nb) = $db->sql_fetch_row($resultCompo)) {
-                                $compo[] = array($sheep, $nb);
-                            }
-                            $datas[] = array($id, $user_stat_name, $id_vague, $attacker, $origin_planet, $origin_coords, $cible_planet, $cible_coords, $arrival_time, 'compo' => $compo);
-                            $compo = array();
-                        }
-                        $isAttack = 1;
-                        $i++;
-                    }
-                    $io->set(array('hostile' => array('isAttack' => $isAttack, 'attaks' => $datas)));
-                    //$hostile = array('isAttack' => $isAttack, 'attaks' => $datas);
-                }
-
-                break;
-
-            case 'ally': // Détails alliance
-                /*******************************************************
-                 ***  Récuperation des données d'alliance ***
-                 ********************************************************/
-                $alliance = array();
-                $queryAllianceName = "SELECT DISTINCT(ally) FROM " . TABLE_UNIVERSE . " WHERE (player = '" . $user_data['user_stat_name'] . "' OR player = '" . $user_data['user_name'] . "') ORDER BY last_update DESC LIMIT 1";
-
-                $resultAllianceName = $db->sql_query($queryAllianceName);
-
-                while ($name = $db->sql_fetch_row($resultAllianceName)) {
-                    $alliance[] = array($name[0]);
-                    break;
-                }
-                $io->set(array('alliance' => $alliance));
-
-                break;
-
-            case 'spys':
-                /*******************************************************
-                 ***  Récuperation des données des espionnages ***
-                 ********************************************************/
-
-                //Gestion des dates
-                $date = date("j");
-                $mois = date("m");
-                $annee = date("Y");
-
-                //Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
-                $pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
-                $pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
-
-                $pub_date_from = intval($pub_date_from);
-                $pub_date_to = intval($pub_date_to);
-
-                $querySpyPlayer = "SELECT joueur, alliance, count(*) AS nb " .
-                    "FROM " . $table_prefix . "QuiMeSonde " .
-                    "WHERE sender_id = '" . $user_data['user_id'] . "' AND (datadate BETWEEN " . $pub_date_from . " AND " . $pub_date_to . ") " .
-                    "GROUP BY joueur " .
-                    "ORDER BY nb DESC " .
-                    "LIMIT 5";
-
-                $spysPlayer = array();
-
-                $result = $db->sql_query($querySpyPlayer);
-
-                while ($players = $db->sql_fetch_row($result)) {
-                    $spysPlayer[] = array($players[0], $players[1], $players[2]);
-                }
-                $io->set(array('mostCuriousPlayer' => $spysPlayer));
-
-                $querySpyAlliance = "SELECT alliance, count(*) AS nb " .
-                    "FROM " . $table_prefix . "QuiMeSonde " .
-                    "WHERE sender_id = '" . $user_data['user_id'] . "' AND (datadate BETWEEN " . $pub_date_from . " AND " . $pub_date_to . ") " .
-                    "GROUP BY alliance " .
-                    "ORDER BY nb DESC " .
-                    "LIMIT 5";
-                $result = $db->sql_query($querySpyAlliance);
-
-                $spysAlliance = array();
-                while ($alliances = $db->sql_fetch_row($result)) {
-                    $spysAlliance[] = array($alliances[0], $alliances[1]);
-                }
-                $io->set(array('mostCuriousAlliance' => $spysAlliance));
-
-                break;
-
-            case 'rentas':
-                /*******************************************************
-                 ***  Récuperation des données des espionnages ***
-                 ********************************************************/
-
-                //Gestion des dates
-                $date = date("j");
-                $mois = date("m");
-                $annee = date("Y");
-
-                //Si les dates d'affichage ne sont pas définies, on affiche par défaut les attaques du jours
-                if ($pub_interval == 'day') {
-                    $pub_date_from = mktime(0, 0, 0, $mois, $date, $annee);
-                    $pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
-                } else if ($pub_interval == 'yesterday') {
-                    $yesterday = $date - 1;
-                    if ($yesterday < 1) $yesterday = 1;
-
-                    $pub_date_from = mktime(0, 0, 0, $mois, $yesterday, $annee);
-                    $pub_date_to = mktime(23, 59, 59, $mois, $yesterday, $annee);
-                } else if ($pub_interval == 'week') {
-                    $septjours = $date - 7;
-                    if ($septjours < 1) $septjours = 1;
-
-                    $pub_date_from = mktime(0, 0, 0, $mois, $septjours, $annee);
-                    $pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
-                } else {
-                    $pub_date_from = mktime(0, 0, 0, $mois, "1", $annee);
-                    $pub_date_to = mktime(23, 59, 59, $mois, $date, $annee);
-                }
-
-                $pub_date_from = intval($pub_date_from);
-                $pub_date_to = intval($pub_date_to);
-
-
-                $requete_renta_asgards = "SELECT usr.user_stat_name AS user, SUM(attack_metal) AS metal, SUM(attack_cristal) AS cristal, SUM(attack_deut) AS deuterium, SUM(attack_pertes) AS pertes, ((SUM(attack_metal) + SUM(attack_cristal) + SUM(attack_deut)) - SUM(attack_pertes)) AS gains " .
-                    "FROM ogspy_asgard_attaques_attaques attks " .
-                    "INNER JOIN ogspy_asgard_user_group usrgrp ON usrgrp.user_id = attks.attack_user_id " .
-                    "INNER JOIN ogspy_asgard_group grp ON grp.group_id = usrgrp.group_id " .
-                    "INNER JOIN ogspy_asgard_user usr ON usr.user_id = usrgrp.user_id " .
-                    "WHERE grp.group_name = 'Asgards' AND usr.user_stat_name != '' AND (attack_metal + attack_cristal + attack_deut) > 0 AND (attks.attack_date BETWEEN " . $pub_date_from . " AND " . $pub_date_to . ") " .
-                    "GROUP BY attks.attack_user_id " .
-                    "ORDER BY gains DESC";
-
-                $rentasPlayers = array();
-
-                $result_renta_asgards = $db->sql_query($requete_renta_asgards);
-
-                while ($row = $db->sql_fetch_assoc($result_renta_asgards)) {
-                    $rentasPlayers[] = array($row['user'], $row['metal'], $row['cristal'], $row['deuterium'], $row['pertes'], $row['gains']);
-                }
-                $io->set(array('rentasPlayers' => $rentasPlayers));
-
-                break;
-
-            case 'server':
-
-                /***********************************
-                 ***  Construction de la réponse ***
-                 ***********************************/
-                //$io->set(array('server' => $server_config['servername'], 'type' => 'android', 'hostile' => $hostile, 'alliance' => $alliance, 'spys' => $spys));
-                $io->set(array('server' => $server_config['servername']));
-
-                break;
-        }
-
-        //add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));			}
-        break;
+    
 
     default:
         die('hack ' . $pub_type);

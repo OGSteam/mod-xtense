@@ -1,5 +1,9 @@
 # Change Log #
 
+## Module OGSpy 2.8.0 ##
+
+* Adaptation OGSpy 3.4.0
+
 ## Module OGSpy 2.7.0 ##
 
 ### Correctif ###
