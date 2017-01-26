@@ -1,5 +1,10 @@
 # Change Log #
 
+## Module OGSpy 2.7.2 ##
+
+### Nouveau ###
+* Compatibilité OGame 6.3.5
+
 ## Module OGSpy 2.7.0 ##
 
 ### Correctif ###
