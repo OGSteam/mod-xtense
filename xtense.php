@@ -5,6 +5,8 @@
  * @licence GNU
  */
 
+namespace Ogsteam\Ogspy;
+
 define('IN_SPYOGAME', true);
 define('IN_XTENSE', true);
 
