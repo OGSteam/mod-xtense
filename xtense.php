@@ -32,10 +32,11 @@ require_once("mod/{$root}/includes/Callback.php");
 require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php");
 
-set_error_handler('error_handler');
+set_error_handler('\\Ogsteam\\Ogspy\\xtense_error_handler');
 $start_time = get_microtime();
 
 $io = new Io();
+$mod_tools = new Mod_DevTools("xtense");
 $time = time() - 60 * 4;
 if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) $timestamp = mktime(0, 0, 0);
 if ($time > mktime(8, 0, 0) && $time < mktime(16, 0, 0)) $timestamp = mktime(8, 0, 0);
@@ -74,14 +75,14 @@ if ($server_config['server_active'] == 0) {
     $io->send(0, true);
 }
 
-if ($server_config['xtense_allow_connections'] == 0) {
+if ($mod_tools->mod_get_option('xtense_allow_connections') == 0) {
     $io->set(array(
         'type' => 'plugin connections',
     ));
     $io->send(0, true);
 }
 
-if (strtolower($server_config['xtense_universe']) != strtolower($pub_univers)) {
+if (strtolower($mod_tools->mod_get_option('xtense_universe')) != strtolower($pub_univers)) {
     $io->set(array(
         'type' => 'plugin univers',
     ));

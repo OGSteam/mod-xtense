@@ -5,6 +5,8 @@
  * @licence GNU
  */
 
+namespace Ogsteam\Ogspy;
+
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 /**
@@ -70,15 +72,17 @@ function clean_nb($str) {
  * @return bool
  * @throws \Exception
  */
-function error_handler($no, $str, $file, $line) {
-	global $call;
-	
-	if ($call->currentCallback !== false) {
-		global $io;
-		
-		throw new Exception('Erreur PHP lors de l\'execution'."\n".' '.$file.' @ '.$line.' : "'.$str.'"');
-	}
-	
+function xtense_error_handler($errno, $errstr, $errfile, $errline) {
+
+    global $io;
+    $io->set(array(
+        'type' => 'plugin error',
+        'data' => '[{ "error" : "'.$errfile.'@'.$errline.' : '.$errstr.'"}]'
+    ));
+    $io->status(0);
+
+    //throw new \Exception('Erreur PHP lors de l\'execution'."\n".' '.$errfile.' @ '.$errline.' : "'.$errstr.'"');
+
 	return false;
 }
 
