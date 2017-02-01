@@ -555,7 +555,7 @@ switch ($page_type) {
                 $db->sql_query('UPDATE ' . TABLE_PARSEDSPY . ' SET active = "0" WHERE coordinates IN ("' . implode('", "', $toDelete) . '")');
             }
 
-            $db->sql_query('UPDATE ' . TABLE_USER . ' SET planet_added_ogs = planet_added_ogs + 15 WHERE user_id = ' . $user_data['user_id']);
+            $db->sql_query('UPDATE ' . TABLE_USER . ' SET planet_added_xtense = planet_added_xtense + 15 WHERE user_id = ' . $user_data['user_id']);
 
             $call->add('system', array(
                 'data' => $data,
@@ -569,7 +569,7 @@ switch ($page_type) {
                 'system' => $system
             ));
 
-            update_statistic('planetimport_ogs', 15);
+            update_statistic('planet_added_xtense', 15);
             add_log('system', array('coords' => $galaxy . ':' . $system, 'toolbar' => $toolbar_info));
         }
         break;
@@ -722,7 +722,7 @@ switch ($page_type) {
                 }
             }
 
-            $db->sql_query('UPDATE ' . TABLE_USER . ' SET rank_added_ogs = rank_added_ogs + ' . $total . ' WHERE user_id = ' . $user_data['user_id']);
+            $db->sql_query('UPDATE ' . TABLE_USER . ' SET rank_added_xtense = rank_added_xtense + ' . $total . ' WHERE user_id = ' . $user_data['user_id']);
 
             $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
 
@@ -739,7 +739,7 @@ switch ($page_type) {
                 'offset' => $offset
             ));
 
-            update_statistic('rankimport_ogs', 100);
+            update_statistic('rank_added_xtense', 100);
             add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $time, 'toolbar' => $toolbar_info));
         }
         break;
@@ -1112,8 +1112,8 @@ RocketLauncher': 401,
                                     $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET name = "' . $spy['planet_name'] . '", last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
                             }
                         }
-                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET spy_added_ogs = spy_added_ogs + 1 WHERE user_id = ' . $user_data['user_id']);
-                        update_statistic('spyimport_ogs', '1');
+                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET spy_added_xtense = spy_added_xtense + 1 WHERE user_id = ' . $user_data['user_id']);
+                        update_statistic('spy_added_xtense', '1');
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $coords, 'toolbar' => $toolbar_info));
                     }
                     break;
