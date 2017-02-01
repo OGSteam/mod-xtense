@@ -25,6 +25,7 @@ require_once("mod/{$root}/includes/functions.php");
 require_once("mod/{$root}/includes/Check.php");
 require_once("mod/{$root}/lang/" . $ui_lang . "/lang_xtense.php");
 
+$mod_tools = new Mod_DevTools('xtense');
 
 $page = 'infos';
 if (isset($pub_page)) {
@@ -32,7 +33,7 @@ if (isset($pub_page)) {
     if ($pub_page == 'about') $page = $pub_page;
 
     // Pages admin
-    if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && mod_get_option('xtense_strict_admin') == 0)) {
+    if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && $mod_tools->mod_get_option('xtense_strict_admin') == 0)) {
         if ($pub_page == 'config' || $pub_page == 'group' || $pub_page == 'mods' || $pub_page == 'infos') $page = $pub_page;
     }
 }
@@ -46,13 +47,14 @@ if ($page == 'config') {
 
     if (isset($pub_universe)) {
         $universe = Check::universe($pub_universe);
+
         if ($universe === false) $universe = 'https://sxx-yy.ogame.gameforge.com';
 
         foreach ($checkboxes as $name) {
-            mod_set_option("xtense_' . $name . '", (isset($_POST[$name]) ? 1 : 0));
+            $mod_tools->mod_set_option("xtense_' . $name . '", (isset($_POST[$name]) ? 1 : 0));
         }
-        mod_set_option('xtense_universe', $universe);
-        generate_config_cache();
+        $mod_tools->mod_set_option('xtense_universe', $universe);
+        generate_mod_cache();
 
         $update = true;
     }
@@ -152,7 +154,7 @@ $php_timing = $php_end - $php_start;
             </div>
         </li>
 
-        <?php if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && mod_get_option('xtense_strict_admin') == 0)) { ?>
+        <?php if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && $mod_tools->mod_get_option('xtense_strict_admin') == 0)) { ?>
             <li class="config<?php if ($page == 'config') echo ' active'; ?>">
                 <div>
                     <a href="index.php?action=xtense&amp;page=config"><?php echo($lang['MOD_XTENSE_CONFIGURATION']); ?></a>
@@ -252,23 +254,23 @@ $php_timing = $php_end - $php_start;
                 <div class="col">
                     <p>
                         <span class="chk"><input type="checkbox" id="allow_connections"
-                                                 name="allow_connections"<?php echo(mod_get_option('xtense_allow_connections') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                 name="allow_connections"<?php echo($mod_tools->mod_get_option('xtense_allow_connections') == 1 ? ' checked="checked"' : ''); ?> /></span>
                         <label for="allow_connections"><?php echo($lang['MOD_XTENSE_ALLOW_CONNECTIONS']); ?></label>
                     </p>
                     <p>
                         <span class="chk"><input type="checkbox" id="strict_admin"
-                                                 name="strict_admin"<?php echo(mod_get_option('xtense_strict_admin') == 1 ? ' checked="checked"' : ''); ?>
+                                                 name="strict_admin"<?php echo($mod_tools->mod_get_option('xtense_strict_admin') == 1 ? ' checked="checked"' : ''); ?>
                                                  onclick="if (this.checked && <?php echo (int)($user_data['user_coadmin'] && !$user_data['user_admin']); ?>) alert('Vous &ecirc;tes co-admin, si vous cochez cette option vous ne pourrez plus acceder &agrave; l&#039;administration de Xtense');"/></span>
                         <label for="strict_admin"><?php echo($lang['MOD_XTENSE_ALLOW_ADMIN_ONLY']); ?></label>
                     </p>
                     <p>
                         <span class="chk"><input type="checkbox" id="spy_autodelete"
-                                                 name="spy_autodelete"<?php echo(mod_get_option('xtense_spy_autodelete') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                 name="spy_autodelete"<?php echo($mod_tools->mod_get_option('xtense_spy_autodelete') == 1 ? ' checked="checked"' : ''); ?> /></span>
                         <label for="spy_autodelete"><?php echo($lang['MOD_XTENSE_SPYREPORTS_AUTODELETE']); ?></label>
                     </p>
                     <p>
                         <span class="chk"><input type="text" size="30" maxlength="40" id="universe" name="universe"
-                                                 value="<?php echo mod_get_option('xtense_universe'); ?>"/></span>
+                                                 value="<?php echo $mod_tools->mod_get_option('xtense_universe'); ?>"/></span>
                         <label for="universe"><?php echo($lang['MOD_XTENSE_SERVER_NAME']); ?></label>
                     </p>
                 </div>
@@ -279,32 +281,32 @@ $php_timing = $php_end - $php_start;
 
                         <p>
                             <span class="chk"><input type="checkbox" id="log_system"
-                                                     name="log_system"<?php echo(mod_get_option('xtense_log_system') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_system"<?php echo($mod_tools->mod_get_option('xtense_log_system') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_system"><?php echo($lang['MOD_XTENSE_SOLARSYSTEMS']); ?></label>
                         </p>
                         <p>
                             <span class="chk"><input type="checkbox" id="log_spy"
-                                                     name="log_spy"<?php echo(mod_get_option('xtense_log_spy') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_spy"<?php echo($mod_tools->mod_get_option('xtense_log_spy') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_spy"><?php echo($lang['MOD_XTENSE_SPYREPORTS']); ?></label>
                         </p>
                         <p>
                             <span class="chk"><input type="checkbox" id="log_empire"
-                                                     name="log_empire"<?php echo(mod_get_option('xtense_log_empire') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_empire"<?php echo($mod_tools->mod_get_option('xtense_log_empire') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_empire"><?php echo($lang['MOD_XTENSE_EMPIRE']); ?></label>
                         </p>
                         <p>
                             <span class="chk"><input type="checkbox" id="log_ranking"
-                                                     name="log_ranking"<?php echo(mod_get_option('xtense_log_ranking') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_ranking"<?php echo($mod_tools->mod_get_option('xtense_log_ranking') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_ranking"><?php echo($lang['MOD_XTENSE_RANKINGS']); ?></label>
                         </p>
                         <p>
                             <span class="chk"><input type="checkbox" id="log_ally_list"
-                                                     name="log_ally_list"<?php echo(mod_get_option('xtense_log_ally_list') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_ally_list"<?php echo($mod_tools->mod_get_option('xtense_log_ally_list') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_ally_list"><?php echo($lang['MOD_XTENSE_ALLIANCE_LIST']); ?></label>
                         </p>
                         <p>
                             <span class="chk"><input type="checkbox" id="log_messages"
-                                                     name="log_messages"<?php echo(mod_get_option('xtense_log_messages') == 1 ? ' checked="checked"' : ''); ?> /></span>
+                                                     name="log_messages"<?php echo($mod_tools->mod_get_option('xtense_log_messages') == 1 ? ' checked="checked"' : ''); ?> /></span>
                             <label for="log_messages"><?php echo($lang['MOD_XTENSE_MESSAGES']); ?></label>
                         </p>
                     </fieldset>
