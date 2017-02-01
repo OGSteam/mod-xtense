@@ -5,8 +5,8 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
+namespace Ogsteam\Ogspy;
 
 /**
  * Class Io

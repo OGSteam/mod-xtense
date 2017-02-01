@@ -5,7 +5,7 @@
  * @licence GNU
  */
 
-if (!defined('IN_SPYOGAME')) exit;
+namespace Ogsteam\Ogspy;
 
 /**
  * Gestion des fonctions de callback des plugins OGSpyw
