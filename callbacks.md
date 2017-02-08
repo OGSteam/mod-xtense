@@ -345,7 +345,7 @@ or for ally :
     [subject] (string)
     [message] (string)
 ```
-* spy
+### spy
 ```
     (array #3)
     [planetName] (string)
@@ -396,7 +396,7 @@ or for ally :
      ['RRI'] (int) Level
      ['Astrophysique'] (int) Level
      ['Graviton'
-//    fleets
+### fleets
      ['PT'] (int) Level
      ['GT'] (int) Level
      ['CLE'] (int) Level
@@ -411,7 +411,7 @@ or for ally :
      ['DST'] (int) Level
      ['EDLM'] (int) Level
      ['TRA'
-// defense'
+### defense'
      ['LM'] (int) Level
      ['LLE'] (int) Level
      ['LLO'] (int) Level
@@ -423,7 +423,7 @@ or for ally :
      ['MIC'] (int) Level
      ['MIP'] (int) Level
 ```
-* ennemy_spy:
+### ennemy_spy:
 ```
     (array #3)
     [from] (string)
