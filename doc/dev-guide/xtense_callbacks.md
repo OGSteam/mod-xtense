@@ -87,7 +87,7 @@ Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau ave
 
 ## Pages
 
-* overview
+### overview
 ```
     (array #9)
     [coords] (array #3)
@@ -110,9 +110,9 @@ Soit il y a un nombre à la suite du #, ce qui signifie que c'est un tableau ave
         [uuid] (int)
         [temps] (int)
 ```
-* buildings
+### buildings
 
-Mine Page:
+* Mine Page:
 ```
     (array #4)
     [coords] (array #3)
@@ -131,7 +131,7 @@ Mine Page:
     [HC] => niveau (int)
     [HD] => niveau (int)
 ```
-Installations Page:
+* Installations Page:
 ```
     (array #13)
     [coords] (array #3)
@@ -151,7 +151,7 @@ Installations Page:
     [Pha] => niveau (int) // For Moon Only
     [PoSa] => niveau (int) // For Moon Only
 ```
-* research
+### research
 ```
     (array #19)
     [coords] (array #3)
@@ -177,7 +177,7 @@ Installations Page:
     [Bouclier] => niveau (int)
     [Protection] => niveau (int)
 ```
-* fleet
+### fleet
 ```
     (array #16)
     [coords] (array #3)
@@ -200,7 +200,7 @@ Installations Page:
     [REC] => (int)
     [SE] => (int)
 ```
-* defense
+### defence
 ```
     (array #16)
     [coords] (array #3)
@@ -220,7 +220,7 @@ Installations Page:
     [MIC] => (int)
     [MIP] => (int)
 ```
-* ranking
+### ranking
 ```
     (array #3)
     [offset] (int)
@@ -235,7 +235,7 @@ Installations Page:
         [ally_tag] (string)
         [points] (int)
         [nb_spacecraft] (int)
-or
+or for ally :
     [n] (array {1,100}) For alliance
         [ally_id] (int)
         [ally_tag] (string)
@@ -243,7 +243,7 @@ or
         [points] (int)
         [mean] (int)
 ```
-* system
+### system
 ```
     (array #3)
     [galaxy] (int)
@@ -264,7 +264,7 @@ or
         [activity] (string) au format du jeu, * ou 37mn par exemple Ogame
         [activityMoon] (string) au format du jeu, * ou 37mn par exemple Ogame
 ```
-* ally_list
+### ally_list
 ```
     (array #2)
     [tag] (string)
@@ -276,7 +276,7 @@ or
 ```
 ##Messages
 
-* rc
+### cr
 ```
     (array #)
     [date] (int)
@@ -312,7 +312,7 @@ or
         [xxxxxxx]  // A compléter au debugger
     [ogapilnk]
 ```
-* rc_cdr
+### rc_cdr
 ```
     (array #7)
     [nombre] (int) // Nb recycleurs
@@ -323,21 +323,21 @@ or
     [C_total] (int) Cristal dans le CdR
     [date] (int)
 ```
-* expedition
+### expedition
 ```
     (array #3)
     [coords] (string)
     [content] (string)
     [time] (int)
 ```
-* ally_msg
+### ally_msg
 ```
     (array #4)
     [from] (string)
     [tag] (string)
     [message] (string)
 ```
-* msg (player_msg)
+### msg (player_msg)
 ```
     (array #4)
     [from] (string)
@@ -345,7 +345,7 @@ or
     [subject] (string)
     [message] (string)
 ```
-* spy:
+### spy
 ```
     (array #3)
     [planetName] (string)
@@ -356,7 +356,9 @@ or
     ['cristal'] (int)
     ['deuterium'] (int)
     ['energie'] (int)
-    //buildings
+```    
+#### buildings
+```
      ['M'] (int) Level
      ['C'] (int) Level
      ['D'] (int) Level
@@ -378,8 +380,10 @@ or
      ['Silo'] (int) Level
      ['BaLu'] (int) Level
      ['Pha'] (int) Level
-     ['PoSa'
-      // researchs
+     ['PoSa'] (int) Level
+```     
+#### researchs
+```
      ['Esp'] (int) Level
      ['Ordi'] (int) Level
      ['Armes'] (int) Level
@@ -395,8 +399,10 @@ or
      ['Plasma'] (int) Level
      ['RRI'] (int) Level
      ['Astrophysique'] (int) Level
-     ['Graviton'
-//    fleets
+     ['Graviton']
+```
+#### fleets
+```
      ['PT'] (int) Level
      ['GT'] (int) Level
      ['CLE'] (int) Level
@@ -410,8 +416,10 @@ or
      ['SAT'] (int) Level
      ['DST'] (int) Level
      ['EDLM'] (int) Level
-     ['TRA'
-// defense'
+     ['TRA']
+```  
+#### defense
+```
      ['LM'] (int) Level
      ['LLE'] (int) Level
      ['LLO'] (int) Level
@@ -423,9 +431,9 @@ or
      ['MIC'] (int) Level
      ['MIP'] (int) Level
 ```
-* ennemy_spy:
+### ennemy_spy:
 ```
-    (array #3)
+    (array #3)release-notes
     [from] (string)
     [to] (string)
     [proba] (int)
