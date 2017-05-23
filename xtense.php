@@ -746,7 +746,10 @@ switch ($page_type) {
 
     case 'rc': //PAGE RC
     case 'rc_shared':
+        $pub_json = file_get_contents(@'D:\Projets\Ogsteam\rc4.json');
         if (isset($pub_json) == false) die("hack");
+        if(!isset($pub_ogapilnk))
+            $pub_ogapilnk = '';
 
         if (!$user_data['grant']['messages']) {
             $io->set(array(
