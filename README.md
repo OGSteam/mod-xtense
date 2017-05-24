@@ -1,5 +1,9 @@
 # Change Log #
 
+## Module OGSpy 2.7.3 ##
+
+* Parsing des RC par Itori
+
 ## Module OGSpy 2.7.2 ##
 
 ### Nouveau ###
