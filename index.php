@@ -208,7 +208,7 @@ $db->sql_close();
             </p>
             <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
             <br>
-            <p><a href="http://wiki.ogsteam.fr/doku.php?id=ogspy:documentationxtense"
+            <p><a href="https://wiki.ogsteam.fr/doku.php?id=fr:ogspy:documentationxtense"
                   target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
 
         <?php } elseif ($page == 'config') { ?>
@@ -446,7 +446,7 @@ $db->sql_close();
             <br/>
             <?php } elseif ($page == 'about') { ?>
                 <p><?php echo($lang['MOD_XTENSE_AUTHOR']); ?></a></p>
-                <p><?php echo($lang['MOD_XTENSE_FORUM']); ?> : <a href="http://www.ogsteam.fr/"
+                <p><?php echo($lang['MOD_XTENSE_FORUM']); ?> : <a href="https://forum.ogsteam.fr/"
                                                                   onclick="return winOpen(this);"
                                                                   target="_blank"><?php echo($lang['MOD_XTENSE_TITLE']); ?></a>
                 </p>
@@ -456,14 +456,14 @@ $db->sql_close();
                 <div class="sep"></div>
                 <h2><?php echo($lang['MOD_XTENSE_CHANGELOG']); ?></h2>
                 <p>
-                    <a href="https://bitbucket.org/ogsteam/mod-xtense/overview"><?php echo($lang['MOD_XTENSE_CHANGELOG_LINK']); ?></a>
+                    <a href="https://github.com/OGSteam/mod-xtense/releases/"><?php echo($lang['MOD_XTENSE_CHANGELOG_LINK']); ?></a>
                 </p>
 
             <?php } ?>
     </div>
 </div>
 
-<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="http://www.ogsteam.fr/"
+<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="https://forum.ogsteam.fr/"
                                                             onclick="return winOpen(this);"
                                                             target="_blank"><?php echo($lang['MOD_XTENSE_SUPPPORT']); ?></a>
 </div>
