@@ -8,7 +8,7 @@
 define('IN_SPYOGAME', true);
 define('IN_XTENSE', true);
 
-date_default_timezone_set(date_default_timezone_get());
+date_default_timezone_set(@date_default_timezone_get());
 
 $currentFolder = getcwd();
 if (preg_match('#mod#', getcwd())) chdir('../../');
@@ -744,6 +744,8 @@ switch ($page_type) {
     case 'rc': //PAGE RC
     case 'rc_shared':
         if (isset($pub_json) == false) die("hack");
+        if(!isset($pub_ogapilnk))
+            $pub_ogapilnk = '';
 
         if (!$user_data['grant']['messages']) {
             $io->set(array(
@@ -758,6 +760,10 @@ switch ($page_type) {
             ));
 
             $jsonObj = json_decode($pub_json);
+            if($jsonObj == null)
+                die("hack");
+
+            
 
             $exist = $db->sql_fetch_row($db->sql_query("SELECT id_rc FROM " . TABLE_PARSEDRC . " WHERE dateRC = '" . $jsonObj->event_timestamp . "'"));
             if (!$exist[0]) {
@@ -799,6 +805,27 @@ switch ($page_type) {
                     )"
                 );
                 $id_rc = $db->sql_insertid();
+
+                $attackers = array();
+                foreach($jsonObj->attacker as $attacker)
+                {
+                    $attackers[$attacker->fleetID] = array('coords' => $attacker->ownerCoordinates,
+                                                            'planetType' => $attacker->ownerPlanetType,
+                                                            'name' => $attacker->ownerName,
+                                                            'armor' => $attacker->armorPercentage,
+                                                            'weapon' => $attacker->weaponPercentage,
+                                                            'shield' => $attacker->shieldPercentage);
+                }
+                $defenders = array();
+                foreach($jsonObj->defender as $defender)
+                {
+                    $defenders[] = array('coords' => $attacker->ownerCoordinates,
+                        'planetType' => $defender->ownerPlanetType,
+                        'name' => $defender->ownerName,
+                        'armor' => $defender->armorPercentage,
+                        'weapon' => $defender->weaponPercentage,
+                        'shield' => $defender->shieldPercentage);
+                }
 
                 for ($i = 0; $i <= $nbRounds; $i++)
                 {
@@ -848,45 +875,62 @@ RocketLauncher': 401,
            'LargeShieldDome': 408,
            'AntiBallisticMissiles': 502,
            'InterplanetaryMissiles': 503,*/
+                    $shipList = array('202' => 'PT', '203' => 'GT', '204' => 'CLE', '205' => 'CLO', '206' => 'CR', '207' => 'VB', '208' => 'VC', '209' => 'REC',
+                        '210' => 'SE', '211' => 'BMD', '212' => 'SAT', '213' => 'DST', '214' => 'EDLM', '215' => 'TRA',
+                        '401' => 'LM', '402' => 'LLE', '403' => 'LLO', '404' => 'CG', '405' => 'AI', '406' => 'LP', '407' => 'PB', '408' => 'GB', '502' => 'MIC', '503' => 'MIP');
 
-                    $attacker = array_fill_keys($database['fleet'], 0);
-                    unset($attacker['SAT']);
+                    foreach($round->attackerShips as $fleetId => $attackerRound)
+                    {
+                        $attackerFleet = array_fill_keys($database['fleet'], 0);
+                        foreach((array)$attackerRound as $ship => $nbShip)
+                            $attackerFleet[$shipList[$ship]]  = $nbShip;
+                        // On efface les sat qui attaquent
+                        unset($attackerFleet['SAT']);
+
+                        $attacker = $attackers[$fleetId];
+                        $fleet = '';
+                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA') as $ship)
+                            $fleet .=  ", " . $attackerFleet[$ship];
+
+                        $db->sql_query("INSERT INTO " . TABLE_ROUND_ATTACK . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`, 
+                        `PT`, `GT`, `CLE`, `CLO`, `CR`, `VB`, `VC`, `REC`, `SE`, `BMD`,  `DST`, `EDLM`, `TRA`) VALUE ('{$id_rcround}', '"
+                            . $attacker['name'] . "', '"
+                            . $attacker['coords'] . "', '"
+                            . $attacker['weapon'] . "', '"
+                            . $attacker['shield'] . "', '"
+                            . $attacker['armor'] . "'"
+                            .  $fleet. ")");
 
 
-
-
-
-                }
-
-                /*$j = 0;
-                foreach ($pub_n as $i => $n) {
-                    $j = floor($i / (count($pub_n) / count($id_rcround))) + 1;
-                    $fields = '';
-                    $values = '';
-
-                    if (array_key_exists('content', $n)) {
-                        foreach ($n['content'] as $field => $value) {
-                            // Cas des attaques d'aliens
-                            if ($n['type'] == "A" && $field == 'SAT')
-                                continue;
-
-                            $fields .= ", `{$field}`";
-                            $values .= ", '{$value}'";
-                        }
                     }
 
-                    $db->sql_query("INSERT INTO " . (($n['type'] == "D") ? TABLE_ROUND_DEFENSE : TABLE_ROUND_ATTACK) . " (
-                            `id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`" . $fields . "
-                        ) VALUE (
-                         '" . $id_rcround[$j] . "', '"
-                        . $n['player'] . "', '"
-                        . $n['coords'] . "', '"
-                        . (isset($n['weapons']['arm']) ? $n['weapons']['arm'] : "0" ). "', '"
-                        . (isset($n['weapons']['bcl']) ? $n['weapons']['bcl'] : "0") . "', '"
-                        . (isset($n['weapons']['coq']) ? $n['weapons']['coq'] : "0") . "'"
-                        . $values . ")"
-                    );
-                }*/
+                    foreach($round->defenderShips as $fleetId => $defenderRound)
+                    {
+                        $defenderFleet = array_fill_keys(array_merge($database['fleet'], $database['defense']), 0);
+                        foreach((array)$defenderRound as $ship => $nbShip)
+                            $defenderFleet[$shipList[$ship]]  = $nbShip;
+
+                        $defender = $defenders[0];
+
+                        $columns = array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA',
+                            'LM', 'LLE', 'LLO', 'CG', 'AI', 'LP', 'PB', 'GB');
+
+                        $query = "INSERT INTO " . TABLE_ROUND_DEFENSE . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection` ";
+                        foreach($columns as $column)
+                            $query .= ", `{$column}`";
+                        $query .= ") VALUE ('{$id_rcround}', '"
+                            . $defender['name'] . "', '"
+                            . $defender['coords'] . "', '"
+                            . $defender['weapon'] . "', '"
+                            . $defender['shield'] . "', '"
+                            . $defender['armor'] . "'";
+                        foreach($columns as $ship)
+                            $query .=  ", " . $defenderFleet[$ship];
+                        $query .= ")";
+
+                        $db->sql_query($query);
+                    }
+                }
             }
 
             $io->set(array(
