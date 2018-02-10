@@ -39,9 +39,11 @@ if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) $timestamp = mktime(0, 0
 if ($time > mktime(8, 0, 0) && $time < mktime(16, 0, 0)) $timestamp = mktime(8, 0, 0);
 if ($time > mktime(16, 0, 0) && $time < (mktime(0, 0, 0) + 60 * 60 * 24)) $timestamp = mktime(16, 0, 0);
 
-if (isset($pub_toolbar_version, $pub_toolbar_type, $pub_mod_min_version, $pub_user, $pub_password, $pub_univers) == false) die("hack");
+if (isset($pub_data) == false) die("hack");
 
-if (version_compare($pub_toolbar_version, TOOLBAR_MIN_VERSION, '<')) {
+$xtense_data = json_decode($pub_data,TRUE);
+
+if (version_compare($xtense_data['toolbar_version'], TOOLBAR_MIN_VERSION, '<')) {
     $io->set(array(
         'type' => 'wrong version',
         'target' => 'toolbar',
@@ -50,7 +52,7 @@ if (version_compare($pub_toolbar_version, TOOLBAR_MIN_VERSION, '<')) {
     $io->send(0, true);
 }
 
-if (version_compare($pub_mod_min_version, PLUGIN_VERSION, '>')) {
+if (version_compare($xtense_data['mod_min_version'], PLUGIN_VERSION, '>')) {
     $io->set(array(
         'type' => 'wrong version',
         'target' => 'plugin',
@@ -79,14 +81,14 @@ if ($server_config['xtense_allow_connections'] == 0) {
     $io->send(0, true);
 }
 
-if (strtolower($server_config['xtense_universe']) != strtolower($pub_univers)) {
+if (strtolower($server_config['xtense_universe']) != strtolower($xtense_data['univers'])) {
     $io->set(array(
         'type' => 'plugin univers',
     ));
     $io->send(0, true);
 }
 
-$query = $db->sql_query('SELECT user_id, user_name, user_password, user_active, user_stat_name FROM ' . TABLE_USER . ' WHERE user_name = "' . quote($pub_user) . '"');
+$query = $db->sql_query('SELECT user_id, user_name, user_password, user_active, user_stat_name FROM ' . TABLE_USER . ' WHERE user_name = "' . $db->sql_escape_string($xtense_data['user']) . '"');
 if (!$db->sql_numrows($query)) {
     $io->set(array(
         'type' => 'username'
@@ -95,7 +97,7 @@ if (!$db->sql_numrows($query)) {
 } else {
     $user_data = $db->sql_fetch_assoc($query);
 
-    if ($pub_password != $user_data['user_password']) {
+    if ($xtense_data['password'] != $user_data['user_password']) {
         $io->set(array(
             'type' => 'password'
         ));
