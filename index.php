@@ -203,7 +203,7 @@ $db->sql_close();
                        onclick="this.select();" readonly/>
             </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="password" value="<?php echo '**********' ?>"
+                <input type="text" class="infos" id="plugin" name="password" value="<?php echo $user_token["token"]; ?>"
                        onclick="this.select();" readonly/>
             </p>
             <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
