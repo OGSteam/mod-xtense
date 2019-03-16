@@ -16,12 +16,11 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
 
-if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
-} else {
-    header("Access-Control-Allow-Origin: *");
-}
+header("Access-Control-Allow-Origin: * ");
+header('Access-Control-Max-Age: 86400', false);    // cache for 1 day
+header("Content-Type: text/plain", false);
+header("Access-Control-Allow-Methods: POST, GET", false);
+header('X-Content-Type-Options: nosniff', false);
 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
@@ -1284,4 +1283,4 @@ $io->set('execution', str_replace(',', '.', round((get_microtime() - $start_time
 $io->send();
 $db->sql_close();
 
-
+exit();
