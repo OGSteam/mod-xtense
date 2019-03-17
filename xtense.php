@@ -30,8 +30,6 @@ require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php");
 require_once("mod/{$root}/includes/auth.php");
 
-
-set_error_handler('error_handler');
 $start_time = get_microtime();
 
 $io = new Io();
@@ -47,10 +45,8 @@ if (isset($pub_type)) {
 } else die("hack");
 
 xtense_check_before_auth($pub_toolbar_version, $pub_mod_min_version, $active,$pub_univers);
-xtense_check_auth($pub_user, $pub_password);
-xtense_check_user_rights();
-
-
+$user_data = xtense_check_auth($pub_user, $pub_password);
+$user_data = xtense_check_user_rights($user_data);
 
 $call = new CallbackHandler();
 

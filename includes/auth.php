@@ -9,9 +9,10 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 
 
-function xtense_check_user_rights() {
+function xtense_check_user_rights($user_data) {
 
-    global $db, $server_config, $user_data, $io;
+    global $db, $server_config, $io;
+
     // Verification des droits de l'user
     $query = $db->sql_query("SELECT system, ranking, empire, messages FROM " . TABLE_USER_GROUP . " u LEFT JOIN " . TABLE_GROUP . " g ON g.group_id = u.group_id LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.group_id = g.group_id WHERE u.user_id = '" . $user_data['user_id'] . "'");
     $user_data['grant'] = $db->sql_fetch_assoc($query);
@@ -27,6 +28,7 @@ function xtense_check_user_rights() {
         $io->send(1, true);
     }
 
+    return $user_data;
 
 }
 
@@ -85,6 +87,7 @@ function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $
 /**
  * @param $user
  * @param $password
+ * @return
  * @throws Exception
  */
 function xtense_check_auth ($user, $password){
@@ -104,7 +107,7 @@ function xtense_check_auth ($user, $password){
 
         if($user_data['user_password'] == '' ) {
 
-            if ( $password != $user_token) {
+            if ( $password != $user_token['token']) {
                 $io->set(array(
                     'type' => 'token'
                 ));
@@ -128,5 +131,6 @@ function xtense_check_auth ($user, $password){
         $user_data['grant'] = array('system' => 0, 'ranking' => 0, 'empire' => 0, 'messages' => 0);
     }
 
+    return $user_data;
 
 }
