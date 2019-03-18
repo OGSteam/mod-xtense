@@ -74,3 +74,4 @@ $lang['MOD_XTENSE_ICONS'] = "Set d'icônes";
 $lang['MOD_XTENSE_CHANGELOG'] = "Changelog";
 $lang['MOD_XTENSE_CHANGELOG_LINK'] = "Lien vers le changelog";
 $lang['MOD_XTENSE_SUPPPORT'] = "Support";
+$lang['MOD_XTENSE_PSEUDO_PASSWORD'] = "Vous devez également mettre votre pseudo et votre mot de passe de connexion de Ogspy";

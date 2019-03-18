@@ -1,4 +1,9 @@
-# Change Log #
+Présentation
+
+Xtense est l'interface permettant de récupérer les 
+## Module OGSpy 2.7.3 ##
+
+* Parsing des RC par Itori
 
 ## Module OGSpy 2.8.0 ##
 

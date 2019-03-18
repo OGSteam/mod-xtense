@@ -1,3 +1,4 @@
+theme: jekyll-theme-cayman
 
 site_name: Xtense
 site_url: https://www.ogsteam.fr
@@ -26,5 +27,5 @@ markdown_extensions:
         permalink: 
     - admonition:
 
-copyright: Copyright &copy; 2016 <a href="/release-notes/">DarkNoon</a>, Maintained by the OGSTeam</a>.
-google_analytics: ['', 'ogsteam.fr']
+copyright: Copyright &copy; 2017 <a href="/release-notes/">DarkNoon</a>, Maintained by the OGSTeam</a>.
+
