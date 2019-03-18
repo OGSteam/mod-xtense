@@ -10,7 +10,7 @@ namespace Ogsteam\Ogspy;
 define('IN_SPYOGAME', true);
 define('IN_XTENSE', true);
 
-date_default_timezone_set(date_default_timezone_get());
+date_default_timezone_set(@date_default_timezone_get());
 
 $currentFolder = getcwd();
 if (preg_match('#mod#', getcwd())) chdir('../../');
@@ -18,12 +18,11 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
 
-if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
-} else {
-    header("Access-Control-Allow-Origin: *");
-}
+header("Access-Control-Allow-Origin: * ");
+header('Access-Control-Max-Age: 86400', false);    // cache for 1 day
+header("Content-Type: text/plain", false);
+header("Access-Control-Allow-Methods: POST, GET", false);
+header('X-Content-Type-Options: nosniff', false);
 
 
 require("mod/{$root}/includes/xtense_config.php");
@@ -33,10 +32,10 @@ require("mod/{$root}/includes/Callback.php");
 require("mod/{$root}/includes/Io.php");
 require("mod/{$root}/includes/Check.php");
 
-
 $start_time = get_microtime();
 
 $io = new Io();
+$mod_tools = new Mod_DevTools("xtense");
 $time = time() - 60 * 4;
 if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) $timestamp = mktime(0, 0, 0);
 if ($time > mktime(8, 0, 0) && $time < mktime(16, 0, 0)) $timestamp = mktime(8, 0, 0);
@@ -75,14 +74,14 @@ if ($server_config['server_active'] == 0) {
     $io->send(0, true);
 }
 
-if ($server_config['xtense_allow_connections'] == 0) {
+if ($mod_tools->mod_get_option('xtense_allow_connections') == 0) {
     $io->set(array(
         'type' => 'plugin connections',
     ));
     $io->send(0, true);
 }
 
-if (strtolower($server_config['xtense_universe']) != strtolower($pub_univers)) {
+if (strtolower($mod_tools->mod_get_option('xtense_universe')) != strtolower($pub_univers)) {
     $io->set(array(
         'type' => 'plugin univers',
     ));
@@ -569,7 +568,7 @@ switch ($page_type) {
                 'system' => $system
             ));
 
-            update_statistic('planetimport_xtense', 15);
+            update_statistic('planet_added_xtense', 15);
             add_log('system', array('coords' => $galaxy . ':' . $system, 'toolbar' => $toolbar_info));
         }
         break;
@@ -739,23 +738,16 @@ switch ($page_type) {
                 'offset' => $offset
             ));
 
-            update_statistic('rankimport_xtense', 100);
+            update_statistic('rank_added_xtense', 100);
             add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $time, 'toolbar' => $toolbar_info));
         }
         break;
 
     case 'rc': //PAGE RC
     case 'rc_shared':
-        if (isset($pub_date, $pub_win, $pub_count, $pub_result, $pub_moon, $pub_n, $pub_rawdata) == false) die("hack");
-
-        if (!isset($pub_rounds)) $pub_rounds = Array(1 => Array(
-            'a_nb' => 0,
-            'a_shoot' => 0,
-            'd_bcl' => 0,
-            'a_bcl' => 0,
-            'd_nb' => 0,
-            'd_shoot' => 0
-        ));
+        if (isset($pub_json) == false) die("hack");
+        if(!isset($pub_ogapilnk))
+            $pub_ogapilnk = '';
 
         if (!$user_data['grant']['messages']) {
             $io->set(array(
@@ -765,83 +757,180 @@ switch ($page_type) {
             $io->status(0);
         } else {
             $call->add('rc', array(
-                'date' => $pub_date,
-                'win' => $pub_win,
-                'count' => $pub_count,
-                'result' => $pub_result,
-                'moon' => $pub_moon,
-                'moonprob' => $pub_moonprob,
-                'rounds' => $pub_rounds,
-                'n' => $pub_n,
-                'rawdata' => $pub_rawdata
+                'json' => $pub_json,
+                'api' => $pub_ogapilnk
             ));
 
-            $id_rcround = Array();
+            $jsonObj = json_decode($pub_json);
+            if($jsonObj == null)
+                die("hack");
 
 
-            $exist = $db->sql_fetch_row($db->sql_query("SELECT id_rc FROM " . TABLE_PARSEDRC . " WHERE dateRC = '" . $pub_date . "'"));
+
+            $exist = $db->sql_fetch_row($db->sql_query("SELECT id_rc FROM " . TABLE_PARSEDRC . " WHERE dateRC = '" . $jsonObj->event_timestamp . "'"));
             if (!$exist[0]) {
+
+                switch($jsonObj->result)
+                {
+                    case 'draw':
+                        $winner = 'N';
+                        break;
+                    case 'attacker':
+                        $winner = 'A';
+                        break;
+                    case 'defender':
+                        $winner = 'D';
+                        break;
+                    default:
+                        die($jsonObj->result);
+                        break;
+                }
+                $nbRounds = count($jsonObj->combatRounds)-1;
+                $moon = (int)($jsonObj->moon->genesis);
+                $coordinates = "{$jsonObj->coordinates->galaxy}:{$jsonObj->coordinates->system}:{$jsonObj->coordinates->position}";
+
                 $db->sql_query("INSERT INTO " . TABLE_PARSEDRC . " (
-                        `dateRC`, `nb_rounds`, `victoire`, `pertes_A`, `pertes_D`, `gain_M`, `gain_C`, `gain_D`, `debris_M`, `debris_C`, `lune`
+                        `dateRC`, `coordinates`, `nb_rounds`, `victoire`, `pertes_A`, `pertes_D`, `gain_M`, `gain_C`, `gain_D`, `debris_M`, `debris_C`, `lune`
                     ) VALUES (
-                     '{$pub_date}', '{$pub_count}', '{$pub_win}', '" . $pub_result['a_lost'] . "', '" . $pub_result['d_lost'] . "', '" . $pub_result['win_metal'] . "', '" . $pub_result['win_cristal'] . "', '" . $pub_result['win_deut'] . "', '" . $pub_result['deb_metal'] . "', '" . $pub_result['deb_cristal'] . "', '{$pub_moon}'
+                     '{$jsonObj->event_timestamp}',
+                     '{$coordinates}',
+                      '{$nbRounds}',
+                      '{$winner}',
+                      '{$jsonObj->statistic->lostUnitsAttacker}',
+                      '{$jsonObj->statistic->lostUnitsDefender}',
+                      '{$jsonObj->loot->metal}',
+                      '{$jsonObj->loot->crystal}',
+                      '{$jsonObj->loot->deuterium}',
+                      '{$jsonObj->debris->metal}',
+                      '{$jsonObj->debris->crystal}',
+                      '{$moon}'
                     )"
                 );
                 $id_rc = $db->sql_insertid();
 
-                foreach ($pub_rounds as $i => $round) {
+                $attackers = array();
+                foreach($jsonObj->attacker as $attacker)
+                {
+                    $attackers[$attacker->fleetID] = array('coords' => $attacker->ownerCoordinates,
+                                                            'planetType' => $attacker->ownerPlanetType,
+                                                            'name' => $attacker->ownerName,
+                                                            'armor' => $attacker->armorPercentage,
+                                                            'weapon' => $attacker->weaponPercentage,
+                                                            'shield' => $attacker->shieldPercentage);
+                }
+                $defenders = array();
+                foreach($jsonObj->defender as $defender)
+                {
+                    $defenders[] = array('coords' => $attacker->ownerCoordinates,
+                        'planetType' => $defender->ownerPlanetType,
+                        'name' => $defender->ownerName,
+                        'armor' => $defender->armorPercentage,
+                        'weapon' => $defender->weaponPercentage,
+                        'shield' => $defender->shieldPercentage);
+                }
+
+                for ($i = 0; $i <= $nbRounds; $i++)
+                {
+                    $round = $jsonObj->combatRounds[$i];
+
+                    if(!isset($round->statistic))
+                        $a_nb = $a_shoot = $a_bcl = $d_nb = $d_shoot = $d_bcl = 0;
+                    else {
+                        $a_nb = $round->statistic->hitsAttacker;
+                        $d_nb = $round->statistic->hitsDefender;
+                        $a_shoot = $round->statistic->fullStrengthAttacker;
+                        $d_shoot = $round->statistic->fullStrengthDefender;
+                        $a_bcl = $round->statistic->absorbedDamageAttacker;
+                        $d_bcl = $round->statistic->absorbedDamageDefender;
+                    }
+
                     $db->sql_query("INSERT INTO " . TABLE_PARSEDRCROUND . " (
                             `id_rc`, `numround`, `attaque_tir`, `attaque_puissance`, `defense_bouclier`, `attaque_bouclier`, `defense_tir`, `defense_puissance`
                         ) VALUE (
-                            '{$id_rc}', '{$i}', '" . $round['a_nb'] . "', '" . $round['a_shoot'] . "', '" . $round['d_bcl'] . "', '" . $round['a_bcl'] . "', '" . $round['d_nb'] . "', '" . $round['d_shoot'] . "'
+                            '{$id_rc}', '{$i}', '" . $a_nb . "', '" . $a_shoot . "', '" . $d_bcl . "', '" . $a_bcl . "', '" . $d_nb . "', '" . $d_shoot . "'
                         )"
                     );
-                    $id_rcround[$i] = $db->sql_insertid();
-                }
-                //Ne pas le faire si destruction attaquant ou dÃ©fenseur au 1er tour, ou match nul au 1er tour
-                if ($pub_count > 1) {
-                    $i++;
-                    $db->sql_query("INSERT INTO " . TABLE_PARSEDRCROUND . " (
-                                `id_rc`, `numround`, `attaque_tir`, `attaque_puissance`, `defense_bouclier`, `attaque_bouclier`, `defense_tir`, `defense_puissance`
-                            ) VALUE (
-                                '{$id_rc}', '{$i}', 0, 0, 0, 0, 0, 0
-                            )"
-                    );
-                    $id_rcround[$i] = $db->sql_insertid();
-                }
+                    $id_rcround = $db->sql_insertid();
 
-                $j = 0;
-                foreach ($pub_n as $i => $n) {
-                    $j = floor($i / (count($pub_n) / count($id_rcround))) + 1;
-                    $fields = '';
-                    $values = '';
+                    /*'SmallCargo': 202,
+         'LargeCargo': 203,
+         'LightFighter': 204,
+         'HeavyFighter': 205,
+         'Cruiser': 206,
+         'Battleship': 207,
+         'ColonyShip': 208,
+         'Recycler': 209,
+         'EspionageProbe': 210,
+         'Bomber': 211,
+         'SolarSatellite': 212,
+         'Destroyer': 213,
+         'Deathstar': 214,
+         'Battlecruiser': 215,
 
-                    if (array_key_exists('content', $n)) {
-                        foreach ($n['content'] as $field => $value) {
-                            // Cas des attaques d'aliens
-                            if ($n['type'] == "A" && $field == 'SAT')
-                                continue;
+RocketLauncher': 401,
+           'LightLaser': 402,
+           'HeavyLaser': 403,
+           'GaussCannon': 404,
+           'IonCannon': 405,
+           'PlasmaTurret': 406,
+           'SmallShieldDome': 407,
+           'LargeShieldDome': 408,
+           'AntiBallisticMissiles': 502,
+           'InterplanetaryMissiles': 503,*/
+                    $shipList = array('202' => 'PT', '203' => 'GT', '204' => 'CLE', '205' => 'CLO', '206' => 'CR', '207' => 'VB', '208' => 'VC', '209' => 'REC',
+                        '210' => 'SE', '211' => 'BMD', '212' => 'SAT', '213' => 'DST', '214' => 'EDLM', '215' => 'TRA',
+                        '401' => 'LM', '402' => 'LLE', '403' => 'LLO', '404' => 'CG', '405' => 'AI', '406' => 'LP', '407' => 'PB', '408' => 'GB', '502' => 'MIC', '503' => 'MIP');
 
-                            $fields .= ", `{$field}`";
-                            $values .= ", '{$value}'";
-                        }
+                    foreach($round->attackerShips as $fleetId => $attackerRound)
+                    {
+                        $attackerFleet = array_fill_keys($database['fleet'], 0);
+                        foreach((array)$attackerRound as $ship => $nbShip)
+                            $attackerFleet[$shipList[$ship]]  = $nbShip;
+                        // On efface les sat qui attaquent
+                        unset($attackerFleet['SAT']);
+
+                        $attacker = $attackers[$fleetId];
+                        $fleet = '';
+                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA') as $ship)
+                            $fleet .=  ", " . $attackerFleet[$ship];
+
+                        $db->sql_query("INSERT INTO " . TABLE_ROUND_ATTACK . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`,
+                        `PT`, `GT`, `CLE`, `CLO`, `CR`, `VB`, `VC`, `REC`, `SE`, `BMD`,  `DST`, `EDLM`, `TRA`) VALUE ('{$id_rcround}', '"
+                            . $attacker['name'] . "', '"
+                            . $attacker['coords'] . "', '"
+                            . $attacker['weapon'] . "', '"
+                            . $attacker['shield'] . "', '"
+                            . $attacker['armor'] . "'"
+                            .  $fleet. ")");
+
+
                     }
 
-                    $db->sql_query("INSERT INTO " . (($n['type'] == "D") ? TABLE_ROUND_DEFENSE : TABLE_ROUND_ATTACK) . " (
-                            `id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`" . $fields . "
-                        ) VALUE (
-                         '" . $id_rcround[$j] . "', '"
-                        . $n['player'] . "', '"
-                        . $n['coords'] . "', '"
-                        . (isset($n['weapons']['arm']) ? $n['weapons']['arm'] : "0" ). "', '"
-                        . (isset($n['weapons']['bcl']) ? $n['weapons']['bcl'] : "0") . "', '"
-                        . (isset($n['weapons']['coq']) ? $n['weapons']['coq'] : "0") . "'"
-                        . $values . ")"
-                    );
+                    foreach($round->defenderShips as $fleetId => $defenderRound)
+                    {
+                        $defenderFleet = array_fill_keys(array_merge($database['fleet'], $database['defense']), 0);
+                        foreach((array)$defenderRound as $ship => $nbShip)
+                            $defenderFleet[$shipList[$ship]]  = $nbShip;
 
-                    if ($n['type'] == "D") {
-                        if (!isset($update))
-                            $update = $db->sql_query("UPDATE " . TABLE_PARSEDRC . " SET coordinates = '" . $n['coords'] . "' WHERE id_rc = '{$id_rc}'");
+                        $defender = $defenders[0];
+
+                        $columns = array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA',
+                            'LM', 'LLE', 'LLO', 'CG', 'AI', 'LP', 'PB', 'GB');
+
+                        $query = "INSERT INTO " . TABLE_ROUND_DEFENSE . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection` ";
+                        foreach($columns as $column)
+                            $query .= ", `{$column}`";
+                        $query .= ") VALUE ('{$id_rcround}', '"
+                            . $defender['name'] . "', '"
+                            . $defender['coords'] . "', '"
+                            . $defender['weapon'] . "', '"
+                            . $defender['shield'] . "', '"
+                            . $defender['armor'] . "'";
+                        foreach($columns as $ship)
+                            $query .=  ", " . $defenderFleet[$ship];
+                        $query .= ")";
+
+                        $db->sql_query($query);
                     }
                 }
             }
@@ -1067,7 +1156,7 @@ switch ($page_type) {
                             }
                         }
                         $db->sql_query('UPDATE ' . TABLE_USER . ' SET spy_added_xtense = spy_added_xtense + 1 WHERE user_id = ' . $user_data['user_id']);
-                        update_statistic('spyimport_xtense', '1');
+                        update_statistic('spy_added_xtense', '1');
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $coords, 'toolbar' => $toolbar_info));
                     }
                     break;
@@ -1185,7 +1274,7 @@ switch ($page_type) {
 
         break;
 
-    
+
 
     default:
         die('hack ' . $pub_type);
@@ -1197,4 +1286,4 @@ $io->set('execution', str_replace(',', '.', round((get_microtime() - $start_time
 $io->send();
 $db->sql_close();
 
-
+exit();

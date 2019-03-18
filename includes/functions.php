@@ -5,7 +5,6 @@
  * @licence GNU
  */
 
-
 namespace Ogsteam\Ogspy;
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
@@ -19,7 +18,7 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
  * @return false/int - Retourne false si il y a une erreur ou le nombre d'appels ajoutés
  */
 function install_callbacks ($action, $data, $version = null) {
-	global $db, $table_prefix;
+	global $db;
 
 	define('XTENSE_LITE_CONFIG', 1);
 	require_once('mod/xtense/includes/config.php');
@@ -74,15 +73,17 @@ function clean_nb($str) {
  * @throws \Exception
  */
 function xtense_error_handler($errno, $errstr, $errfile, $errline) {
-	global $call;
 
-	if ($call->currentCallback !== false) {
-		global $io;
+    global $io;
+    $io->set(array(
+        'type' => 'plugin error',
+        'data' => '[{ "error" : "'.$errfile.'@'.$errline.' : '.$errstr.'"}]'
+    ));
+    $io->status(0);
 
-		throw new Exception('Erreur PHP '.$errno.' lors de l\'execution'."\n".' '.$errfile.' @ '.$errline.' : "'.$errstr.'"');
-	}
+    //throw new \Exception('Erreur PHP lors de l\'execution'."\n".' '.$errfile.' @ '.$errline.' : "'.$errstr.'"');
 
-	return true;
+	return false;
 }
 
 /**
@@ -212,11 +213,12 @@ function get_microtime() {
  * @param null $data
  */
 function add_log($type, $data = null) {
-	global $server_config, $user_data, $root;
+	global $user_data;
+    $mod_tools = new Mod_DevTools('xtense');
 	$message = '';
 	if(!isset($data['toolbar'])) {$data['toolbar'] = "";}
 	if ($type == 'buildings' || $type == 'overview' || $type == 'defense' || $type == 'research' || $type == 'fleet'||$type == 'info') {
-		if (!$server_config['xtense_log_empire']) return;
+		if (!$mod_tools->mod_get_option('xtense_log_empire')) return;
 
 		if ($type == 'buildings') 	$message = 'envoie les batiments de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'overview') 	$message = 'envoie les informations de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
@@ -227,13 +229,13 @@ function add_log($type, $data = null) {
 	}
 
 	if ($type == 'system') {
-		if (!$server_config['xtense_log_system']) return;
+		if (!$mod_tools->mod_get_option('xtense_log_system')) return;
 
 		$message = 'envoie le système solaire '.$data['coords'];
 	}
 
 	if ($type == 'ranking') {
-		if (!$server_config['xtense_log_ranking']) return;
+		if (!$mod_tools->mod_get_option('xtense_log_ranking')) return;
 
 		$message = 'envoie le classement '.$data['type2'].' des '.$data['type1'].' ('.$data['offset'].'-'.($data['offset']+99).') : '.date('H', $data['time']).'h';
 	}

@@ -13,12 +13,12 @@ global $db,$table_prefix;
 
 define("TABLE_XTENSE_CALLBACKS", $table_prefix . "xtense_callbacks");
 
-$mod_name = "xtense";
+$mod_tools = new Mod_DevTools("xtense");
 
-mod_del_option("xtense_log_ogspy");
-mod_del_option("xtense_keep_log");
+$mod_tools->mod_del_option("xtense_log_ogspy");
+$mod_tools->mod_del_option("xtense_keep_log");
 
-$version = mod_version($mod_name);
+$version = $mod_tools->mod_version();
 
 if(version_compare($version, '2.7.2', '<')){
     $db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." MODIFY `type` enum('overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy', 'spy_shared', 'ennemy_spy','rc', 'rc_shared','rc_cdr', 'msg', 'ally_msg', 'expedition','expedition_shared', 'ranking', 'trade', 'trade_me','hostiles') NOT NULL");

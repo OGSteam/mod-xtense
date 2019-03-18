@@ -1,8 +1,18 @@
-# Change Log #
+Présentation
+
+Xtense est l'interface permettant de récupérer les 
+## Module OGSpy 2.7.3 ##
+
+* Parsing des RC par Itori
 
 ## Module OGSpy 2.8.0 ##
 
 * Adaptation OGSpy 3.4.0
+
+## Module OGSpy 2.7.2 ##
+
+### Nouveau ###
+* Compatibilité OGame 6.3.5
 
 ## Module OGSpy 2.7.0 ##
 

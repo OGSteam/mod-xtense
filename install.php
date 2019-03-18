@@ -16,8 +16,10 @@ $db->sql_query("UPDATE " . TABLE_MOD . " SET menu = '<span onclick=\"window.open
 
 require_once('mod/xtense/includes/config.php');
 
+$mod_tools = new Mod_DevTools('xtense');
+
 //---- Creation de la table des recyclages
-mod_create_table(TABLE_PARSEDREC , "CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDREC . " (
+$mod_tools->mod_create_table(TABLE_PARSEDREC , "CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDREC . " (
 			`id_rec` INT( 255 ) NOT NULL AUTO_INCREMENT ,
 			`dateRec` INT( 11 ) NOT NULL ,
 			`coordinates` VARCHAR( 9 ) NOT NULL ,
@@ -30,7 +32,7 @@ mod_create_table(TABLE_PARSEDREC , "CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDR
 			PRIMARY KEY ( `id_rec` )
 		) DEFAULT CHARSET=utf8;");
 
-mod_create_table(TABLE_PARSEDSPYEN, "CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDSPYEN . " (
+$mod_tools->mod_create_table(TABLE_PARSEDSPYEN, "CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDSPYEN . " (
             `spy_id` INT( 255 ) NOT NULL AUTO_INCREMENT ,
             `dateSpy` INT( 11 ) NOT NULL ,
             `from` VARCHAR( 9 ) NOT NULL ,
@@ -41,7 +43,7 @@ mod_create_table(TABLE_PARSEDSPYEN, "CREATE TABLE IF NOT EXISTS " . TABLE_PARSED
         )DEFAULT CHARSET=utf8;");
 
 //---- Creation de la table des Callbacks
-mod_create_table(TABLE_XTENSE_CALLBACKS, "CREATE TABLE IF NOT EXISTS `" . TABLE_XTENSE_CALLBACKS . "` (
+$mod_tools->mod_create_table(TABLE_XTENSE_CALLBACKS, "CREATE TABLE IF NOT EXISTS `" . TABLE_XTENSE_CALLBACKS . "` (
 			`id` int(3) NOT NULL auto_increment,
 			`mod_id` int(3) NOT NULL,
 			`function` varchar(30) NOT NULL,
@@ -52,7 +54,7 @@ mod_create_table(TABLE_XTENSE_CALLBACKS, "CREATE TABLE IF NOT EXISTS `" . TABLE_
 			KEY `active` (`active`)
 			) DEFAULT CHARSET=utf8;");
 
-mod_create_table(TABLE_XTENSE_GROUPS, "CREATE TABLE IF NOT EXISTS `" . TABLE_XTENSE_GROUPS . "` (
+$mod_tools->mod_create_table(TABLE_XTENSE_GROUPS, "CREATE TABLE IF NOT EXISTS `" . TABLE_XTENSE_GROUPS . "` (
 			`group_id` int(4) NOT NULL,
 			`system` tinyint(4) NOT NULL,
 			`ranking` tinyint(4) NOT NULL,
@@ -63,17 +65,20 @@ mod_create_table(TABLE_XTENSE_GROUPS, "CREATE TABLE IF NOT EXISTS `" . TABLE_XTE
 
 //---- Creation configuration Xtense
 
-mod_set_option('xtense_allow_connections', '1');
-mod_set_option('xtense_log_empire', '0');
-mod_set_option('xtense_log_ranking', '1');
-mod_set_option('xtense_log_spy', '1');
-mod_set_option('xtense_log_system', '1');
-mod_set_option('xtense_log_ally_list', '1');
-mod_set_option('xtense_log_messages', '1');
-mod_set_option('xtense_log_reverse', '0');
-mod_set_option('xtense_strict_admin', '0');
-mod_set_option('xtense_universe', 'https://sxx-fr.ogame.gameforge.com');
-mod_set_option('xtense_spy_autodelete', '1');
+
+
+$mod_tools->mod_set_option('xtense_allow_connections', '1');
+$mod_tools->mod_set_option('xtense_log_empire', '0');
+$mod_tools->mod_set_option('xtense_log_ranking', '1');
+$mod_tools->mod_set_option('xtense_log_spy', '1');
+$mod_tools->mod_set_option('xtense_log_system', '1');
+$mod_tools->mod_set_option('xtense_log_ally_list', '1');
+$mod_tools->mod_set_option('xtense_log_messages', '1');
+$mod_tools->mod_set_option('xtense_log_reverse', '0');
+$mod_tools->mod_set_option('xtense_strict_admin', '0');
+$mod_tools->mod_set_option('xtense_universe', 'https://sxx-fr.ogame.gameforge.com');
+$mod_tools->mod_set_option('xtense_spy_autodelete', '1');
+
 generate_config_cache();
 
 
