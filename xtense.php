@@ -16,12 +16,11 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
 
-if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
-} else {
-    header("Access-Control-Allow-Origin: *");
-}
+header("Access-Control-Allow-Origin: * ");
+header('Access-Control-Max-Age: 86400', false);    // cache for 1 day
+header("Content-Type: text/plain", false);
+header("Access-Control-Allow-Methods: POST, GET", false);
+header('X-Content-Type-Options: nosniff', false);
 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
@@ -29,8 +28,8 @@ require_once("mod/{$root}/includes/CallbackHandler.php");
 require_once("mod/{$root}/includes/Callback.php");
 require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php");
+require_once("mod/{$root}/includes/auth.php");
 
-set_error_handler('error_handler');
 $start_time = get_microtime();
 
 $io = new Io();
@@ -41,95 +40,13 @@ if ($time > mktime(16, 0, 0) && $time < (mktime(0, 0, 0) + 60 * 60 * 24)) $times
 
 if (isset($pub_toolbar_version, $pub_toolbar_type, $pub_mod_min_version, $pub_user, $pub_password, $pub_univers) == false) die("hack");
 
-if (version_compare($pub_toolbar_version, TOOLBAR_MIN_VERSION, '<')) {
-    $io->set(array(
-        'type' => 'wrong version',
-        'target' => 'toolbar',
-        'version' => TOOLBAR_MIN_VERSION
-    ));
-    $io->send(0, true);
-}
-
-if (version_compare($pub_mod_min_version, PLUGIN_VERSION, '>')) {
-    $io->set(array(
-        'type' => 'wrong version',
-        'target' => 'plugin',
-        'version' => PLUGIN_VERSION
-    ));
-    $io->send(0, true);
-}
-
-if ($active != 1) {
-    $io->set(array('type' => 'plugin config'));
-    $io->send(0, true);
-}
-
-if ($server_config['server_active'] == 0) {
-    $io->set(array(
-        'type' => 'server active',
-        'reason' => $server_config['reason']
-    ));
-    $io->send(0, true);
-}
-
-if ($server_config['xtense_allow_connections'] == 0) {
-    $io->set(array(
-        'type' => 'plugin connections',
-    ));
-    $io->send(0, true);
-}
-
-if (strtolower($server_config['xtense_universe']) != strtolower($pub_univers)) {
-    $io->set(array(
-        'type' => 'plugin univers',
-    ));
-    $io->send(0, true);
-}
-
-$query = $db->sql_query('SELECT user_id, user_name, user_password, user_active, user_stat_name FROM ' . TABLE_USER . ' WHERE user_name = "' . quote($pub_user) . '"');
-if (!$db->sql_numrows($query)) {
-    $io->set(array(
-        'type' => 'username'
-    ));
-    $io->send(0, true);
-} else {
-    $user_data = $db->sql_fetch_assoc($query);
-
-    if ($pub_password != $user_data['user_password']) {
-        $io->set(array(
-            'type' => 'password'
-        ));
-        $io->send(0, true);
-    }
-
-    if ($user_data['user_active'] == 0) {
-        $io->set(array(
-            'type' => 'user active'
-        ));
-        $io->send(0, true);
-    }
-
-    $user_data['grant'] = array('system' => 0, 'ranking' => 0, 'empire' => 0, 'messages' => 0);
-}
-
-// Verification des droits de l'user
-$query = $db->sql_query("SELECT system, ranking, empire, messages FROM " . TABLE_USER_GROUP . " u LEFT JOIN " . TABLE_GROUP . " g ON g.group_id = u.group_id LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.group_id = g.group_id WHERE u.user_id = '" . $user_data['user_id'] . "'");
-$user_data['grant'] = $db->sql_fetch_assoc($query);
-
-
-// Si Xtense demande la verification du serveur, renvoi des droits de l'utilisateur
-if (isset($pub_server_check)) {
-    $io->set(array(
-        'version' => $server_config['version'],
-        'servername' => $server_config['servername'],
-        'grant' => $user_data['grant']
-    ));
-    $io->send(1, true);
-}
-
 if (isset($pub_type)) {
     $page_type = filter_var($pub_type, FILTER_SANITIZE_STRING);
 } else die("hack");
+
+xtense_check_before_auth($pub_toolbar_version, $pub_mod_min_version, $active,$pub_univers);
+$user_data = xtense_check_auth($pub_user, $pub_password);
+$user_data = xtense_check_user_rights($user_data);
 
 $call = new CallbackHandler();
 
@@ -989,63 +906,6 @@ RocketLauncher': 401,
         }
         break;
 
-    case 'trader': //PAGE MARCHAND
-        $call->add('trader', array());
-        $io->set(array(
-            'type' => 'trader'
-        ));
-        break;
-
-    case 'hostiles': // Hostiles
-        $line = $pub_data;
-        $line['attacker_name'] = filter_var($line['attacker_name'], FILTER_SANITIZE_STRING);
-        $line['origin_attack_name'] = filter_var($line['origin_attack_name'], FILTER_SANITIZE_STRING);
-        $line['destination_name'] = filter_var($line['destination_name'], FILTER_SANITIZE_STRING);
-        $line['composition'] = filter_var($line['composition'], FILTER_SANITIZE_STRING);
-
-        $hostile = array('id' => $line['id'],
-            'id_vague' => $line['id_vague'],
-            'player_id' => $line['player_id'],
-            'ally_id' => $line['ally_id'],
-            'arrival_time' => $line['arrival_time'],
-            'arrival_datetime' => $line['arrival_datetime'],
-            'destination_name' => $line['destination_name'],
-            'attacker' => $line['attacker_name'],
-            'origin_planet' => $line['origin_attack_name'],
-            'origin_coords' => $line['origin_attack_coords'],
-            'cible_planet' => $line['destination_name'],
-            'cible_coords' => $line['destination_coords'],
-            'composition_flotte' => $line['composition'],
-            'clean' => $line['clean'],
-            'check' => false
-        );
-
-        $call->add('hostiles', $hostile);
-
-        $io->set(array('function' => 'hostiles',
-            'type' => 'hostiles'
-        ));
-
-        add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une flotte hostile de " . $line['attacker_name']));
-
-        break;
-
-    case 'checkhostiles': // Verification des flotttes Hostiles des joueurs de la communauté
-        $hostile = array('is_attack' => false,
-            'user_attack' => null,
-            'check' => true
-        );
-
-        $call->add('hostiles', $hostile);
-
-        $io->set(array('type' => 'checkhostiles',
-            'check' => $hostile['is_attack'],
-            'user' => $hostile['user_attack']
-        ));
-
-        add_log('info', array('toolbar' => $toolbar_info, 'message' => "vérifie les flottes hostiles de la communauté"));
-        break;
-
     case 'messages': //PAGE MESSAGES
         if (isset($pub_data) == false) die("hack");
 
@@ -1222,47 +1082,6 @@ RocketLauncher': 401,
                     $call->add($line['type'], $expedition);
                     break;
 
-                case 'trade': // LIVRAISONS AMIES
-                    if (isset($line['date'], $line['trader'], $line['trader_planet'], $line['trader_planet_coords'], $line['planet'], $line['planet_coords'], $line['metal'], $line['cristal'], $line['deuterium']) == false) die("hack");
-
-                    $line['trader'] = filter_var($line['trader'], FILTER_SANITIZE_STRING);
-                    $line['planet'] = filter_var($line['planet'], FILTER_SANITIZE_STRING);
-
-                    $trade = array(
-                        'time' => $line['date'],
-                        'trader' => $line['trader'],
-                        'trader_planet' => $line['trader_planet'],
-                        'trader_planet_coords' => $line['trader_planet_coords'],
-                        'planet' => $line['planet'],
-                        'planet_coords' => $line['planet_coords'],
-                        'metal' => $line['metal'],
-                        'cristal' => $line['cristal'],
-                        'deuterium' => $line['deuterium']
-                    );
-                    $call->add('trade', $trade);
-                    add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une livraison amie provenant de " . $line['trader']));
-                    break;
-
-                case 'trade_me': // MES LIVRAISONS
-
-                    if (isset($line['date'], $line['planet_dest'], $line['planet_dest_coords'], $line['trader'], $line['metal'], $line['cristal'], $line['deuterium']) == false) die("hack");
-                    $line['trader'] = filter_var($line['trader'], FILTER_SANITIZE_STRING);
-                    $line['planet'] = filter_var($line['planet'], FILTER_SANITIZE_STRING);
-
-                    $trade_me = array(
-                        'time' => $line['date'],
-                        'planet_dest' => $line['planet_dest'],
-                        'planet_dest_coords' => $line['planet_dest_coords'],
-                        'planet' => $line['planet'],
-                        'planet_coords' => $line['planet_coords'],
-                        'trader' => $line['trader'],
-                        'metal' => $line['metal'],
-                        'cristal' => $line['cristal'],
-                        'deuterium' => $line['deuterium']
-                    );
-                    $call->add('trade_me', $trade_me);
-                    add_log('info', array('toolbar' => $toolbar_info, 'message' => "envoie une de ses livraison effectuée pour " . $line['trader']));
-                    break;
             }
 
             $io->set(array(
@@ -1284,4 +1103,4 @@ $io->set('execution', str_replace(',', '.', round((get_microtime() - $start_time
 $io->send();
 $db->sql_close();
 
-
+exit();

@@ -63,26 +63,6 @@ function clean_nb($str) {
 }
 
 /**
- * @param $no
- * @param $str
- * @param $file
- * @param $line
- * @return bool
- * @throws \Exception
- */
-function error_handler($no, $str, $file, $line) {
-	global $call;
-	
-	if ($call->currentCallback !== false) {
-		global $io;
-		
-		throw new Exception('Erreur PHP lors de l\'execution'."\n".' '.$file.' @ '.$line.' : "'.$str.'"');
-	}
-	
-	return false;
-}
-
-/**
  * Amélioration de var_dump()
  *
  */
