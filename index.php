@@ -36,7 +36,9 @@ if (isset($pub_page)) {
 }
 
 if ($page == 'infos') {
-    $plugin_url = 'https://' . $_SERVER['HTTP_HOST'] . substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], '/') + 1);
+    $phpSelf = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_URL);
+    $http_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
+    $plugin_url = 'https://' . $http_host . substr($phpSelf, 0, strrpos($phpSelf, '/') + 1);
 }
 
 if ($page == 'config') {
