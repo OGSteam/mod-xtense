@@ -36,7 +36,7 @@ $database = array(
 
 $callbackTypesNames = array(
 	'overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy','ennemy_spy','rc',
-	'rc_cdr', 'msg', 'ally_msg', 'expedition','ranking' , 'trade' , 'trade_me' , 'hostiles'
+	'rc_cdr', 'msg', 'ally_msg', 'expedition','ranking'
 );
 
 

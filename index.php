@@ -36,7 +36,9 @@ if (isset($pub_page)) {
 }
 
 if ($page == 'infos') {
-    $plugin_url = 'https://' . $_SERVER['HTTP_HOST'] . substr($_SERVER['PHP_SELF'], 0, strrpos($_SERVER['PHP_SELF'], '/') + 1);
+    $phpSelf = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_URL);
+    $http_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
+    $plugin_url = 'https://' . $http_host . substr($phpSelf, 0, strrpos($phpSelf, '/') + 1);
 }
 
 if ($page == 'config') {
@@ -203,7 +205,7 @@ $db->sql_close();
                        onclick="this.select();" readonly/>
             </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="password" value="<?php echo '**********' ?>"
+                <input type="text" class="infos" id="plugin" name="password" value="<?php echo $user_token["token"]; ?>"
                        onclick="this.select();" readonly/>
             </p>
             <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
