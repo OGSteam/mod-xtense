@@ -16,11 +16,15 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
 
-header("Access-Control-Allow-Origin: * ");
-header('Access-Control-Max-Age: 86400', false);    // cache for 1 day
-header("Content-Type: text/plain", false);
-header("Access-Control-Allow-Methods: POST, GET", false);
-header('X-Content-Type-Options: nosniff', false);
+
+$origin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_URL);
+
+header("Access-Control-Allow-Origin: {$origin} ");
+header('Access-Control-Max-Age: 86400');    // cache for 1 day
+header('Access-Control-Request-Headers: Content-Type');    // cache for 1 day
+header("Content-Type: text/plain");
+header("Access-Control-Allow-Methods: POST, GET");
+header('X-Content-Type-Options: nosniff');
 
 require_once("mod/{$root}/includes/config.php");
 require_once("mod/{$root}/includes/functions.php");
@@ -602,32 +606,54 @@ switch ($page_type) {
                         $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
                     } else die ("Erreur Pas de points pour le joueur !");
 
+                    if (isset($data['ally_id'])) {
+                        $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
+                    } else die ("Aucun id alliance !");
+
+                    if (isset($data['player_id'])) {
+                        $data['player_id'] = filter_var($data['player_id'], FILTER_SANITIZE_NUMBER_INT);
+                    } else die ("Aucun id joueur !");
+
 
                     if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                        $query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ', ' . ((int)$data['nb_spacecraft']) . ')';
+                        //$query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ', ' . ((int)$data['nb_spacecraft']) . ')';
+                        $query[] = "({$timestamp}, {$i}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']}, {$data['nb_spacecraft']} )";
                     } else {
-                        $query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ')';
+                        //$query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ')';
+                        $query[] = "({$timestamp}, {$i}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']} )";
                     }
                     $total++;
                     $datas[] = $data;
                 }
                 if (!empty($query))
                     if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                        $db->sql_query('REPLACE INTO ' . $table . ' (datadate, rank, player, ally, points, sender_id, nb_spacecraft) VALUES ' . implode(',', $query));
+                        $db->sql_query('REPLACE INTO ' . $table . ' (datadate, rank, player, player_id, ally, ally_id, points, sender_id, nb_spacecraft) VALUES ' . implode(',', $query));
                     } else {
-                        $db->sql_query('REPLACE INTO ' . $table . ' (datadate, rank, player, ally, points, sender_id) VALUES ' . implode(',', $query));
+                        $db->sql_query('REPLACE INTO ' . $table . ' (datadate, rank, player, player_id, ally, ally_id, points, sender_id) VALUES ' . implode(',', $query));
                     }
             } else {
-                $fields = 'datadate, rank, ally, points, sender_id, number_member';
+                $fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
                 foreach ($n as $i => $val) {
                     $data = $n[$i];
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_SANITIZE_STRING);
 
+                    if (isset($data['ally_id'])) {
+                        $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
+                    } else die ("Aucun id alliance !");
+
                     if (isset($data['points'])) {
                         $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
-                    } else die ("Erreur Pas de points pour le joueur !");
+                    } else die ("Erreur Pas de points pour cette alliance !");
 
-                    $query[] = '(' . $timestamp . ', ' . $i . ', "' . $data['ally_tag'] . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ',' . ((int)$data['members'][0]) . ')';
+                    if (isset($data['mean'])) {
+                        $data['mean'] = filter_var($data['mean'], FILTER_SANITIZE_NUMBER_INT);
+                    } else die ("Erreur Pas de moyenne pour cette alliance !");
+
+                    if (isset($data['members'])) {
+                        $data['members'] = filter_var($data['members'], FILTER_SANITIZE_NUMBER_INT);
+                    } else die ("Erreur Pas de nb de joueurs pour cette alliance !");
+
+                    $query[] = "({$timestamp}, {$i} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
                     $datas[] = $data;
                     $total++;
                 }
