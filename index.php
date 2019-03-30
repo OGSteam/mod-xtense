@@ -39,6 +39,14 @@ if ($page == 'infos') {
     $phpSelf = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_URL);
     $http_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
     $plugin_url = 'https://' . $http_host . substr($phpSelf, 0, strrpos($phpSelf, '/') + 1);
+
+    if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
+
+        user_profile_token_updater($user_data['user_id']);
+        unset($pub_action_xtense);
+        }
+    $my_user_token = get_user_profile_token($user_data['user_id']);
+
 }
 
 if ($page == 'config') {
@@ -137,8 +145,7 @@ $php_end = benchmark();
 $php_timing = $php_end - $php_start;
 $db->sql_close();
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/2002/REC-xhtml1-20020801/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo($lang['MOD_XTENSE_LANG']); ?>"
       lang="<?php echo($lang['MOD_XTENSE_LANG']); ?>">
 <head>
@@ -184,17 +191,18 @@ $db->sql_close();
 
     <div id="content">
         <?php if ($page == 'infos') { ?>
-            <p><?php echo($lang['MOD_XTENSE_DESCRIPTION']); ?></p><br>
+            <p><?php echo($lang['MOD_XTENSE_DESCRIPTION']); ?></p>
             <h2><?php echo($lang['MOD_XTENSE_DOWNLOAD']); ?></h2><br>
             <p><?php echo($lang['MOD_XTENSE_FIREFOX']); ?> : <a
                     href="https://addons.mozilla.org/fr/firefox/addon/xtense-we/"
                     target="_blank"><?php echo($lang['MOD_XTENSE_FIREFOX_LINK']); ?></a></p>
             <p><?php echo($lang['MOD_XTENSE_CHROME']); ?> : <a
                     href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr"
-                    target="_blank"><?php echo($lang['MOD_XTENSE_CHROME_LINK']); ?></a></p><br>
+                    target="_blank"><?php echo($lang['MOD_XTENSE_CHROME_LINK']); ?></a></p>
+            <p><a href="https://wiki.ogsteam.fr/doku.php?id=fr:ogspy:documentationxtense"
+                  target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
 
             <h2><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?></h2>
-            <br>
             <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></label></p>
             <p class="c">
                 <input type="text" class="infos" id="plugin" name="plugin" value="<?php echo $plugin_url; ?>"
@@ -205,13 +213,18 @@ $db->sql_close();
                        onclick="this.select();" readonly/>
             </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="password" value="<?php echo $user_token["token"]; ?>"
+                <input type="text" class="infos" id="plugin" name="password" value="<?php echo $my_user_token ?>"
                        onclick="this.select();" readonly/>
             </p>
-            <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
-            <br>
-            <p><a href="https://wiki.ogsteam.fr/doku.php?id=fr:ogspy:documentationxtense"
-                  target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
+            <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p><br>
+            <div id="actions">
+                <h2><?php echo($lang['MOD_XTENSE_ACTIONS']); ?></h2>
+                <p>
+                    <a href="?action=xtense&action_xtense=renew_token" class="action"
+                       title="Effectuer cette action">&nbsp;</a>
+                    <?php echo($lang['MOD_XTENSE_RENEW_TOKEN']); ?>
+                </p>
+            </div>
 
         <?php } elseif ($page == 'config') { ?>
 
@@ -223,8 +236,7 @@ $db->sql_close();
                 <?php if ($action == 'repair') { ?>
                     <p class="success"><?php echo($lang['MOD_XTENSE_REPAIR_DONE']); ?></p>
                 <?php } elseif ($action == 'install_callbacks') { ?>
-                    <p class="success"
-                       name="callback_sumary"><?php echo($lang['MOD_XTENSE_CALLBACK_SUMMARY'] . " (" . $installed_callbacks); ?>
+                    <p class="success"><?php echo($lang['MOD_XTENSE_CALLBACK_SUMMARY'] . " (" . $installed_callbacks); ?>
                     / <?php echo $total_callbacks; ?>).
                     <?php if (!empty($callInstall['errors'])) { ?>
                         <label for="callback_sumary">
@@ -334,8 +346,8 @@ $db->sql_close();
                 <div class="sep"></div>
 
                 <p class="center">
-                    <button type="submit" class="submit"><?php echo($lang['MOD_XTENSE_SEND']); ?></button>
-                    <button type="reset" class="reset"><?php echo($lang['MOD_XTENSE_CANCEL']); ?></button>
+                    <button class="submit" type="submit"><?php echo($lang['MOD_XTENSE_SEND']); ?></button>
+                    <button class="reset" type="reset"><?php echo($lang['MOD_XTENSE_CANCEL']); ?></button>
                 </p>
 
             </form>
