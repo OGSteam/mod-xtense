@@ -107,7 +107,7 @@ function xtense_check_auth ($user, $password){
 
         if($user_data['user_password'] == '' ) {
 
-            if ( $password != $user_token['token']) {
+            if ( $password != $user_token) {
                 $io->set(array(
                     'type' => 'token'
                 ));
