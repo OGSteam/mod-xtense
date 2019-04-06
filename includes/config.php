@@ -28,7 +28,7 @@ define('TOOLBAR_MIN_VERSION', trim($toolbar_min_version));
 
 $database = array(
 	'ressources' => array('metal','cristal','deuterium','energie','activite'),
-	'buildings' => array('M', 'C', 'D', 'CES', 'CEF', 'UdR', 'UdN', 'CSp', 'SAT', 'HM', 'HC', 'HD', 'Lab', 'Ter', 'Silo', 'DdR', 'BaLu', 'Pha', 'PoSa'),
+	'buildings' => array('M', 'C', 'D', 'CES', 'CEF', 'UdR', 'UdN', 'CSp', 'SAT', 'HM', 'HC', 'HD', 'Lab', 'Ter','Dock', 'Silo', 'DdR', 'BaLu', 'Pha', 'PoSa'),
 	'labo' => array('Esp', 'Ordi', 'Armes', 'Bouclier', 'Protection', 'NRJ', 'Hyp', 'RC', 'RI', 'PH', 'Laser', 'Ions', 'Plasma', 'RRI', 'Graviton', 'Astrophysique'),
 	'defense' => array('LM', 'LLE', 'LLO', 'CG', 'LP', 'AI', 'PB', 'GB', 'MIC', 'MIP'),
 	'fleet' => array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA')
