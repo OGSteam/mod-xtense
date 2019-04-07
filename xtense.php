@@ -604,16 +604,16 @@ switch ($page_type) {
 
                     if (isset($data['points'])) {
                         $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
-                    } else die ("Erreur Pas de points pour le joueur !");
+                    }
 
                     if (isset($data['ally_id'])) {
                         $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
-                    } else die ("Aucun id alliance !");
+                        if( $data['ally_id'] === '') $data['ally_id'] = -1;
+                    }
 
                     if (isset($data['player_id'])) {
                         $data['player_id'] = filter_var($data['player_id'], FILTER_SANITIZE_NUMBER_INT);
-                    } else die ("Aucun id joueur !");
-
+                    }
 
                     if ($table == TABLE_RANK_PLAYER_MILITARY) {
                         //$query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ', ' . ((int)$data['nb_spacecraft']) . ')';
