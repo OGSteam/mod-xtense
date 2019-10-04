@@ -36,10 +36,37 @@ if (isset($pub_page)) {
 }
 
 if ($page == 'infos') {
-    $phpSelf = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_URL);
-    $http_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
-    $plugin_url = 'https://' . $http_host . substr($phpSelf, 0, strrpos($phpSelf, '/') + 1);
-
+    # Hack: The last part of the OR assumes HTTPS is enabled if HTTP_X_FORWARDED_PROTO is not available
+    # In such cases we basically do not know what the proxy is using, so let's assume the administrator
+    # is doing its job propperly and using HTTPS
+    if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') || (!isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && isset($_SERVER['HTTP_X_FORWARDED_HOST']))) {
+        $plugin_protocol = "https://";
+    }
+    else {
+        $plugin_protocol = "http://";
+    }
+    // Get host, uri (without index.php*) and port
+    if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+        $plugin_host = filter_input(INPUT_SERVER, 'HTTP_X_FORWARDED_HOST', FILTER_SANITIZE_URL);
+        $plugin_uri = preg_replace('/^(.*)index.php.*$/', '$1', filter_input(INPUT_SERVER, 'HTTP_X_REQUEST_URI', FILTER_SANITIZE_URL));
+        // Same as before, if the proxy does not provide HTTP_X_FORWARDED_PORT, asume 443
+        if (!isset($_SERVER['HTTP_X_FORWARDED_PORT'])) {
+            $plugin_port = filter_input(INPUT_SERVER, 'HTTP_X_FORWARDED_PORT', FILTER_SANITIZE_URL);
+        }
+        else {
+            $plugin_port = "443";
+        }
+    }
+    else {
+        $plugin_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
+        $plugin_uri = $plugin_host . preg_replace('/^(.*)index.php.*$/', '$1', filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL));
+        $plugin_port = filter_input(INPUT_SERVER, 'SERVER_PORT', FILTER_SANITIZE_URL);
+    }
+    // Show the port ONLY if it is not the standard for the protocol being used
+    if (($plugin_protocol == "http://" && $plugin_port != "80" ) || ($plugin_protocol == "https://" && $plugin_port != "443")) {
+        $plugin_uri = preg_replace('/^(http|https):\/\/(' . $plugin_host . ' )(\/.*)$/', '$1$2:' . $plugin_port . '$3', $plugin_uri);
+    }
+    $plugin_url = $plugin_protocol . $plugin_uri;
     if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
 
         user_profile_token_updater($user_data['user_id']);
