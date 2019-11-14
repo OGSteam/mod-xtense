@@ -23,7 +23,6 @@ require_once("mod/{$root}/includes/functions.php");
 require_once("mod/{$root}/includes/Check.php");
 require_once("mod/{$root}/lang/" . $ui_lang . "/lang_xtense.php");
 
-
 $page = 'infos';
 if (isset($pub_page)) {
     // Pages publiques
@@ -136,8 +135,6 @@ if ($page == 'mods') {
         $calls_id[] = $data['id'];
     }
 }
-
-
 $php_end = benchmark();
 $php_timing = $php_end - $php_start;
 $db->sql_close();
@@ -354,8 +351,8 @@ $db->sql_close();
         <?php } elseif ($page == 'group') { ?>
 
 
-            <script language="Javascript" type="text/javascript">
-                var groups_id = [<?php echo implode(', ', $groups_id); ?>];
+            <script>
+                let groups_id = [<?php echo implode(', ', $groups_id); ?>];
             </script>
 
             <p><?php echo($lang['MOD_XTENSE_GROUPS_DEFINITION']); ?></p>
@@ -475,14 +472,9 @@ $db->sql_close();
             <?php } ?>
     </div>
 </div>
-
 <div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="https://forum.ogsteam.fr/"
                                                             onclick="return winOpen(this);"
                                                             target="_blank"><?php echo($lang['MOD_XTENSE_SUPPPORT']); ?></a>
 </div>
-
-
-
-
 </body>
 </html>
