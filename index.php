@@ -36,9 +36,6 @@ if (isset($pub_page)) {
 }
 
 if ($page == 'infos') {
-    $phpSelf = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_URL);
-    $http_host = filter_input(INPUT_SERVER, 'HTTP_HOST', FILTER_SANITIZE_URL);
-    $plugin_url = 'https://' . $http_host . substr($phpSelf, 0, strrpos($phpSelf, '/') + 1);
 
     if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
 
