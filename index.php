@@ -182,8 +182,7 @@ $db->sql_close();
 </head>
 <body>
 <h1><?php echo($lang['MOD_XTENSE_ADMINTITLE']); ?></h1>
-<script language="Javascript" type="text/javascript" src="mod/<?php echo $root; ?>/js/config.js"></script>
-
+<script src="mod/<?php echo $root; ?>/js/config.js" type="text/javascript"></script>
 <div id="wrapper">
     <ul id="menu">
         <li class="infos<?php if ($page == 'infos') echo ' active'; ?>">
@@ -232,15 +231,15 @@ $db->sql_close();
             <h2><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?></h2>
             <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="plugin" value="<?php echo $plugin_url; ?>"
+                <input type="text" class="infos" id="plugin_url" name="plugin" value=""
                        onclick="this.select();" readonly/>
             </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_USER']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="name" value="<?php echo $user_data["user_name"]; ?>"
+                <input type="text" class="infos" id="plugin_user" name="name" value="<?php echo $user_data["user_name"]; ?>"
                        onclick="this.select();" readonly/>
             </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
-                <input type="text" class="infos" id="plugin" name="password" value="<?php echo $my_user_token ?>"
+                <input type="text" class="infos" id="plugin_password" name="password" value="<?php echo $my_user_token ?>"
                        onclick="this.select();" readonly/>
             </p>
             <p><?php echo($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p><br>
@@ -252,6 +251,9 @@ $db->sql_close();
                     <?php echo($lang['MOD_XTENSE_RENEW_TOKEN']); ?>
                 </p>
             </div>
+            <script>
+                document.getElementById("plugin_url").value = get_xtense_url().toString();
+            </script>
 
         <?php } elseif ($page == 'config') { ?>
 
@@ -508,6 +510,9 @@ $db->sql_close();
                                                             onclick="return winOpen(this);"
                                                             target="_blank"><?php echo($lang['MOD_XTENSE_SUPPPORT']); ?></a>
 </div>
+
+
+
 
 </body>
 </html>
