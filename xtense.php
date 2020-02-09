@@ -14,7 +14,7 @@ $currentFolder = getcwd();
 if (preg_match('#mod#', getcwd())) chdir('../../');
 $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_replace('#\/mod\/(.*)\/#', '/', $_SERVER['SCRIPT_FILENAME']));
 include("common.php");
-list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT root, active FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
+list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT `root`, `active` FROM " . TABLE_MOD . " WHERE `action` = 'xtense'"));
 
 
 $origin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_URL);
@@ -58,7 +58,8 @@ $call = new CallbackHandler();
 $io->set(array('new_messages' => 0));
 
 // Xtense : Ajout de la version et du type de barre utilisée par l'utilisateur
-$db->sql_query("UPDATE " . TABLE_USER . " SET xtense_version='" . $pub_toolbar_version . "', xtense_type='" . $pub_toolbar_type . "' WHERE user_id = " . $user_data['user_id']);
+$current_user_id =  $user_data['user_id'];
+$db->sql_query("UPDATE " . TABLE_USER . " SET `xtense_version` = '$pub_toolbar_version', `xtense_type` = '$pub_toolbar_type' WHERE `user_id` =  $current_user_id" );
 $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
 
 switch ($page_type) {
@@ -96,9 +97,9 @@ switch ($page_type) {
                 $io->status(0);
             } else {
                 if ($home[0] == 'update') {
-                    $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET planet_name = "' . $planet_name . '", `fields` = ' . $fields . ', boosters = "' . $boosters . '", temperature_min = ' . $temperature_min . ', temperature_max = ' . $temperature_max . '  WHERE planet_id = ' . $home['id'] . ' AND user_id = ' . $user_data['user_id']);
+                    $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '", `fields` = ' . $fields . ', `boosters` = "' . $boosters . '", `temperature_min` = ' . $temperature_min . ', `temperature_max` = ' . $temperature_max . '  WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
                 } else {
-                    $db->sql_query('INSERT INTO ' . TABLE_USER_BUILDING . ' (user_id, planet_id, coordinates, planet_name, fields, boosters, temperature_min, temperature_max) VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . ', "' . $coords . '", "' . $planet_name . '", ' . $fields . ', "' . $boosters . '", ' . $pub_temperature_min . ', ' . $pub_temperature_max . ')');
+                    $db->sql_query('INSERT INTO ' . TABLE_USER_BUILDING . ' (`user_id`, `planet_id`, `coordinates`, `planet_name`, `fields`, `boosters`, `temperature_min`, `temperature_max`) VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . ', "' . $coords . '", "' . $planet_name . '", ' . $fields . ', "' . $boosters . '", ' . $pub_temperature_min . ', ' . $pub_temperature_max . ')');
                 }
 
                 $io->set(array(
@@ -708,7 +709,7 @@ switch ($page_type) {
 
             
 
-            $exist = $db->sql_fetch_row($db->sql_query("SELECT id_rc FROM " . TABLE_PARSEDRC . " WHERE dateRC = '" . $jsonObj->event_timestamp . "'"));
+            $exist = $db->sql_fetch_row($db->sql_query("SELECT `id_rc` FROM " . TABLE_PARSEDRC . " WHERE `dateRC` = '" . $jsonObj->event_timestamp . "'"));
             if (!$exist[0]) {
 
                 switch($jsonObj->result)
@@ -819,7 +820,7 @@ RocketLauncher': 401,
            'AntiBallisticMissiles': 502,
            'InterplanetaryMissiles': 503,*/
                     $shipList = array('202' => 'PT', '203' => 'GT', '204' => 'CLE', '205' => 'CLO', '206' => 'CR', '207' => 'VB', '208' => 'VC', '209' => 'REC',
-                        '210' => 'SE', '211' => 'BMD', '212' => 'SAT', '213' => 'DST', '214' => 'EDLM', '215' => 'TRA',
+                        '210' => 'SE', '211' => 'BMD', '212' => 'SAT', '213' => 'DST', '214' => 'EDLM', '215' => 'TRA', '218' => 'FAU', '219' => 'ECL',
                         '401' => 'LM', '402' => 'LLE', '403' => 'LLO', '404' => 'CG', '405' => 'AI', '406' => 'LP', '407' => 'PB', '408' => 'GB', '502' => 'MIC', '503' => 'MIP');
 
                     foreach($round->attackerShips as $fleetId => $attackerRound)
@@ -832,11 +833,11 @@ RocketLauncher': 401,
 
                         $attacker = $attackers[$fleetId];
                         $fleet = '';
-                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA') as $ship)
+                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA', 'FAU', 'ECL') as $ship)
                             $fleet .=  ", " . $attackerFleet[$ship];
 
                         $db->sql_query("INSERT INTO " . TABLE_ROUND_ATTACK . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`, 
-                        `PT`, `GT`, `CLE`, `CLO`, `CR`, `VB`, `VC`, `REC`, `SE`, `BMD`,  `DST`, `EDLM`, `TRA`) VALUE ('{$id_rcround}', '"
+                        `PT`, `GT`, `CLE`, `CLO`, `CR`, `VB`, `VC`, `REC`, `SE`, `BMD`,  `DST`, `EDLM`, `TRA`, `FAU`, `ECL`) VALUE ('{$id_rcround}', '"
                             . $attacker['name'] . "', '"
                             . $attacker['coords'] . "', '"
                             . $attacker['weapon'] . "', '"
@@ -855,7 +856,7 @@ RocketLauncher': 401,
 
                         $defender = $defenders[0];
 
-                        $columns = array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA',
+                        $columns = array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA', 'FAU', 'ECL',
                             'LM', 'LLE', 'LLO', 'CG', 'AI', 'LP', 'PB', 'GB');
 
                         $query = "INSERT INTO " . TABLE_ROUND_DEFENSE . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection` ";
@@ -1025,8 +1026,8 @@ RocketLauncher': 401,
                         $fields .= ', `' . $field . '`';
                         $values .= ', ' . $value;
                     }
-
-                    $test = $db->sql_numrows($db->sql_query('SELECT id_spy FROM ' . TABLE_PARSEDSPY . ' WHERE coordinates = "' . $coords . '" AND dateRE = ' . $spy['time']));
+                    $spy_time = $spy['time'];
+                    $test = $db->sql_numrows($db->sql_query("SELECT `id_spy` FROM " . TABLE_PARSEDSPY . " WHERE `coordinates` = '$coords' AND `dateRE` = '$spy_time'"));
                     if (!$test) {
                         $db->sql_query('INSERT INTO ' . TABLE_PARSEDSPY . ' ( ' . $fields . ') VALUES (' . $values . ')');
                         $query = $db->sql_query('SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
@@ -1076,7 +1077,7 @@ RocketLauncher': 401,
                     $line['M_total'] = filter_var($line['M_total'], FILTER_SANITIZE_NUMBER_INT);
                     $line['C_total'] = filter_var($line['C_total'], FILTER_SANITIZE_NUMBER_INT);
 
-                    $query = "SELECT id_rec FROM " . TABLE_PARSEDREC . " WHERE sender_id = '" . $user_data['user_id'] . "' AND dateRec = '{$line['date']}'";
+                    $query = "SELECT `id_rec` FROM " . TABLE_PARSEDREC . " WHERE `sender_id` = '" . $user_data['user_id'] . "' AND `dateRec` = '{$line['date']}'";
                     if ($db->sql_numrows($db->sql_query($query)) == 0)
                         $db->sql_query("INSERT INTO " . TABLE_PARSEDREC . " (`dateRec`, `coordinates`, `nbRec`, `M_total`, `C_total`, `M_recovered`, `C_recovered`, `sender_id`) VALUES ('" . $line['date'] . "', '" . $line['coords'] . "', '" . $line['nombre'] . "', '" . $line['M_total'] . "', '" . $line['C_total'] . "', '" . $line['M_recovered'] . "', '" . $line['C_recovered'] . "', '" . $user_data['user_id'] . "')");
 
