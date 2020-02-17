@@ -113,7 +113,7 @@ function home_check($type, $coords) {
 	$planets = $moons = array();
 	$offset = ($type == TYPE_PLANET ? 100 : 200);
 	
-	$query = $db->sql_query("SELECT planet_id, coordinates FROM ".TABLE_USER_BUILDING." WHERE user_id = ".$user_data['user_id']." ORDER BY planet_id ASC");
+	$query = $db->sql_query("SELECT `planet_id`, `coordinates` FROM ".TABLE_USER_BUILDING." WHERE `user_id` = ".$user_data['user_id']." ORDER BY planet_id ASC");
 	while ($data = $db->sql_fetch_assoc($query)) {
 		if ($data['planet_id'] < 200) {
 			$planets[$data['planet_id']] = $data['coordinates'];

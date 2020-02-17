@@ -64,7 +64,7 @@ $toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
 
 switch ($page_type) {
     case 'overview': {//PAGE OVERVIEW
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources) == false) die("hack");
+        if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources, $pub_playerdetails, $pub_unidetails) == false) die("hack");
         if (!$user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -72,28 +72,67 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
-            $pub_coords = Check::coords($pub_coords);
+            $player_details = filter_var_array($pub_playerdetails, [
+                'player_name'   => FILTER_SANITIZE_STRING,
+                'player_id'   => FILTER_SANITIZE_STRING,
+                'playerclass_explorer'   => FILTER_SANITIZE_STRING,
+                'playerclass_miner'   => FILTER_SANITIZE_STRING,
+                'playerclass_warrior'   => FILTER_VALIDATE_INT,
+                'player_officer_commander'   => FILTER_VALIDATE_INT,
+                'player_officer_amiral'   => FILTER_VALIDATE_INT,
+                'player_officer_engineer'   => FILTER_VALIDATE_INT,
+                'player_officer_geologist'   => FILTER_VALIDATE_INT,
+                'player_officer_technocrate'   => FILTER_VALIDATE_INT
+            ]);
+
+            $uni_details = filter_var_array($pub_unidetails, [
+                'uni_version'   => FILTER_SANITIZE_STRING,
+                'uni_url'   => FILTER_SANITIZE_STRING,
+                'uni_lang'   => FILTER_SANITIZE_STRING,
+                'uni_name'   => FILTER_SANITIZE_STRING,
+                'uni_time'   => FILTER_VALIDATE_INT,
+                'uni_speed'   => FILTER_VALIDATE_INT, // speed_uni
+                'uni_speed_fleet'   => FILTER_VALIDATE_INT,
+                'uni_donut_g'   => FILTER_VALIDATE_INT,
+                'uni_donut_s'   => FILTER_VALIDATE_INT
+            ]
+            );
+
             $planet_name = filter_var($pub_planet_name, FILTER_SANITIZE_STRING);
+            $ressources = filter_var_array($pub_ressources, FILTER_VALIDATE_INT);
+            $temperature_min = filter_var($pub_temperature_min, FILTER_VALIDATE_INT);
+            $temperature_max = filter_var($pub_temperature_max, FILTER_VALIDATE_INT);
+            $fields = filter_var($pub_fields, FILTER_VALIDATE_INT);
 
-            $coords = $pub_coords;
+            $coords = Check::coords($pub_coords);
             $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-            $fields = (int)$pub_fields;
-            $temperature_min = (int)$pub_temperature_min;
-            $temperature_max = (int)$pub_temperature_max;
-            $ressources = $pub_ressources;
-            $ogame_timestamp = $pub_ogame_timestamp;
+            $ogame_timestamp = $uni_details['uni_time'];
+            $player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : $player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : $player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none' ;
+            $off_commandant = $player_details['player_officer_commander'];
+            $off_amiral = $player_details['player_officer_amiral'];
+            $off_ingenieur = $player_details['player_officer_engineer'];
+            $off_geologue = $player_details['player_officer_geologist'];
+            $off_technocrate = $player_details['player_officer_technocrate'];
 
-            $home = home_check($planet_type, $coords);
+            //Officers
+            $db->sql_query("UPDATE " . TABLE_USER. " SET `user_class` = '$userclass', `off_commandant` = '$off_commandant', `off_amiral` = '$off_amiral', `off_ingenieur` = '$off_ingenieur', `off_geologue` = '$off_geologue', `off_technocrate` = '$off_technocrate'" );
+
+            //Uni Speed
+            $unispeed = $uni_details['uni_speed'];
+            $db->sql_query("UPDATE " . TABLE_CONFIG. " SET `config_value` = '$unispeed' WHERE `config_name` = 'speed_uni' " );
+            generate_config_cache();
+
+            //boosters
             if (isset($pub_boostExt)) {
                 $boosters = update_boosters($pub_boostExt, $ogame_timestamp); /*Merge des différents boosters*/
                 $boosters = booster_encode($boosters); /*Conversion de l'array boosters en string*/
             } else
                 $boosters = booster_encodev(0, 0, 0, 0, 0, 0, 0, 0); /* si aucun booster détecté*/
 
+            //Empire
+            $home = home_check($planet_type, $coords);
             if ($home[0] == 'full') {
-                $io->set(array(
-                    'type' => 'home full'
-                ));
+                $io->set(array('type' => 'home full'));
                 $io->status(0);
             } else {
                 if ($home[0] == 'update') {
