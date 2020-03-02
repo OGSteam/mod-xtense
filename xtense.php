@@ -192,10 +192,10 @@ switch ($page_type) {
                 $set = '';
                 foreach ($database['buildings'] as $code) {
                     if (isset(${'pub_' . $code}))
-                        $set .= ', ' . $code . ' = ' . ${'pub_' . $code};//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+                        $set .= ", `$code` = " . ${'pub_' . $code};//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
                 }
 
-                $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET planet_name = "' . $planet_name . '"' . $set . ' WHERE planet_id = ' . $home['id'] . ' AND user_id = ' . $user_data['user_id']);
+                $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '"' . $set . ' WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
 
                 $io->set(array(
                     'type' => 'home updated',
@@ -662,6 +662,9 @@ switch ($page_type) {
                         //$query[] = '(' . $timestamp . ', ' . $i . ', "' . quote($data['player_name']) . '", "' . quote($data['ally_tag']) . '", ' . ((int)$data['points']) . ', ' . $user_data['user_id'] . ')';
                         $query[] = "({$timestamp}, {$i}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']} )";
                     }
+
+
+
                     $total++;
                     $datas[] = $data;
                 }
