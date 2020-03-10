@@ -33,6 +33,7 @@ $lang['MOD_XTENSE_CONNECTION_DETAILS'] = "Here are informations that  you need t
 $lang['MOD_XTENSE_URL_PLUGIN'] = "Link your server OGSpy";
 $lang['MOD_XTENSE_USER'] = "OGSpy account";
 $lang['MOD_XTENSE_PASSWORD'] = "Password / Personnal Token";
+$lang['MOD_XTENSE_RENEW_TOKEN'] = "Create / Renew Personal Access Key (Token)";
 $lang['MOD_XTENSE_UPDATE_DONE'] = "Update done";
 $lang['MOD_XTENSE_REPAIR_DONE'] = "Personal space has been properly repaired";
 $lang['MOD_XTENSE_CALLBACK_SUMMARY'] = "The calls have been installed.";

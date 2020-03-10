@@ -31,6 +31,7 @@ $lang['MOD_XTENSE_CONNECTION_DETAILS'] = "Voici les informations que vous devez 
 $lang['MOD_XTENSE_URL_PLUGIN'] = "Link del vostro server OGSpy";
 $lang['MOD_XTENSE_USER'] = "Account OGSpy";
 $lang['MOD_XTENSE_PASSWORD'] = "Mot de passe/ Token Personnel";
+$lang['MOD_XTENSE_RENEW_TOKEN'] = "Créer/Renouveller la clé d'accès personnelle (Token)";
 $lang['MOD_XTENSE_UPDATE_DONE'] = "Aggiornamento eseguito";
 $lang['MOD_XTENSE_REPAIR_DONE'] = "La home page è stata correttamente riparata";
 $lang['MOD_XTENSE_CALLBACK_SUMMARY'] = "Le chiamate sono state installate";
