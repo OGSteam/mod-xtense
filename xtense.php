@@ -107,7 +107,7 @@ switch ($page_type) {
             $coords = Check::coords($pub_coords);
             $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $ogame_timestamp = $uni_details['uni_time'];
-            $player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : $player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : $player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none' ;
+            ($player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : ($player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : ($player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none'))) ;
             $off_commandant = $player_details['player_officer_commander'];
             $off_amiral = $player_details['player_officer_amiral'];
             $off_ingenieur = $player_details['player_officer_engineer'];
