@@ -107,7 +107,7 @@ switch ($page_type) {
             $coords = Check::coords($pub_coords);
             $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $ogame_timestamp = $uni_details['uni_time'];
-            $player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : $player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : $player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none' ;
+            ($player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : ($player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : ($player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none'))) ;
             $off_commandant = $player_details['player_officer_commander'];
             $off_amiral = $player_details['player_officer_amiral'];
             $off_ingenieur = $player_details['player_officer_engineer'];
@@ -203,13 +203,13 @@ switch ($page_type) {
                     'planet' => $coords
                 ));
             } else {
-                $set = '';
+                $set = "";
 
                 foreach ($database['buildings'] as $code) {
-                    $set .= ', ' . (isset(${'pub_' . $code}) ? (int)${'pub_' . $code} : 0);
+                    $set .= ", " . (isset(${'pub_' . $code}) ? (int)${'pub_' . $code} : 0);
                 }
 
-                $db->sql_query('INSERT INTO ' . TABLE_USER_BUILDING . ' (user_id, planet_id, coordinates, planet_name, ' . implode(',', $database['buildings']) . ') VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . ', "' . $coords . '", "' . $planet_name . '"' . $set . ')');
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . " (`user_id`, `planet_id`, `coordinates`, `planet_name`, `" . implode('`,`', $database['buildings']) . "`) VALUES (" . $user_data['user_id'] . ", " . $home['id'] . ", '$coords', '$planet_name' {$set} )");
 
                 $io->set(array(
                     'type' => 'home updated',
