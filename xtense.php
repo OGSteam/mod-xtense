@@ -42,14 +42,14 @@ if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) $timestamp = mktime(0, 0
 if ($time > mktime(8, 0, 0) && $time < mktime(16, 0, 0)) $timestamp = mktime(8, 0, 0);
 if ($time > mktime(16, 0, 0) && $time < (mktime(0, 0, 0) + 60 * 60 * 24)) $timestamp = mktime(16, 0, 0);
 
-if (isset($pub_toolbar_version, $pub_toolbar_type, $pub_mod_min_version, $pub_user, $pub_password, $pub_univers) == false) die("hack");
+if (isset($pub_toolbar_version, $pub_toolbar_type, $pub_mod_min_version, $pub_password, $pub_univers) == false) die("hack");
 
 if (isset($pub_type)) {
     $page_type = filter_var($pub_type, FILTER_SANITIZE_STRING);
 } else die("hack");
 
 xtense_check_before_auth($pub_toolbar_version, $pub_mod_min_version, $active,$pub_univers);
-$user_data = xtense_check_auth($pub_user, $pub_password);
+$user_data = xtense_check_auth( $pub_password);
 $user_data = xtense_check_user_rights($user_data);
 
 $call = new CallbackHandler();
