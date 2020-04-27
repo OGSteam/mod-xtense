@@ -87,7 +87,7 @@ function xtense_check_auth ($token){
                 $io->send(0, true);
             }
 
-            $user_data['grant'] = array('system' => 0, 'ranking' => 0, 'empire' => 0, 'messages' => 0);
+            $user_data['grant'] = array('system' => 0, 'ranking' => 0, 'empire' => 0);
             return $user_data;
         }
 
