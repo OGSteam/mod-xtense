@@ -16,7 +16,6 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT `root`, `active` FROM " . TABLE_MOD . " WHERE `action` = 'xtense'"));
 
-
 $origin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_URL);
 
 header("Access-Control-Allow-Origin: {$origin} ");
@@ -42,29 +41,40 @@ if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) $timestamp = mktime(0, 0
 if ($time > mktime(8, 0, 0) && $time < mktime(16, 0, 0)) $timestamp = mktime(8, 0, 0);
 if ($time > mktime(16, 0, 0) && $time < (mktime(0, 0, 0) + 60 * 60 * 24)) $timestamp = mktime(16, 0, 0);
 
-if (isset($pub_toolbar_version, $pub_toolbar_type, $pub_mod_min_version, $pub_password, $pub_univers) == false) die("hack");
+$json = file_get_contents('php://input');
+$received_content = json_decode($json, true);
+//print_r($received_content);
+$args = array(
+    'type'   => FILTER_SANITIZE_ENCODED,
+    'toolbar_version'   => FILTER_SANITIZE_ENCODED,
+    'toolbar_type'   => FILTER_SANITIZE_ENCODED,
+    'mod_min_version'   => FILTER_SANITIZE_ENCODED,
+    'univers'   => FILTER_VALIDATE_URL,
+    'password' => FILTER_SANITIZE_STRING,
+    'data' => FILTER_UNSAFE_RAW
+);
 
-if (isset($pub_type)) {
-    $page_type = filter_var($pub_type, FILTER_SANITIZE_STRING);
-} else die("hack");
+$received_game_data = filter_var_array($received_content, $args);
+//print_r($received_game_data);
 
-xtense_check_before_auth($pub_toolbar_version, $pub_mod_min_version, $active,$pub_univers);
-$user_data = xtense_check_auth( $pub_password);
+if (!isset($received_game_data['type']))  die("hack");
+
+xtense_check_before_auth($received_game_data['toolbar_version'], $received_game_data['mod_min_version'], $active, $received_game_data['univers']);
+$user_data = xtense_check_auth( $received_game_data['password']);
 $user_data = xtense_check_user_rights($user_data);
 
 $call = new CallbackHandler();
 
-//nombre de messages
-$io->set(array('new_messages' => 0));
-
 // Xtense : Ajout de la version et du type de barre utilisée par l'utilisateur
 $current_user_id =  $user_data['user_id'];
-$db->sql_query("UPDATE " . TABLE_USER . " SET `xtense_version` = '$pub_toolbar_version', `xtense_type` = '$pub_toolbar_type' WHERE `user_id` =  $current_user_id" );
-$toolbar_info = $pub_toolbar_type . " V" . $pub_toolbar_version;
+$db->sql_query("UPDATE " . TABLE_USER . " SET `xtense_version` = '" . $received_game_data['toolbar_version'] . "', `xtense_type` = '" . $received_game_data['toolbar_type'] . "' WHERE `user_id` =  $current_user_id" );
+$toolbar_info = $received_game_data['toolbar_type'] . " V" . $received_game_data['toolbar_version'];
 
-switch ($page_type) {
+// Récupération des données de jeu
+$data = json_decode($received_game_data['data'], true);
+
+switch ($received_game_data['type']) {
     case 'overview': {//PAGE OVERVIEW
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type, $pub_fields, $pub_temperature_min, $pub_temperature_max, $pub_ressources, $pub_playerdetails, $pub_unidetails) == false) die("hack");
         if (!$user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -72,7 +82,8 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
-            $player_details = filter_var_array($pub_playerdetails, [
+
+            $player_details = filter_var_array($data['playerdetails'], [
                 'player_name'   => FILTER_SANITIZE_STRING,
                 'player_id'   => FILTER_SANITIZE_STRING,
                 'playerclass_explorer'   => FILTER_SANITIZE_STRING,
@@ -85,7 +96,7 @@ switch ($page_type) {
                 'player_officer_technocrate'   => FILTER_VALIDATE_INT
             ]);
 
-            $uni_details = filter_var_array($pub_unidetails, [
+            $uni_details = filter_var_array($data['unidetails'], [
                 'uni_version'   => FILTER_SANITIZE_STRING,
                 'uni_url'   => FILTER_SANITIZE_STRING,
                 'uni_lang'   => FILTER_SANITIZE_STRING,
@@ -98,14 +109,14 @@ switch ($page_type) {
             ]
             );
 
-            $planet_name = filter_var($pub_planet_name, FILTER_SANITIZE_STRING);
-            $ressources = filter_var_array($pub_ressources, FILTER_VALIDATE_INT);
-            $temperature_min = filter_var($pub_temperature_min, FILTER_VALIDATE_INT);
-            $temperature_max = filter_var($pub_temperature_max, FILTER_VALIDATE_INT);
-            $fields = filter_var($pub_fields, FILTER_VALIDATE_INT);
+            $planet_name = filter_var($data['planet_name'], FILTER_SANITIZE_STRING);
+            $ressources = filter_var_array($data['ressources'], FILTER_VALIDATE_INT);
+            $temperature_min = filter_var($data['temperature_min'], FILTER_VALIDATE_INT);
+            $temperature_max = filter_var($data['temperature_max'], FILTER_VALIDATE_INT);
+            $fields = filter_var($data['fields'], FILTER_VALIDATE_INT);
 
-            $coords = Check::coords($pub_coords);
-            $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+            $coords = Check::coords($data['coords']);
+            $planet_type = ((int)$data['planet_type'] == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $ogame_timestamp = $uni_details['uni_time'];
             ($player_details['playerclass_miner'] == 1 ? $userclass = 'COL' : ($player_details['playerclass_warrior'] == 1 ? $userclass = 'GEN' : ($player_details['playerclass_explorer'] == 1 ? $userclass = 'EXP' : $userclass = 'none'))) ;
             $off_commandant = $player_details['player_officer_commander'];
@@ -123,8 +134,8 @@ switch ($page_type) {
             generate_config_cache();
 
             //boosters
-            if (isset($pub_boostExt)) {
-                $boosters = update_boosters($pub_boostExt, $ogame_timestamp); /*Merge des différents boosters*/
+            if (isset($data['boostExt'])) {
+                $boosters = update_boosters($data['boostExt'], $ogame_timestamp); /*Merge des différents boosters*/
                 $boosters = booster_encode($boosters); /*Conversion de l'array boosters en string*/
             } else
                 $boosters = booster_encodev(0, 0, 0, 0, 0, 0, 0, 0); /* si aucun booster détecté*/
@@ -165,7 +176,6 @@ switch ($page_type) {
         break;
 
     case 'buildings': //PAGE BATIMENTS
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
@@ -174,13 +184,13 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
-            $pub_coords = Check::coords($pub_coords);
-            $planet_name = filter_var($pub_planet_name, FILTER_SANITIZE_STRING);
+            $coords = filter_var($data['coords'], FILTER_SANITIZE_STRING);
+            $planet_name = filter_var($data['planet_name'], FILTER_SANITIZE_STRING);
+            $planet_type = filter_var($data['planet_type'], FILTER_SANITIZE_STRING);
+            if (isset($coords, $planet_name, $planet_type) == false) die("hack");
 
-            $coords = $pub_coords;
-            $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-            $planet_name = $pub_planet_name;
-
+            $coords = Check::coords($coords);
+            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $home = home_check($planet_type, $coords);
 
             if ($home[0] == 'full') {
@@ -191,8 +201,8 @@ switch ($page_type) {
             } elseif ($home[0] == 'update') {
                 $set = '';
                 foreach ($database['buildings'] as $code) {
-                    if (isset(${'pub_' . $code}))
-                        $set .= ", `$code` = " . ${'pub_' . $code};//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+                    if (isset($data[$code]))
+                        $set .= ", `$code` = " . $data[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
                 }
 
                 $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '"' . $set . ' WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
@@ -206,7 +216,7 @@ switch ($page_type) {
                 $set = "";
 
                 foreach ($database['buildings'] as $code) {
-                    $set .= ", " . (isset(${'pub_' . $code}) ? (int)${'pub_' . $code} : 0);
+                    $set .= ", " . (isset($data[$code]) ? (int)$data[$code] : 0);
                 }
 
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . " (`user_id`, `planet_id`, `coordinates`, `planet_name`, `" . implode('`,`', $database['buildings']) . "`) VALUES (" . $user_data['user_id'] . ", " . $home['id'] . ", '$coords', '$planet_name' {$set} )");
@@ -220,8 +230,8 @@ switch ($page_type) {
 
             $buildings = array();
             foreach ($database['buildings'] as $code) {
-                if (isset(${'pub_' . $code})) {
-                    $buildings[$code] = (int)${'pub_' . $code};
+                if (isset($data[$code])) {
+                    $buildings[$code] = (int)$data[$code];
                 }
             }
 
@@ -237,7 +247,7 @@ switch ($page_type) {
         break;
 
     case 'defense': //PAGE DEFENSE
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
+
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
@@ -246,12 +256,15 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
-            $pub_coords = Check::coords($pub_coords);
-            $planet_name = filter_var($pub_planet_name, FILTER_SANITIZE_STRING);
+            $coords = filter_var($data['coords'], FILTER_SANITIZE_STRING);
+            $planet_name = filter_var($data['planet_name'], FILTER_SANITIZE_STRING);
+            $planet_type = filter_var($data['planet_type'], FILTER_SANITIZE_STRING);
 
-            $coords = $pub_coords;
-            $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-            $planet_name = $pub_planet_name;
+            //Stop si donnée manquante
+            if (isset($coords, $planet_name, $planet_type) == false) die("hack");
+
+            $coords = Check::coords($coords);
+            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
 
             $home = home_check($planet_type, $coords);
 
@@ -264,14 +277,14 @@ switch ($page_type) {
                 $fields = '';
                 $values = '';
                 foreach ($database['defense'] as $code) {
-                    if (isset(${'pub_' . $code})) {
+                    if (isset($data[$code])) {
                         $fields .= ', ' . $code;
-                        $values .= ', ' . (int)${'pub_' . $code};
+                        $values .= ', ' . (int)$data[$code];
                     }
                 }
 
-                $db->sql_query('REPLACE INTO ' . TABLE_USER_DEFENCE . ' (user_id, planet_id' . $fields . ') VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . $values . ')');
-                $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET planet_name = "' . $planet_name . '" WHERE user_id = ' . $user_data['user_id'] . ' AND planet_id = ' . $home['id']);
+                $db->sql_query("REPLACE INTO " . TABLE_USER_DEFENCE . " (`user_id`, `planet_id` " . $fields . ") VALUES (" . $user_data['user_id'] . ", " . $home['id'] . $values . ")");
+                $db->sql_query("UPDATE " . TABLE_USER_BUILDING . " SET `planet_name` = '$planet_name' WHERE `user_id` = " . $user_data['user_id'] . " AND `planet_id` = " . $home['id']);
 
                 $io->set(array(
                     'type' => 'home updated',
@@ -283,14 +296,14 @@ switch ($page_type) {
                 $set = '';
 
                 foreach ($database['defense'] as $code) {
-                    if (isset(${'pub_' . $code})) {
+                    if (isset($data[$code])) {
                         $fields .= ', ' . $code;
-                        $set .= ', ' . (int)${'pub_' . $code};
+                        $set .= ', ' . (int)$data[$code];
                     }
                 }
 
-                $db->sql_query('INSERT INTO ' . TABLE_USER_BUILDING . ' (user_id, planet_id, coordinates, planet_name) VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . ', "' . $coords . '", "' . $planet_name . '")');
-                $db->sql_query('INSERT INTO ' . TABLE_USER_DEFENCE . ' (user_id, planet_id' . $fields . ') VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . $set . ')');
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . " (`user_id`, `planet_id`, `coordinates`, `planet_name`) VALUES (" . $user_data['user_id'] . ", " . $home['id'] . ", '$coords', '$planet_name')");
+                $db->sql_query("INSERT INTO " . TABLE_USER_DEFENCE . " (`user_id`, `planet_id` " . $fields . ") VALUES (" . $user_data['user_id'] . ", " . $home['id'] . $set . ")");
 
                 $io->set(array(
                     'type' => 'home updated',
@@ -301,8 +314,8 @@ switch ($page_type) {
 
             $defenses = array();
             foreach ($database['defense'] as $code) {
-                if (isset(${'pub_' . $code})) {
-                    $defenses[$code] = (int)${'pub_' . $code};
+                if (isset($data[$code])) {
+                    $defenses[$code] = (int)$data[$code];
                 }
             }
 
@@ -318,9 +331,6 @@ switch ($page_type) {
         break;
 
     case 'researchs': //PAGE RECHERCHE
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
-
-        $coords = $pub_coords;
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
@@ -329,12 +339,20 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
+            $coords = filter_var($data['coords'], FILTER_SANITIZE_STRING);
+            $planet_name = filter_var($data['planet_name'], FILTER_SANITIZE_STRING);
+            $planet_type = filter_var($data['planet_type'], FILTER_SANITIZE_STRING);
 
-            if ($db->sql_numrows($db->sql_query('SELECT user_id FROM ' . TABLE_USER_TECHNOLOGY . ' WHERE user_id = ' . $user_data['user_id']))) {
+            if (isset($coords, $planet_name, $planet_type) == false) die("hack");
+            $coords = Check::coords($coords);
+            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+
+
+            if ($db->sql_numrows($db->sql_query('SELECT `user_id` FROM ' . TABLE_USER_TECHNOLOGY . ' WHERE `user_id` = ' . $user_data['user_id']))) {
                 $set = array();
                 foreach ($database['labo'] as $code) {
-                    if (isset(${'pub_' . $code})) {
-                        $set[] = $code . ' = ' . (int)${'pub_' . $code};
+                    if (isset($data[$code])) {
+                        $set[] = $code . ' = ' . (int)$data[$code];
                     }
                 }
 
@@ -345,14 +363,14 @@ switch ($page_type) {
                 $set = '';
 
                 foreach ($database['labo'] as $code) {
-                    if (isset(${'pub_' . $code})) {
+                    if (isset($data[$code])) {
                         $fields .= ', ' . $code;
-                        $set .= ', "' . (int)${'pub_' . $code} . '"';
+                        $set .= ', "' . (int)$data[$code] . '"';
                     }
                 }
 
                 if (!empty($fields))
-                    $db->sql_query('INSERT INTO ' . TABLE_USER_TECHNOLOGY . ' (user_id' . $fields . ') VALUES (' . $user_data['user_id'] . $set . ')');
+                    $db->sql_query('INSERT INTO ' . TABLE_USER_TECHNOLOGY . ' (`user_id`' . $fields . ') VALUES (' . $user_data['user_id'] . $set . ')');
             }
 
             $io->set(array(
@@ -363,8 +381,8 @@ switch ($page_type) {
 
             $research = array();
             foreach ($database['labo'] as $code) {
-                if (isset(${'pub_' . $code})) {
-                    $research[$code] = (int)${'pub_' . $code};
+                if (isset($data[$code])) {
+                    $research[$code] = (int)$data[$code];
                 }
             }
 
@@ -377,7 +395,6 @@ switch ($page_type) {
         break;
 
     case 'fleet': //PAGE FLOTTE
-        if (isset($pub_coords, $pub_planet_name, $pub_planet_type) == false) die("hack");
 
         if (!$user_data['grant']['empire']) {
             $io->set(array(
@@ -386,14 +403,13 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
-            $pub_coords = Check::coords($pub_coords);
-            $planet_name = filter_var($pub_planet_name, FILTER_SANITIZE_STRING);
+            $coords = filter_var($data['coords'], FILTER_SANITIZE_STRING);
+            $planet_name = filter_var($data['planet_name'], FILTER_SANITIZE_STRING);
+            $planet_type = filter_var($data['planet_type'], FILTER_SANITIZE_STRING);
 
-            $coords = $pub_coords;
-            $planet_type = ((int)$pub_planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-            $planet_name = $pub_planet_name;
-            if (isset($pub_SAT)) $ss = $pub_SAT;
-            if (!isset($ss)) $ss = "";
+            if (isset($coords, $planet_name, $planet_type) == false) die("hack");
+            $coords = Check::coords($coords);
+            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
 
             $home = home_check($planet_type, $coords);
 
@@ -403,18 +419,14 @@ switch ($page_type) {
                 ));
                 $io->status(0);
             } elseif ($home[0] == 'update') {
-                $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET planet_name = "' . $planet_name . '" WHERE user_id = ' . $user_data['user_id'] . ' AND planet_id = ' . $home['id']);
-
-                if (isset($pub_SAT)) $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET planet_name = "' . $planet_name . '", Sat = \'' . $ss . '\' WHERE planet_id = ' . $home['id'] . ' AND user_id = ' . $user_data['user_id']);
-
+                // Flotte à mettre à jour si table disponible
                 $io->set(array(
                     'type' => 'home updated',
                     'page' => 'fleet',
                     'planet' => $coords
                 ));
             } else {
-                if (isset($pub_SAT)) $db->sql_query('INSERT INTO ' . TABLE_USER_BUILDING . ' (user_id, planet_id, coordinates, planet_name, Sat) VALUES (' . $user_data['user_id'] . ', ' . $home['id'] . ', "' . $coords . '", "' . $planet_name . '", ' . $ss . ')');
-
+                // Flotte à mettre à insérer si table disponible
                 $io->set(array(
                     'type' => 'home updated',
                     'page' => 'fleet',
@@ -424,8 +436,8 @@ switch ($page_type) {
 
             $fleet = array();
             foreach ($database['fleet'] as $code) {
-                if (isset(${'pub_' . $code})) {
-                    $fleet[$code] = (int)${'pub_' . $code};
+                if (isset($data[$code])) {
+                    $fleet[$code] = (int)$data[$code];
                 }
             }
 
@@ -441,8 +453,6 @@ switch ($page_type) {
         break;
 
     case 'system': //PAGE SYSTEME SOLAIRE
-        if (isset($pub_galaxy, $pub_system) == false) die("hack");
-
         if (!$user_data['grant']['system']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -450,24 +460,28 @@ switch ($page_type) {
             ));
             $io->status(0);
         } else {
+            $galaxy = filter_var($data['galaxy'], FILTER_SANITIZE_NUMBER_INT);
+            $system = filter_var($data['system'], FILTER_SANITIZE_NUMBER_INT);
+            if (isset($galaxy, $system, $rows) == false) die("hack");
 
-            if ($pub_galaxy > $server_config['num_of_galaxies'] || $pub_system > $server_config['num_of_systems']) ;
+            if ($galaxy > $server_config['num_of_galaxies'] || $system > $server_config['num_of_systems'])
             {
-                $galaxy = (int)$pub_galaxy;
-                $system = (int)$pub_system;
-                $rows = (isset($pub_row) ? $pub_row : array());
                 $data = array();
                 $delete = array();
                 $update = array();
 
-                $check = $db->sql_query('SELECT row FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $galaxy . ' AND system = ' . $system . '');
+                $check = $db->sql_query("SELECT `row` FROM " . TABLE_UNIVERSE . " WHERE `galaxy` = $galaxy  AND system =  $system ");
                 while ($value = $db->sql_fetch_assoc($check))
                     $update[$value['row']] = true;
             }
+
+            $rows = $data['rows'];
+            //print_r($rows);
             // Recupération des données
             for ($i = 1; $i < 16; $i++) {
                 if (isset($rows[$i])) {
                     $line = $rows[$i];
+                    print_r($line);
                     // Filtrage des data
                     $line['player_name'] = filter_var($line['player_name'], FILTER_SANITIZE_STRING);
                     $line['planet_name'] = filter_var($line['planet_name'], FILTER_SANITIZE_STRING);
