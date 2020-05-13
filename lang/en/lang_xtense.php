@@ -31,7 +31,6 @@ $lang['MOD_XTENSE_CHROME_LINK'] = "Xtense Module in the Chrome Store";
 $lang['MOD_XTENSE_INSTALL_HELP'] = "Full Documentation to install and configure the module";
 $lang['MOD_XTENSE_CONNECTION_DETAILS'] = "Here are informations that  you need to enter in the web browser module Xtense";
 $lang['MOD_XTENSE_URL_PLUGIN'] = "Link your server OGSpy";
-$lang['MOD_XTENSE_USER'] = "OGSpy account";
 $lang['MOD_XTENSE_PASSWORD'] = "Password / Personnal Token";
 $lang['MOD_XTENSE_RENEW_TOKEN'] = "Create / Renew Personal Access Key (Token)";
 $lang['MOD_XTENSE_UPDATE_DONE'] = "Update done";
