@@ -137,8 +137,8 @@ switch ($received_game_data['type']) {
             generate_config_cache();
 
             //boosters
-            if (isset($data['boostExt'])) {
-                $boosters = update_boosters($data['boostExt'], $ogame_timestamp); /*Merge des différents boosters*/
+            if (isset($data['boosters'])) {
+                $boosters = update_boosters($data['boosters'], $ogame_timestamp); /*Merge des différents boosters*/
                 $boosters = booster_encode($boosters); /*Conversion de l'array boosters en string*/
             } else
                 $boosters = booster_encodev(0, 0, 0, 0, 0, 0, 0, 0); /* si aucun booster détecté*/
