@@ -201,7 +201,6 @@ $db->sql_close();
                 <input type="text" class="infos" id="plugin_url" name="plugin" value=""
                        onclick="this.select();" readonly/>
             </p>
-            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_USER']); ?></strong></label></p>
             <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
                 <input type="text" class="infos" id="plugin_password" name="password" value="<?php echo $my_user_token ?>"
