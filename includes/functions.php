@@ -87,15 +87,6 @@ function json_quote($str) {
 	return str_replace('"', '\\"', $str);
 }
 
-/**
- * Addslashes en fonction des magic_quotes
- *
- * @param string $str
- * @return string
- */
-function quote($str) {
-	return (MAGIC_QUOTES ? $str : addslashes($str));
-}
 
 /**
  * Verification de l'empire (Mise à jour, rajout, empire plein)
