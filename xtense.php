@@ -886,7 +886,7 @@ RocketLauncher': 401,
 
                         $attacker = $attackers[$fleetId];
                         $fleet = '';
-                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA', 'FOR','FAU', 'ECL') as $ship)
+                        foreach(array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA','FAU', 'ECL') as $ship)
                             $fleet .=  ", " . $attackerFleet[$ship];
 
                         $db->sql_query("INSERT INTO " . TABLE_ROUND_ATTACK . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`, 
