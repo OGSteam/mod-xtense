@@ -31,7 +31,7 @@ $database = array(
 	'buildings' => array('M', 'C', 'D', 'CES', 'CEF', 'UdR', 'UdN', 'CSp', 'SAT', 'HM', 'HC', 'HD', 'FOR', 'Lab', 'Ter','Dock', 'Silo', 'DdR', 'BaLu', 'Pha', 'PoSa'),
 	'labo' => array('Esp', 'Ordi', 'Armes', 'Bouclier', 'Protection', 'NRJ', 'Hyp', 'RC', 'RI', 'PH', 'Laser', 'Ions', 'Plasma', 'RRI', 'Graviton', 'Astrophysique'),
 	'defense' => array('LM', 'LLE', 'LLO', 'CG', 'LP', 'AI', 'PB', 'GB', 'MIC', 'MIP'),
-	'fleet' => array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA','FAU', 'ECL')
+	'fleet' => array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'FOR','TRA','FAU', 'ECL')
 );
 
 $callbackTypesNames = array(
