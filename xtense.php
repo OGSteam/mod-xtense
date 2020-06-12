@@ -1060,7 +1060,7 @@ RocketLauncher': 401,
                     }
                     $coords = $spy['coords'][0] . ':' . $spy['coords'][1] . ':' . $spy['coords'][2];
 
-                    $moon = ($line['isMoon'] > 0 ? 1 : 0);
+                    $moon = ($line['isMoon'] === 'true' ? 1 : 0);
                     $matches = array();
                     $data = array();
                     $values = $fields = '';
@@ -1084,7 +1084,7 @@ RocketLauncher': 401,
                             $assoc = $db->sql_fetch_assoc($query);
                             if ($assoc['last_update' . ($moon ? '_moon' : '')] < $spy['time']) {
                                 if ($moon)
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . ($spy['content']['Pha'] > 0 ? $spy['content']['Pha'] : 0) . ', gate = "' . ($spy['content']['PoSa'] > 0 ? 1 : 0) . '", last_update_moon = ' . $line['date'] . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . ($spy['content']['Pha'] > 0 ? $spy['content']['Pha'] : 0) . ', gate = "' . ($spy['content']['PoSa'] > 0 ? 1 : 0) . '", last_update_moon = ' . $date . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
                                 else//we do nothing if buildings are not in the report
                                     $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET name = "' . $spy['planet_name'] . '", last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
                             }
