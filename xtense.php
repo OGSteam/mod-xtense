@@ -1031,40 +1031,36 @@ RocketLauncher': 401,
 
                 case 'spy': //RAPPORT ESPIONNAGE
                 case 'spy_shared':
-                    if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
+                    if (isset($line['coords'], $line['content'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
 
-                    $line['coords'] = Check::coords($line['coords']);
+                    $coords = Check::coords($line['coords']);
+                    $content = filter_var_array($line['content'], FILTER_DEFAULT);
+                    $playerName = filter_var($line['playerName'], FILTER_SANITIZE_STRING);
+                    $planetName = filter_var($line['planetName'], FILTER_SANITIZE_STRING);
+                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
+                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT);
+                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT);
 
-                    $line['content'] = filter_var_array($line['content'], FILTER_SANITIZE_STRING);
-
-                    $line['playerName'] = filter_var($line['playerName'], FILTER_SANITIZE_STRING);
-                    $line['planetName'] = filter_var($line['planetName'], FILTER_SANITIZE_STRING);
-                    $line['proba'] = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
-                    $line['activity'] = filter_var($line['activity'], FILTER_SANITIZE_STRING);
-
-                    $proba = (int)$line['proba'];
                     $proba = $proba > 100 ? 100 : $proba;
-                    $activite = (int)$line['activity'];
                     $activite = $activite > 59 ? 59 : $activite;
                     $spy = array(
                         'proba' => $proba,
                         'activite' => $activite,
-                        'coords' => explode(':', $line['coords']),
-                        'content' => $line['content'],
-                        'time' => $line['date'],
-                        'player_name' => $line['playerName'],
-                        'planet_name' => $line['planetName']
+                        'coords' => explode(':', $coords),
+                        'content' => $content,
+                        'time' => $date,
+                        'player_name' => $playerName,
+                        'planet_name' => $planetName
                     );
                     $call->add($line['type'], $spy);
 
                     $spyDB = array();
-                    foreach ($database as $arr) {
-                        foreach ($arr as $v) $spyDB[$v] = 1;
+                    foreach ($databaseSpyId as $arr) {
+                        foreach ($arr as $index => $v) $spyDB[$index] = $v;
                     }
-
                     $coords = $spy['coords'][0] . ':' . $spy['coords'][1] . ':' . $spy['coords'][2];
 
-                    $moon = ($line['moon'] > 0 ? 1 : 0);
+                    $moon = ($line['isMoon'] > 0 ? 1 : 0);
                     $matches = array();
                     $data = array();
                     $values = $fields = '';
@@ -1072,10 +1068,13 @@ RocketLauncher': 401,
                     $fields .= 'planet_name, coordinates, sender_id, proba, activite, dateRE';
                     $values .= '"' . trim($spy['planet_name']) . '", "' . $coords . '", ' . $user_data['user_id'] . ', ' . $spy['proba'] . ', ' . $spy['activite'] . ', ' . $spy['time'] . ' ';
 
-                    foreach ($spy['content'] as $field => $value) {
+                    foreach ($spy['content'] as $code => $value) {
+                        if ($code === 701 || $code === 702) continue; // La table RE ne supporte pas les CDR dans le rapport
+                        $field = $spyDB[$code];
                         $fields .= ', `' . $field . '`';
                         $values .= ', ' . $value;
                     }
+                    log_('debug', "INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
                     $spy_time = $spy['time'];
                     $test = $db->sql_numrows($db->sql_query("SELECT `id_spy` FROM " . TABLE_PARSEDSPY . " WHERE `coordinates` = '$coords' AND `dateRE` = '$spy_time'"));
                     if (!$test) {
