@@ -1,6 +1,12 @@
 Présentation
 
-Xtense est l'interface permettant de récupérer les 
+Xtense est l'interface permettant de récupérer les données depuis le Jeu.
+
+## Module OGSpy 2.9.0 ##
+* Nouveau format de données pour échaganges avec OGSpy
+* Revue Import des RE
+* Beaucoup de contrôles de données ajoutés
+
 ## Module OGSpy 2.7.3 ##
 
 * Parsing des RC par Itori
