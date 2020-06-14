@@ -7,7 +7,7 @@
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
-list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT version, root FROM " . TABLE_MOD . " WHERE action = 'xtense'"));
+list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT `version`, `root` FROM " . TABLE_MOD . " WHERE `action` = 'xtense'"));
 
 //Language File
 if (!isset($ui_lang)) { // Checks the ui_lang value from parameters file
@@ -200,11 +200,8 @@ $db->sql_close();
             <p class="c">
                 <input type="text" class="infos" id="plugin_url" name="plugin" value=""
                        onclick="this.select();" readonly/>
-            </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_USER']); ?></strong></label></p>
-            <p class="c">
-                <input type="text" class="infos" id="plugin_user" name="name" value="<?php echo $user_data["user_name"]; ?>"
-                       onclick="this.select();" readonly/>
-            </p>            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
+            </p>
+            <p><label for="plugin"><strong><?php echo($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
             <p class="c">
                 <input type="text" class="infos" id="plugin_password" name="password" value="<?php echo $my_user_token ?>"
                        onclick="this.select();" readonly/>
