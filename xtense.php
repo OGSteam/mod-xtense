@@ -244,8 +244,6 @@ switch ($received_game_data['type']) {
         break;
 
     case 'defense': //PAGE DEFENSE
-
-
         if (!$user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -257,7 +255,7 @@ switch ($received_game_data['type']) {
             $planet_name = filter_var($data['planetName'], FILTER_SANITIZE_STRING);
             $planet_type = filter_var($data['planetType'], FILTER_SANITIZE_STRING);
 
-            //$defense = $data['buildings'];
+            $defense = $data['defense'];
             //Stop si donnée manquante
             if (isset($coords, $planet_name, $planet_type) == false) die("hack");
 
@@ -275,9 +273,9 @@ switch ($received_game_data['type']) {
                 $fields = '';
                 $values = '';
                 foreach ($database['defense'] as $code) {
-                    if (isset($data[$code])) {
+                    if (isset($defense[$code])) {
                         $fields .= ', ' . $code;
-                        $values .= ', ' . (int)$data[$code];
+                        $values .= ', ' . (int)$defense[$code];;
                     }
                 }
 
@@ -294,9 +292,9 @@ switch ($received_game_data['type']) {
                 $set = '';
 
                 foreach ($database['defense'] as $code) {
-                    if (isset($data[$code])) {
+                    if (isset($defense[$code])) {
                         $fields .= ', ' . $code;
-                        $set .= ', ' . (int)$data[$code];
+                        $set .= ', ' . (int)$defense[$code];
                     }
                 }
 
@@ -312,8 +310,8 @@ switch ($received_game_data['type']) {
 
             $defenses = array();
             foreach ($database['defense'] as $code) {
-                if (isset($data[$code])) {
-                    $defenses[$code] = (int)$data[$code];
+                if (isset($defense[$code])) {
+                    $defenses[$code] = (int)$defense[$code];
                 }
             }
 
