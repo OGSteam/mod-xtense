@@ -80,7 +80,7 @@ if ($is_ok == true)
 			('xtense_log_messages', '1'),
 			('xtense_log_reverse', '0'),
 			('xtense_strict_admin', '0'),
-			('xtense_universe', 'http://sxx-fr.ogame.gameforge.com'),
+			('xtense_universe', 'https://sxx-fr.ogame.gameforge.com'),
 			('xtense_spy_autodelete', '1')
 		");
 		generate_config_cache();
