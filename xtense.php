@@ -1031,14 +1031,14 @@ RocketLauncher': 401,
                 case 'spy_shared':
                     if (isset($line['coords'], $line['content'], $line['playerName'], $line['planetName'], $line['proba'], $line['activity']) == false) die("hack");
 
-                    $line['coords'] = Check::coords($line['coords']);
-
-                    $line['content'] = filter_var_array($line['content'], FILTER_SANITIZE_STRING);
-
-                    $line['playerName'] = filter_var($line['playerName'], FILTER_SANITIZE_STRING);
-                    $line['planetName'] = filter_var($line['planetName'], FILTER_SANITIZE_STRING);
-                    $line['proba'] = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
-                    $line['activity'] = filter_var($line['activity'], FILTER_SANITIZE_STRING);
+                    $coords = Check::coords($line['coords']);
+                    $content = filter_var_array($line['content'], FILTER_DEFAULT);
+                    $playerName = filter_var($line['playerName'], FILTER_SANITIZE_STRING);
+                    $planetName = filter_var($line['planetName'], FILTER_SANITIZE_STRING);
+                    $moon = filter_var($line['isMoon'], FILTER_SANITIZE_STRING);
+                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
+                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT);
+                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT);
 
                     $proba = (int)$line['proba'];
                     $proba = $proba > 100 ? 100 : $proba;
@@ -1061,8 +1061,6 @@ RocketLauncher': 401,
                     }
 
                     $coords = $spy['coords'][0] . ':' . $spy['coords'][1] . ':' . $spy['coords'][2];
-
-                    $moon = ($line['moon'] > 0 ? 1 : 0);
                     $matches = array();
                     $data = array();
                     $values = $fields = '';
@@ -1079,13 +1077,18 @@ RocketLauncher': 401,
                     if (!$test) {
                         $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
                         $query = $db->sql_query('SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
-                        if ($db->sql_numrows($query)) {
+                        //log_('debug', 'SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                        if ($db->sql_numrows($query) > 0) {
                             $assoc = $db->sql_fetch_assoc($query);
-                            if ($assoc['last_update' . ($moon ? '_moon' : '')] < $spy['time']) {
-                                if ($moon)
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . ($spy['content']['Pha'] > 0 ? $spy['content']['Pha'] : 0) . ', gate = "' . ($spy['content']['PoSa'] > 0 ? 1 : 0) . '", last_update_moon = ' . $line['date'] . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
-                                else//we do nothing if buildings are not in the report
+                            if ($assoc['last_update' . ($moon ? '_moon' : '')] < $spy_time) {
+                                if ($moon) {
+                                    (isset($spy['content'][42]) ? $phalanx = $spy['content'][42] : $phalanx = 0);
+                                    (isset($spy['content'][43]) ? $gate = $spy['content'][43] : $gate = 0);
+                                    log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . $phalanx . ', gate = "' . $gate . '", last_update_moon = ' . $date . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                                } else {//we do nothing if buildings are not in the report
                                     $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET name = "' . $spy['planet_name'] . '", last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                                }
                             }
                         }
                         $db->sql_query('UPDATE ' . TABLE_USER . ' SET spy_added_ogs = spy_added_ogs + 1 WHERE user_id = ' . $user_data['user_id']);
