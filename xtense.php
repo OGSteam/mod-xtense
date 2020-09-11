@@ -1071,7 +1071,7 @@ RocketLauncher': 401,
                         $fields .= ', `' . $field . '`';
                         $values .= ', ' . $value;
                     }
-                    log_('debug', "INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
+                    //log_('debug', "INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
                     $spy_time = $spy['time'];
                     $test = $db->sql_numrows($db->sql_query("SELECT `id_spy` FROM " . TABLE_PARSEDSPY . " WHERE `coordinates` = '$coords' AND `dateRE` = '$spy_time'"));
                     if (!$test) {
@@ -1084,7 +1084,7 @@ RocketLauncher': 401,
                                 if ($moon) {
                                     (isset($spy['content'][42]) ? $phalanx = $spy['content'][42] : $phalanx = 0);
                                     (isset($spy['content'][43]) ? $gate = $spy['content'][43] : $gate = 0);
-                                    log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
+                                    //log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
                                     $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . $phalanx . ', gate = "' . $gate . '", last_update_moon = ' . $date . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
                                 } else {//we do nothing if buildings are not in the report
                                     $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET name = "' . $spy['planet_name'] . '", last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
