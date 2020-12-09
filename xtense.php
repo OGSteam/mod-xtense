@@ -243,6 +243,74 @@ switch ($received_game_data['type']) {
         }
         break;
 
+    case 'resourceSettings':
+        if (!$user_data['grant']['empire']) {
+            $io->set(array(
+                'type' => 'plugin grant',
+                'access' => 'empire'
+            ));
+            $io->status(0);
+        } else {
+            $coords = filter_var($data['coords'], FILTER_SANITIZE_STRING);
+            $planet_name = filter_var($data['planetName'], FILTER_SANITIZE_STRING);
+            $planet_type = filter_var($data['planetType'], FILTER_SANITIZE_STRING);
+            if (isset($coords, $planet_name, $planet_type) == false) die("hack");
+            $resourceSettings = $data['resourceSettings'];
+
+            $coords = Check::coords($coords);
+            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+            $home = home_check($planet_type, $coords);
+
+            //print_r($resourceSettings);
+
+            if ($home[0] == 'full') {
+                $io->set(array(
+                    'type' => 'home full'
+                ));
+                $io->status(0);
+            } elseif ($home[0] == 'update') {
+                $set = '';
+                foreach ($database['ressources_p'] as $code) {
+                    if (isset($resourceSettings[$code]))
+                        $set .= ", `$code` = " . $resourceSettings[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+                }
+
+                $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '"' . $set . ' WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
+
+                $io->set(array(
+                    'type' => 'home updated',
+                    'page' => 'buildings',
+                    'planet' => $coords
+                ));
+            }else {
+                    $set = "";
+
+                    foreach ($database['ressources_p'] as $code) {
+                        $set .= ", " . (isset($resourceSettings[$code]) ? (int)$resourceSettings[$code] : 0);
+                    }
+
+                    $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . " (`user_id`, `planet_id`, `coordinates`, `planet_name`, `" . implode('`,`', $database['ressources_p']) . "`) VALUES (" . $user_data['user_id'] . ", " . $home['id'] . ", '$coords', '$planet_name' {$set} )");
+
+                    $io->set(array(
+                        'type' => 'home updated',
+                        'page' => 'buildings',
+                        'planet' => $coords
+                    ));
+                }
+
+                // Callback to be enabled ?
+                // $call->add('buildings', array(
+                //     'coords' => explode(':', $coords),
+                //     'planet_type' => $planet_type,
+                //     'planet_name' => $planet_name,
+                //     'buildings' => $resourceSetting
+                // ));
+
+                add_log('buildings', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
+            }
+
+        break;
+
     case 'defense': //PAGE DEFENSE
         if (!$user_data['grant']['empire']) {
             $io->set(array(
@@ -937,9 +1005,6 @@ RocketLauncher': 401,
         break;
 
     case 'ally_list': //PAGE ALLIANCE
-
-
-
         if (!$user_data['grant']['ranking']) {
             $io->set(array(
                 'type' => 'plugin grant',
