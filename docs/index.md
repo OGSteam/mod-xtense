@@ -39,6 +39,6 @@ Pour lier les deux modules de Xtense (Module OGSpy et Module Navigateur), vous a
 
 Nous pouvons répondre à toutes vos questions sur le forum de l'OGSteam.
 
-[Forum]: https://www.ogsteam.fr/
+[Forum]: https://www.ogsteam.eu/
 
 

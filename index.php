@@ -192,7 +192,7 @@ $db->sql_close();
             <p><?php echo($lang['MOD_XTENSE_CHROME']); ?> : <a
                     href="https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr"
                     target="_blank"><?php echo($lang['MOD_XTENSE_CHROME_LINK']); ?></a></p>
-            <p><a href="https://wiki.ogsteam.fr/doku.php?id=fr:ogspy:documentationxtense"
+            <p><a href="https://wiki.ogsteam.eu/doku.php?id=fr:ogspy:documentationxtense"
                   target="_blank"><?php echo($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p><br>
 
             <h2><?php echo($lang['MOD_XTENSE_CONNECTION_DETAILS']); ?></h2>
@@ -453,7 +453,7 @@ $db->sql_close();
             <br/>
             <?php } elseif ($page == 'about') { ?>
                 <p><?php echo($lang['MOD_XTENSE_AUTHOR']); ?></a></p>
-                <p><?php echo($lang['MOD_XTENSE_FORUM']); ?> : <a href="https://forum.ogsteam.fr/"
+                <p><?php echo($lang['MOD_XTENSE_FORUM']); ?> : <a href="https://forum.ogsteam.eu/"
                                                                   onclick="return winOpen(this);"
                                                                   target="_blank"><?php echo($lang['MOD_XTENSE_TITLE']); ?></a>
                 </p>
@@ -469,7 +469,7 @@ $db->sql_close();
             <?php } ?>
     </div>
 </div>
-<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="https://forum.ogsteam.fr/"
+<div id="foot"><?php echo round($php_timing, 2); ?> ms - <a href="https://forum.ogsteam.eu/"
                                                             onclick="return winOpen(this);"
                                                             target="_blank"><?php echo($lang['MOD_XTENSE_SUPPPORT']); ?></a>
 </div>

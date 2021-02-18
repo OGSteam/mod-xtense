@@ -343,7 +343,7 @@ switch ($received_game_data['type']) {
                 foreach ($database['defense'] as $code) {
                     if (isset($defense[$code])) {
                         $fields .= ', ' . $code;
-                        $values .= ', ' . (int)$defense[$code];;
+                        $values .= ', ' . (int)$defense[$code];
                     }
                 }
 
@@ -802,7 +802,7 @@ switch ($received_game_data['type']) {
 
     case 'rc': //PAGE RC
     case 'rc_shared':
-    $json = filter_var($data['json'], FILTER_DEFAULT);
+    $json = filter_var($data['json']);
     $ogapilnk = filter_var($data['ogapilnk'], FILTER_SANITIZE_STRING);
 
 

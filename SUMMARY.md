@@ -5,4 +5,3 @@
 * [Callbacks](doc/dev-guide/xtense_callbacks.md)
 * [License](doc/about/license.md)
 
-
