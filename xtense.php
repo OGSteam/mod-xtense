@@ -206,7 +206,7 @@ switch ($received_game_data['type']) {
                 $set = '';
                 foreach ($database['buildings'] as $code) {
                     if (isset($buildings[$code]))
-                        $set .= ", `$code` = " . $buildings[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+                        $set .= ", `$code` = " . (int)$buildings[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
                 }
 
                 $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '"' . $set . ' WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
@@ -272,7 +272,7 @@ switch ($received_game_data['type']) {
                 $set = '';
                 foreach ($database['ressources_p'] as $code) {
                     if (isset($resourceSettings[$code]))
-                        $set .= ", `$code` = " . $resourceSettings[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
+                        $set .= ", `$code` = " . (int)$resourceSettings[$code];//avec la nouvelle version d'Ogame, on n'Ã©crase que si on a vraiment 0
                 }
 
                 $db->sql_query('UPDATE ' . TABLE_USER_BUILDING . ' SET `planet_name` = "' . $planet_name . '"' . $set . ' WHERE `planet_id` = ' . $home['id'] . ' AND `user_id` = ' . $user_data['user_id']);
