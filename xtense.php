@@ -644,14 +644,10 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-
             if ($type1 != ('player' || 'ally')) {
                 throw new UnexpectedValueException("Ranking: Unexpected Ranking type1");
             }
-            if ($type2 != ('points' || 'fleet' || 'research' || 'economy')) {
-
-            }
-            }
+        }
             //Vérification Offset
             if ((($offset - 1) % 100) != 0) {
                 throw new UnexpectedValueException("Ranking: Offset not found");
@@ -823,8 +819,8 @@ switch ($received_game_data['type']) {
 
             update_statistic('rankimport_ogs', 100);
             add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $timestamp, 'toolbar' => $toolbar_info));
-        }
-        break;
+        
+    break;
 
     case 'rc': //PAGE RC
     case 'rc_shared':
