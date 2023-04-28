@@ -17,7 +17,6 @@ define('TABLE_PARSEDSPYEN', $table_prefix.'parsedSpyEn');
 define('TYPE_PLANET', 0);
 define('TYPE_MOON', 1);
 
-define('MAGIC_QUOTES', false);
 if (file_exists ("../mod/{$root}/version.txt"))
 	list($mod_name, $mod_version, $mod_install, $ogspy_min_version, $toolbar_min_version) = file("../mod/{$root}/version.txt");
 else
