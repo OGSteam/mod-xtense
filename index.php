@@ -14,8 +14,9 @@ list($version, $root) = $db->sql_fetch_row($db->sql_query("SELECT `version`, `ro
 if (!isset($ui_lang)) { // Checks the ui_lang value from parameters file
     if (isset($pub_lang)) {
         $ui_lang = $pub_lang; //This value is used during installation
-    } else
+    } else {
         $ui_lang = "fr";
+    }
     //If no language is available in id.php file we take fr by default
 }
 
@@ -27,7 +28,7 @@ require_once("mod/{$root}/lang/" . $ui_lang . "/lang_xtense.php");
 $page = 'infos';
 if (isset($pub_page)) {
     // Pages publiques
-    if ($pub_page == 'about') $page = $pub_page;
+    if ($pub_page == 'about') { $page = $pub_page; }
 
     // Pages admin
     if ($user_data['user_admin'] == 1 || ($user_data['user_coadmin'] == 1 && $server_config['xtense_strict_admin'] == 0)) {
@@ -149,13 +150,13 @@ $db->sql_close();
 </head>
 
 <body>
-    <h1><?php echo ($lang['MOD_XTENSE_ADMINTITLE']); ?></h1>
+    <h1><?= $lang['MOD_XTENSE_ADMINTITLE'] ?></h1>
     <script src="mod/<?php echo $root; ?>/js/config.js" type="text/javascript"></script>
     <div id="wrapper">
         <ul id="menu">
-            <li class="infos<?php if ($page == 'infos') echo ' active'; ?>">
+            <li class="infos<?php if($page == 'infos') echo ' active'; ?>">
                 <div>
-                    <a href="index.php?action=xtense&amp;page=infos"><?php echo ($lang['MOD_XTENSE_INFORMATIONS']); ?></a>
+                    <a href="index.php?action=xtense&amp;page=infos"><?= $lang['MOD_XTENSE_INFORMATIONS']; ?></a>
                 </div>
             </li>
 
