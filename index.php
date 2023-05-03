@@ -141,7 +141,7 @@ $php_timing = $php_end - $php_start;
 $db->sql_close();
 ?>
 <!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>" lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>" lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>">
 
 <head>
     <title><?php echo $lang['MOD_XTENSE_TITLE'] . " " . $version; ?></title>
@@ -427,7 +427,7 @@ $db->sql_close();
                     <p><?php echo ($lang['MOD_XTENSE_AUTHOR']); ?></a></p>
                     <p><?php echo ($lang['MOD_XTENSE_FORUM']); ?> : <a href="https://forum.ogsteam.eu/" onclick="return winOpen(this);" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_TITLE']); ?></a>
                     </p>
-                    <p><?php echo ($lang['MOD_XTENSE_ICONS']); ?> "Silk icons" <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
+                    <p><?php echo ($lang['MOD_XTENSE_ICONS']); ?> "Silk icons" <a href="https://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
 
                     <div class="sep"></div>
                     <h2><?php echo ($lang['MOD_XTENSE_CHANGELOG']); ?></h2>
