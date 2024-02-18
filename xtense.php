@@ -785,11 +785,17 @@ switch ($received_game_data['type']) {
                     }
                 }
             } else {
-                $fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
+                $Ranks_fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
+                $Game_Ally_fields = 'datadate, ally_id, ally, tag,   number_member';
                 foreach ($n as $i => $val) {
                     $data = $n[$i];
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_DEFAULT);
 
+                    if (isset($data['ally'])) {
+                        $data['ally'] = filter_var($data['ally'], FILTER_DEFAULT);
+                    } else {
+                        throw new UnexpectedValueException("Ranking Ally: Alliance Name not found");
+                    }
                     if (isset($data['ally_id'])) {
                         $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
                     } else {
@@ -811,12 +817,18 @@ switch ($received_game_data['type']) {
                         throw new UnexpectedValueException("Ranking Ally: Nb players not found");
                     }
 
-                    $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                    $Ranks_query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                    $Game_Ally_query[] = "({$timestamp}, {$data['ally_id']} , '{$data['ally']}' , '{$data['ally_tag']}' ,  {$data['members']} )";
                     $datas[] = $data;
                     $total++;
                 }
-                if (!empty($query)) {
-                    $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
+                //Table Rank
+                if (!empty($Ranks_query)) {
+                    $db->sql_query("REPLACE INTO " . $table . " (" . $Ranks_fields . ") VALUES " . implode(',', $Ranks_query));
+                }
+                //Table game_ally
+                if (!empty($Ranks_query)) {
+                    $db->sql_query("REPLACE INTO " . TABLE_GAME_ALLY . " (" . $Game_Ally_fields . ") VALUES " . implode(',', $Game_Ally_query));
                 }
             }
 
