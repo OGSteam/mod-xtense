@@ -1,4 +1,4 @@
-<?php
+<?php global $server_config, $user_data;
 
 /**
  * @package Xtense 2
@@ -59,7 +59,7 @@ if ($page == 'config') {
             $replace .= ' ,("xtense_' . $name . '", "' . $server_config['xtense_' . $name] . '")';
         }
 
-        $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (config_name, config_value) VALUES ("xtense_universe", "' . $universe . '")' . $replace);
+        $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (`config_name`, `config_value`) VALUES ("xtense_universe", "' . $universe . '")' . $replace);
         generate_config_cache();
         $server_config['xtense_universe'] = $universe;
 
@@ -69,8 +69,8 @@ if ($page == 'config') {
     if (isset($pub_do)) {
 
         if ($pub_do == 'repair') {
-            $db->sql_query('DELETE FROM ' . TABLE_USER_BUILDING . ' WHERE planet_id < 1');
-            $db->sql_query('DELETE FROM ' . TABLE_USER_DEFENCE . ' WHERE planet_id < 1');
+            $db->sql_query('DELETE FROM ' . TABLE_USER_BUILDING . ' WHERE `planet_id` < 1');
+            $db->sql_query('DELETE FROM ' . TABLE_USER_DEFENCE . ' WHERE `planet_id` < 1');
             $action = 'repair';
         }
 
@@ -94,14 +94,14 @@ if ($page == 'group') {
             $empire = (isset($_POST['empire_' . $group_id]) ? 1 : 0);
             $messages = (isset($_POST['messages_' . $group_id]) ? 1 : 0);
 
-            $db->sql_query('REPLACE INTO ' . TABLE_XTENSE_GROUPS . ' (group_id,  system, ranking, empire, messages) VALUES (' . $group_id . ', ' . $system . ',     ' . $ranking . ', ' . $empire . ', ' . $messages . ')');
+            $db->sql_query('REPLACE INTO ' . TABLE_XTENSE_GROUPS . ' (`group_id`,  `system`, `ranking`, `empire`, `messages`) VALUES (' . $group_id . ', ' . $system . ',     ' . $ranking . ', ' . $empire . ', ' . $messages . ')');
         }
 
         $update = true;
     }
 
 
-    $query = $db->sql_query('SELECT g.group_id, group_name,  system, ranking, empire, messages FROM ' . TABLE_GROUP . ' g LEFT JOIN ' . TABLE_XTENSE_GROUPS . ' x ON x.group_id = g.group_id ORDER BY g.group_name ASC');
+    $query = $db->sql_query('SELECT g.`group_id`, `group_name`,  `system`, `ranking`, `empire`, `messages` FROM ' . TABLE_GROUP . ' g LEFT JOIN ' . TABLE_XTENSE_GROUPS . ' x ON x.`group_id` = g.`group_id` ORDER BY g.`group_name` ASC');
     $groups = array();
     $groups_id = array();
 
@@ -119,12 +119,12 @@ if ($page == 'mods') {
     if (isset($pub_toggle, $pub_state)) {
         $mod_id = (int)$pub_toggle;
         $state = $pub_state == 1 ? 1 : 0;
-        $db->sql_query('UPDATE ' . TABLE_XTENSE_CALLBACKS . ' SET active = ' . $state . ' WHERE id = ' . $mod_id);
+        $db->sql_query('UPDATE ' . TABLE_XTENSE_CALLBACKS . ' SET `active` = ' . $state . ' WHERE id = ' . $mod_id);
 
         $update = true;
     }
 
-    $query = $db->sql_query('SELECT c.id, c.type, c.active AS callback_active, m.title, m.active, m.version FROM ' . TABLE_XTENSE_CALLBACKS . ' c LEFT JOIN ' . TABLE_MOD . ' m ON m.id = c.mod_id ORDER BY m.title ASC');
+    $query = $db->sql_query('SELECT c.`id`, c.`type`, c.`active` AS callback_active, m.`title`, m.`active`, m.`version` FROM ' . TABLE_XTENSE_CALLBACKS . ' c LEFT JOIN ' . TABLE_MOD . ' m ON m.`id` = c.`mod_id` ORDER BY m.`title` ASC');
     $callbacks = array();
     $calls_id = array();
 
@@ -141,7 +141,7 @@ $php_timing = $php_end - $php_start;
 $db->sql_close();
 ?>
 <!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>" lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>" lang="<?php echo ($lang['MOD_XTENSE_LANG']); ?>">
 
 <head>
     <title><?php echo $lang['MOD_XTENSE_TITLE'] . " " . $version; ?></title>
@@ -427,7 +427,7 @@ $db->sql_close();
                     <p><?php echo ($lang['MOD_XTENSE_AUTHOR']); ?></a></p>
                     <p><?php echo ($lang['MOD_XTENSE_FORUM']); ?> : <a href="https://forum.ogsteam.eu/" onclick="return winOpen(this);" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_TITLE']); ?></a>
                     </p>
-                    <p><?php echo ($lang['MOD_XTENSE_ICONS']); ?> "Silk icons" <a href="http://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
+                    <p><?php echo ($lang['MOD_XTENSE_ICONS']); ?> "Silk icons" <a href="https://www.famfamfam.com/lab/icons/silk/">FamFamFam</a></p>
 
                     <div class="sep"></div>
                     <h2><?php echo ($lang['MOD_XTENSE_CHANGELOG']); ?></h2>
