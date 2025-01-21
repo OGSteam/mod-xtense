@@ -104,7 +104,7 @@ function home_check($type, $coords) {
 	$planets = $moons = array();
 	$offset = ($type == TYPE_PLANET ? 100 : 200);
 
-	$query = $db->sql_query("SELECT `planet_id`, `coordinates` FROM ".TABLE_USER_BUILDING." WHERE `user_id` = ".$user_data['user_id']." ORDER BY `planet_id` ASC");
+	$query = $db->sql_query("SELECT `planet_id`, `coordinates` FROM ".TABLE_USER_BUILDING." WHERE `user_id` = ".$user_data['user_id']." ORDER BY `planet_id`");
 	while ($data = $db->sql_fetch_assoc($query)) {
 		if ($data['planet_id'] < 200) {
 			$planets[$data['planet_id']] = $data['coordinates'];
@@ -156,14 +156,6 @@ function check_coords($coords, $exp = 0) {
 	//if ($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15))) return false;
 	return !($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15)));
 	//return true;
-}
-
-/**
- * @param $name
- */
-function icon($name) {
-	global $root;
-	echo "<img src='mod/xtense/img/icons/{$name}.png' class='icon' align='absmiddle' />";
 }
 
 /**
