@@ -170,13 +170,13 @@ $db->sql_close();
                 <h2><?=$lang['MOD_XTENSE_CONNECTION_DETAILS'];?></h2>
             </div>
             <div class="flex-container justify-center">
-                <p><label for="plugin"><strong><?php echo ($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></label></p>
+                <p><strong><?php echo ($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></p>
                 <p>
-                    <label for="plugin_url"></label><input type="text" class="infos" id="plugin_url" name="plugin" value="" onclick="this.select();" readonly />
+                    <label for="plugin_url"></label><input type="text" class="infos" id="plugin_url" name="plugin_url" value="" onclick="this.select();" readonly />
                 </p>
                 <p><label for="plugin"><strong><?php echo ($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
                 <p>
-                    <label for="plugin_password"></label><input type="text" class="infos" id="plugin_password" name="password" value="<?php echo $my_user_token ?>" onclick="this.select();" readonly />
+                    <label for="plugin_password"></label><input type="text" class="infos" id="plugin_password" name="plugin_password" value="<?php echo $my_user_token ?>" onclick="this.select();" readonly />
                 </p>
                 <p><?php echo ($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
             </div>
@@ -210,7 +210,7 @@ $db->sql_close();
                             <th><?php echo ($lang['MOD_XTENSE_RANKINGS']); ?></th>
                             <th><?php echo ($lang['MOD_XTENSE_EMPIRE']); ?></th>
                             <th><?php echo ($lang['MOD_XTENSE_MESSAGES']); ?></th>
-                            <th></th>
+                            <th>(X)</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -224,12 +224,13 @@ $db->sql_close();
                                 <td><label for="messages_<?php echo $l['group_id']; ?>"></label><input type="checkbox" name="messages_<?php echo $l['group_id']; ?>" id="messages_<?php echo $l['group_id']; ?>" <?php if ($l['messages'] == 1) echo 'checked="checked"'; ?> /></td>
                                 <td><label>
                                         <input type="checkbox" onclick="check_row(<?php echo $l['group_id']; ?>, this);" />
-                                    </label></td>
+                                    </label>
+                                </td>
                             </tr>
                         <?php } ?>
 
                         <tr class="bottom">
-                            <th></th>
+                            <th>(X)</th>
                             <th class="c"><label>
                                     <input type="checkbox" onclick="check_col('system', this);" />
                                 </label></th>
@@ -295,6 +296,13 @@ $db->sql_close();
                 <p class="og-content"><a href="https://github.com/OGSteam/mod-xtense/releases/"><?php echo ($lang['MOD_XTENSE_CHANGELOG']); ?></a></p>
             </div>
         </div>
-<script src="mod/xtense/js/config.js">
-    document.getElementById("plugin_url").value = extractXtenseUrl();
+<script src="mod/xtense/js/config.js"></script>
+<script>
+    const PLUGIN_URL_FIELD_NAME = "plugin_url"; // Extraction de constante
+    const xtenseUrl = getXtensePluginUrl(); // Renommage et extraction de la variable
+
+    // Parcours explicite des champs pour définir leur valeur
+   document.getElementsByName(PLUGIN_URL_FIELD_NAME).forEach(function (element) {
+       element.value = xtenseUrl;
+   });
 </script>

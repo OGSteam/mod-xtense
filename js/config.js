@@ -26,9 +26,10 @@ function setAllCheckboxStatus(isChecked) {
   });
 }
 
-const XTENSE_URL_PATTERN = /(.*)index\.php\?action=xtense/gm;
 
-function extractXtenseUrl() {
+
+function getXtensePluginUrl() {
+  const XTENSE_URL_PATTERN = /(.*)index\.php\?action=xtense/gm;
   const currentUrl = window.location.href;
   const match = XTENSE_URL_PATTERN.exec(currentUrl);
   return match ? match[1] : "";
