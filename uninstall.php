@@ -1,5 +1,5 @@
 <?php
-global $db;
+global $db, $root;
 /**
  * @package Xtense 2
  * @author Unibozu

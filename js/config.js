@@ -1,4 +1,4 @@
-var auth = ['system', 'ranking', 'empire', 'messages'];
+const auth = ['system', 'ranking', 'empire', 'messages'];
 
 
 function check_col(type, El) {
@@ -17,32 +17,20 @@ function check_row(id, El) {
     El.checked = status;
 }
 
-function set_all(status) {
-    for (let i in groups_id) {
-        for (var a = 0; a < auth.length; a++) {
-            document.getElementById(auth[a] + '_' + groups_id[i]).checked = status;
-        }
-    }
+function setAllCheckboxStatus(isChecked) {
+  groups_id.forEach(groupId => {
+    auth.forEach(authValue => {
+      const checkboxId = `${authValue}_${groupId}`;
+      document.getElementById(checkboxId).checked = isChecked;
+    });
+  });
 }
 
-function get_xtense_url() {
 
-    const regex = /(.*)index\.php\?action=xtense/gm;
-    const str = window.location.href;
-    let m;
 
-    if ((m = regex.exec(str)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        return m[1];
-    } else {
-        return "";
-    }
-}
-
-function winOpen(El) {
-    try {
-        window.opener.open(El.href);
-        return false;
-    } catch (e) {
-    }
+function getXtensePluginUrl() {
+  const XTENSE_URL_PATTERN = /(.*)index\.php\?action=xtense/gm;
+  const currentUrl = window.location.href;
+  const match = XTENSE_URL_PATTERN.exec(currentUrl);
+  return match ? match[1] : "";
 }

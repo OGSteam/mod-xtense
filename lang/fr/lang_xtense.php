@@ -14,7 +14,7 @@
 
 $lang['MOD_XTENSE_LANG'] = "fr";
 $lang['MOD_XTENSE_TITLE'] = "Xtense";
-$lang['MOD_XTENSE_ADMINTITLE'] = "Administration de Xtense";
+$lang['MOD_XTENSE_ADMINTITLE'] = "Configuration Xtense";
 $lang['MOD_XTENSE_INFORMATIONS'] = "Informations";
 $lang['MOD_XTENSE_CONFIGURATION'] = "Configuration";
 $lang['MOD_XTENSE_PERMISSIONS'] = "Autorisations";
