@@ -27,10 +27,10 @@ if (!isset($ui_lang)) { // Checks the ui_lang value from parameters file
     //If no language is available in id.php file we take fr by default
 }
 
-require_once("mod/{$root}/includes/config.php");
-require_once("mod/{$root}/includes/functions.php");
-require_once("mod/{$root}/includes/Check.php");
-require_once("mod/{$root}/lang/" . $ui_lang . "/lang_xtense.php");
+require_once("mod/$root/includes/config.php");
+require_once("mod/$root/includes/functions.php");
+require_once("mod/$root/includes/Check.php");
+require_once("mod/$root/lang/" . $ui_lang . "/lang_xtense.php");
 
 
 if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
@@ -131,7 +131,7 @@ $db->sql_close();
             </div>
 
             <?php if (isset($update)) { ?>
-            <p class="og-msg"><?php echo ($lang['MOD_XTENSE_UPDATE_DONE']); ?></p>
+            <p class="og-msg"><?= $lang['MOD_XTENSE_UPDATE_DONE']; ?></p>
             <?php } ?>
 
             <table class="og-table og-full-table">
@@ -291,7 +291,7 @@ $db->sql_close();
             </form>
             <div class="og-msg ">
                 <h3 class="og-title"><?=$lang['MOD_XTENSE_AUTHOR']?></h3>
-                <p class="og-content"><?= $lang['MOD_XTENSE_FORUM']; ?> : <a href="https://forum.ogsteam.eu/" onclick="return winOpen(this);" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_TITLE']); ?></a></p>
+                <p class="og-content"><?= $lang['MOD_XTENSE_FORUM']; ?> : <a href="https://forum.ogsteam.eu/"  target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_TITLE']); ?></a></p>
                 <p class="og-content"><a href="https://wiki.ogsteam.eu/doku.php?id=fr:ogspy:documentationxtense" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p>
                 <p class="og-content"><a href="https://github.com/OGSteam/mod-xtense/releases/"><?php echo ($lang['MOD_XTENSE_CHANGELOG']); ?></a></p>
             </div>
