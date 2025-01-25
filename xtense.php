@@ -1,4 +1,5 @@
 <?php
+global $db;
 
 /**
  * @package Xtense 2
@@ -8,6 +9,7 @@
 
 define('IN_SPYOGAME', true);
 define('IN_XTENSE', true);
+
 
 date_default_timezone_set(@date_default_timezone_get());
 
@@ -25,7 +27,7 @@ header("Access-Control-Allow-Origin: {$origin} ");
 header('Access-Control-Max-Age: 86400');    // cache for 1 day
 header('Access-Control-Request-Headers: Content-Type');    // cache for 1 day
 header("Content-Type: text/plain");
-header("Access-Control-Allow-Methods: POST, GET");
+header("Access-Control-Allow-Methods: POST");
 header('X-Content-Type-Options: nosniff');
 
 require_once("mod/{$root}/includes/config.php");
@@ -36,8 +38,8 @@ require_once("mod/{$root}/includes/Io.php");
 require_once("mod/{$root}/includes/Check.php");
 require_once("mod/{$root}/includes/auth.php");
 
-$start_time = get_microtime();
 
+$start_time = get_microtime();
 $io = new Io();
 $time = time() - 60 * 4;
 if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) {
@@ -86,6 +88,7 @@ $toolbar_info = $received_game_data['toolbar_type'] . " V" . $received_game_data
 $data = json_decode($received_game_data['data'], true);
 
 //print_r($data);
+
 
 switch ($received_game_data['type']) {
     case 'overview': { //PAGE OVERVIEW
@@ -624,10 +627,10 @@ switch ($received_game_data['type']) {
                     $toDelete[] = $galaxy . ':' . $system . ':' . $n;
                 }
 
-                $db->sql_query("UPDATE " . TABLE_PARSEDSPY . " SET active = 0 WHERE coordinates IN ('" . implode("', '", $toDelete) . "')");
+                $db->sql_query("UPDATE " . TABLE_PARSEDSPY . " SET `active` = 0 WHERE coordinates IN ('" . implode("', '", $toDelete) . "')");
             }
 
-            $db->sql_query("UPDATE " . TABLE_USER . " SET planet_added_ogs = planet_added_ogs + 15 WHERE user_id = " . $user_data['user_id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_added_ogs` = `planet_added_ogs` + 15 WHERE `user_id` = " . $user_data['user_id']);
 
             $call->add('system', array(
                 'data' => $data['rows'],
@@ -851,7 +854,7 @@ switch ($received_game_data['type']) {
 
             update_statistic('rankimport_ogs', 100);
             add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $timestamp, 'toolbar' => $toolbar_info));
-        
+
     break;
 
     case 'rc': //PAGE RC
@@ -1212,7 +1215,7 @@ RocketLauncher': 401,
                     $test = $db->sql_numrows($db->sql_query("SELECT `id_spy` FROM " . TABLE_PARSEDSPY . " WHERE `coordinates` = '$coords' AND `dateRE` = '$spy_time'"));
                     if (!$test) {
                         $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
-                        $query = $db->sql_query('SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                        $query = $db->sql_query('SELECT `last_update`' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
                         //log_('debug', 'SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
                         if ($db->sql_numrows($query) > 0) {
                             $assoc = $db->sql_fetch_assoc($query);
@@ -1221,13 +1224,13 @@ RocketLauncher': 401,
                                     (isset($spy['content'][42]) ? $phalanx = $spy['content'][42] : $phalanx = 0);
                                     (isset($spy['content'][43]) ? $gate = $spy['content'][43] : $gate = 0);
                                     //log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET moon = "1", phalanx = ' . $phalanx . ', gate = "' . $gate . '", last_update_moon = ' . $date . ', last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `moon` = "1", `phalanx` = ' . $phalanx . ', `gate` = "' . $gate . '", `last_update_moon` = ' . $date . ', `last_update_user_id` = ' . $user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
                                 } else { //we do nothing if buildings are not in the report
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET name = "' . $spy['planet_name'] . '", last_update_user_id = ' . $user_data['user_id'] . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `name` = "' . $spy['planet_name'] . '", `last_update_user_id` = ' . $user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
                                 }
                             }
                         }
-                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET spy_added_ogs = spy_added_ogs + 1 WHERE user_id = ' . $user_data['user_id']);
+                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_added_ogs` = spy_added_ogs + 1 WHERE `user_id` = ' . $user_data['user_id']);
                         update_statistic('spyimport_ogs', '1');
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $coords, 'toolbar' => $toolbar_info));
                     }
