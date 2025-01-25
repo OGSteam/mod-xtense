@@ -590,15 +590,35 @@ switch ($received_game_data['type']) {
 
             foreach ($system_data as $row => $v) {
                 $statusTemp = (Check::player_status_forbidden($v['status']) ? "" : $v['status']); //On supprime les status qui sont subjectifs
+
+                //default player_id/ally_id à -1 (cf shemas SQL)
+                $v['player_id'] = (isset($v['player_id']) ? (int)$v['player_id'] : -1);
+                $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
+                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id']; 
+          
+                //Lors de l'insert ou de l'update il y a l'insert ou l'update de la table game_ally et game_player
+                // phase transitoire avec doublon d information antre table universe(1) et game_player(2)
+                //Table universe(1)
                 if (!isset($update[$row]))
-                    $db->sql_query("INSERT INTO " . TABLE_UNIVERSE . " (`galaxy`, `system`, `row`, `name`, `player`, `ally`, `status`, `last_update`, `last_update_user_id`, `moon`)
-                        VALUES (" . $galaxy . ", " . $system . ", " . $row . ", '" . $v['planet_name'] . "', '" . $v['player_name'] . "', '" . $v['ally_tag'] . "', '" . $statusTemp . "', " . $time . ", " . $user_data['user_id'] . ", '" . $v['moon'] . "')");
+                    $db->sql_query("INSERT INTO " . TABLE_UNIVERSE . " (`galaxy`, `system`, `row`, `name`, `player`, `player_id`, `ally`, `ally_id`, `status`, `last_update`, `last_update_user_id`, `moon`)
+                        VALUES (" . $galaxy . ", " . $system . ", " . $row . ", '" . $v['planet_name'] . "', '" . $v['player_name'] . "', '" . $v['player_id'] . "', '" . $v['ally_tag'] . "', '" . $v['ally_id'] . "', '" . $statusTemp . "', " . $time . ", " . $user_data['user_id'] . ", '" . $v['moon'] . "')");
                 else {
                     $db->sql_query(
-                        "UPDATE " . TABLE_UNIVERSE . " SET `name` = '" . $v['planet_name'] . "', `player` = '" . $v['player_name'] . "' , `ally` = '" . $v['ally_tag'] . "', `status` = '" . $statusTemp . "', `moon` = '" . $v['moon'] . "', `last_update` = " . $time . ", `last_update_user_id` = " . $user_data['user_id']
-                            . " WHERE `galaxy` = " . $galaxy . " AND `system` = " . $system . " AND `row` = " . $row
+                        "UPDATE " . TABLE_UNIVERSE . " SET name = '" . $v['planet_name'] . "', player = '" . $v['player_name'] . "' , player_id = '" . $v['player_id'] . "' , ally = '" . $v['ally_tag'] . "', ally_id = '" . $v['ally_id'] . "', status = '" . $statusTemp . "', moon = '" . $v['moon'] . "', last_update = " . $time . ", last_update_user_id = " . $user_data['user_id']
+                            . " WHERE galaxy = " . $galaxy . " AND system = " . $system . " AND row = " . $row
                     );
                 }
+                //Table Game_player(2)
+                if( $v['player_id'] != -1)
+                {
+                    $db->sql_query(
+                        "REPLACE INTO " . TABLE_GAME_PLAYER . " 
+                        ( player_id , player, status , ally_id , datadate )
+                        VALUES
+                        ( " . $v['player_id'] . " , '" . $v['player_name'] . "' , '" . $statusTemp . "' ,  " . $v['ally_id'] . " , " . $time . ")
+                    ");
+                  }
+                  //La table game ally ne peut se mettre à jour,  champs ally non alimenté (toutes les infos sont  dans page rank)
             }
 
             if (!empty($delete)) {
@@ -768,11 +788,17 @@ switch ($received_game_data['type']) {
                     }
                 }
             } else {
-                $fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
+                $Ranks_fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
+                $Game_Ally_fields = 'datadate, ally_id, ally, tag,   number_member';
                 foreach ($n as $i => $val) {
                     $data = $n[$i];
                     $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_DEFAULT);
 
+                    if (isset($data['ally'])) {
+                        $data['ally'] = filter_var($data['ally'], FILTER_DEFAULT);
+                    } else {
+                        throw new UnexpectedValueException("Ranking Ally: Alliance Name not found");
+                    }
                     if (isset($data['ally_id'])) {
                         $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
                     } else {
@@ -794,12 +820,18 @@ switch ($received_game_data['type']) {
                         throw new UnexpectedValueException("Ranking Ally: Nb players not found");
                     }
 
-                    $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                    $Ranks_query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                    $Game_Ally_query[] = "({$timestamp}, {$data['ally_id']} , '{$data['ally']}' , '{$data['ally_tag']}' ,  {$data['members']} )";
                     $datas[] = $data;
                     $total++;
                 }
-                if (!empty($query)) {
-                    $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
+                //Table Rank
+                if (!empty($Ranks_query)) {
+                    $db->sql_query("REPLACE INTO " . $table . " (" . $Ranks_fields . ") VALUES " . implode(',', $Ranks_query));
+                }
+                //Table game_ally
+                if (!empty($Ranks_query)) {
+                    $db->sql_query("REPLACE INTO " . TABLE_GAME_ALLY . " (" . $Game_Ally_fields . ") VALUES " . implode(',', $Game_Ally_query));
                 }
             }
 
