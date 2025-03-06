@@ -1,4 +1,5 @@
 <?php
+global $db;
 
 /**
  * @package Xtense
@@ -13,7 +14,7 @@ $is_ok = false;
 $mod_folder = "xtense";
 $root = "xtense";
 $is_ok = install_mod($mod_folder);
-$db->sql_query("UPDATE " . TABLE_MOD . " SET menu = '<span onclick=\"window.open(this.parentNode.href, \'Xtense\', \'width=750, height=550, menubar=no, resizable=yes, scrollbars=yes, status=no, toolbar=no\'); return false;\">Xtense</span>' WHERE title = 'xtense'");
+$db->sql_query("UPDATE " . TABLE_MOD . " SET menu = 'Xtense' WHERE title = 'xtense'");
 
 
 if ($is_ok) {
@@ -71,15 +72,6 @@ if ($is_ok) {
 
 		//---- Creation configuration Xtense
 		$db->sql_query("REPLACE INTO " . TABLE_CONFIG . " (config_name, config_value) VALUES
-			('xtense_allow_connections', '1'),
-			('xtense_log_empire', '0'),
-			('xtense_log_ranking', '1'),
-			('xtense_log_spy', '1'),
-			('xtense_log_system', '1'),
-			('xtense_log_ally_list', '1'),
-			('xtense_log_messages', '1'),
-			('xtense_log_reverse', '0'),
-			('xtense_strict_admin', '0'),
 			('xtense_universe', 'https://sxx-fr.ogame.gameforge.com'),
 			('xtense_spy_autodelete', '1')
 		");
@@ -87,10 +79,5 @@ if ($is_ok) {
 		$db->sql_query("REPLACE INTO " .TABLE_XTENSE_GROUPS. " (`group_id`, `system`, `ranking`, `empire`, `messages`) VALUES
 			('1', '1', '1', '1', '1')");
 
-		if ($install_ogspy) {
-			echo "<a onclick=\"window.open('..\/index.php?action=Xtense', 'Xtense', 'width=720, height=500, menubar=no, resizable=yes, scrollbars=yes, status=no, toolbar=no');\"><font color='red' size='9'>Autorisez la pop-up ou cliquez ici!</font></a><script type=\"text/javascript\"><!-- \nwindow.onload = window.open('..\/index.php?action=Xtense', 'Xtense', 'width=720, height=500, menubar=no, resizable=yes, scrollbars=yes, status=no, toolbar=no');\n--></script>";
-		} else {
-			echo "<a onclick=\"window.open('index.php?action=Xtense', 'Xtense', 'width=720, height=500, menubar=no, resizable=yes, scrollbars=yes, status=no, toolbar=no');\"><font color='red' size='9'>Autorisez la pop-up ou cliquez ici!</font></a><script type=\"text/javascript\"><!-- \nwindow.onload = window.open('index.php?action=Xtense', 'Xtense', 'width=720, height=500, menubar=no, resizable=yes, scrollbars=yes, status=no, toolbar=no');\n--></script>";
-		}
 	}
 }
