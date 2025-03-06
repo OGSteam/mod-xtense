@@ -45,13 +45,6 @@ function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $
         $io->send(0, true);
     }
 
-    if ($server_config['xtense_allow_connections'] == 0) {
-        $io->set(array(
-            'type' => 'plugin connections',
-        ));
-        $io->send(0, true);
-    }
-
     if (strtolower($server_config['xtense_universe']) != strtolower($univers)) {
         $io->set(array(
             'type' => 'plugin univers',
@@ -108,7 +101,6 @@ function xtense_check_user_rights($user_data) {
     // Verification des droits de l'user
     $query = $db->sql_query("SELECT `system`, `ranking`, `empire`, `messages` FROM " . TABLE_USER_GROUP . " u LEFT JOIN " . TABLE_GROUP . " g ON g.`group_id` = u.`group_id` LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.`group_id` = g.`group_id` WHERE u.`user_id` = '" . $user_data['user_id'] . "'");
     $user_data['grant'] = $db->sql_fetch_assoc($query);
-
 
     // Si Xtense demande la verification du serveur, renvoi des droits de l'utilisateur
     if (isset($pub_server_check)) {

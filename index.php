@@ -120,6 +120,8 @@ $db->sql_close();
 
 
 ?>
+    <link rel="stylesheet" href="./mod/xtense/flexbox.css"></link>
+
         <div class="body" id="content">
             <div class="og-msg ">
                 <h3 class="og-title"><?=$lang['MOD_XTENSE_ADMINTITLE']?></h3>
@@ -163,29 +165,29 @@ $db->sql_close();
                 <h2><?=$lang['MOD_XTENSE_SERVER_NAME'];?></h2>
             </div>
             <div class="flex-container justify-center">
-                    <input type="text" size="30" maxlength="40" id="universe" name="universe" value="<?php echo $server_config['xtense_universe']; ?>" />
+                    <input type="text" size="30" maxlength="40" id="universe" name="universe" value="<?= $server_config['xtense_universe']; ?>" />
             </div>
             <br>
             <div class="ogspy-mod-header">
                 <h2><?=$lang['MOD_XTENSE_CONNECTION_DETAILS'];?></h2>
             </div>
             <div class="flex-container justify-center">
-                <p><strong><?php echo ($lang['MOD_XTENSE_URL_PLUGIN']); ?></strong></p>
+                <p><strong><?= $lang['MOD_XTENSE_URL_PLUGIN']; ?></strong></p>
                 <p>
                     <label for="plugin_url"></label><input type="text" class="infos" id="plugin_url" name="plugin_url" value="" onclick="this.select();" readonly />
                 </p>
-                <p><label for="plugin"><strong><?php echo ($lang['MOD_XTENSE_PASSWORD']); ?></strong></label></p>
+                <p><label for="plugin"><strong><?= $lang['MOD_XTENSE_PASSWORD']; ?></strong></label></p>
                 <p>
-                    <label for="plugin_password"></label><input type="text" class="infos" id="plugin_password" name="plugin_password" value="<?php echo $my_user_token ?>" onclick="this.select();" readonly />
+                    <label for="plugin_password"></label><input type="text" class="infos" id="plugin_password" name="plugin_password" value="<?=$my_user_token; ?>" onclick="this.select();" readonly />
                 </p>
-                <p><?php echo ($lang['MOD_XTENSE_PSEUDO_PASSWORD']); ?></p>
+                <p><?= $lang['MOD_XTENSE_PSEUDO_PASSWORD']; ?></p>
             </div>
                 <br>
 
                 <div id="actions" class="flex-container justify-center">
                     <p>
                         <a class="og-button" href="?action=xtense&action_xtense=renew_token">
-                            <?php echo ($lang['MOD_XTENSE_RENEW_TOKEN']); ?>
+                            <?= $lang['MOD_XTENSE_RENEW_TOKEN']; ?>
                         </a>
                     </p>
                 </div>
@@ -198,8 +200,8 @@ $db->sql_close();
                 <h2><?= $lang['MOD_XTENSE_GROUPS_DEFINITION'];?></h2>
             </div>
 
-                <p><span onclick="setAllCheckboxStatus(true);" style="cursor:pointer;"><?php echo ($lang['MOD_XTENSE_TICKALL']); ?></span>
-                    / <span onclick="setAllCheckboxStatus(false);" style="cursor:pointer;"><?php echo ($lang['MOD_XTENSE_UNTICKALL']); ?></span></p>
+                <p><span onclick="setAllCheckboxStatus(true);" ><?= $lang['MOD_XTENSE_TICKALL']; ?></span>
+                    / <span onclick="setAllCheckboxStatus(false);" style="cursor:pointer;"><?= $lang['MOD_XTENSE_UNTICKALL']; ?></span></p>
 
                     <input type="hidden" name="groups_id" id="groups_id" value="<?php echo implode('-', $groups_id); ?>" />
                     <table class="og-table og-full-table">
