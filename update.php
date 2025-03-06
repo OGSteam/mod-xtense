@@ -14,6 +14,8 @@ define("TABLE_XTENSE_CALLBACKS", $table_prefix . "xtense_callbacks");
 $mod_folder = "xtense";
 $mod_name = "xtense";
 
+$db->sql_query("UPDATE " . TABLE_MOD . " SET menu = 'Xtense' WHERE title = 'xtense'");
+
 $db->sql_query("ALTER TABLE ".$table_prefix."parsedRec"." CONVERT TO CHARACTER SET utf8");
 $db->sql_query("ALTER TABLE ".TABLE_XTENSE_CALLBACKS." CONVERT TO CHARACTER SET utf8");
 $db->sql_query("ALTER TABLE ".$table_prefix."xtense_groups"." CONVERT TO CHARACTER SET utf8");
