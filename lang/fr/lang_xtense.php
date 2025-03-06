@@ -14,7 +14,7 @@
 
 $lang['MOD_XTENSE_LANG'] = "fr";
 $lang['MOD_XTENSE_TITLE'] = "Xtense";
-$lang['MOD_XTENSE_ADMINTITLE'] = "Administration de Xtense";
+$lang['MOD_XTENSE_ADMINTITLE'] = "Configuration Xtense";
 $lang['MOD_XTENSE_INFORMATIONS'] = "Informations";
 $lang['MOD_XTENSE_CONFIGURATION'] = "Configuration";
 $lang['MOD_XTENSE_PERMISSIONS'] = "Autorisations";
@@ -38,7 +38,6 @@ $lang['MOD_XTENSE_ERROR_DETAILS'] = "Détails des erreurs";
 $lang['MOD_XTENSE_CALLBACK_LIST'] = "Liste des liens";
 $lang['MOD_XTENSE_INSTALLED_CALLBACKS'] = "Voici la liste des liens correctement installés";
 $lang['MOD_XTENSE_WRONG_CALLBACKS'] = "Certains liens n'ont pas pu être automatiquement installés";
-$lang['MOD_XTENSE_ALLOW_CONNECTIONS'] = "Autoriser les connexions au plugin";
 $lang['MOD_XTENSE_ALLOW_ADMIN_ONLY'] = "Limiter l'administration à l'admin (et non aux co-admins)";
 $lang['MOD_XTENSE_SPYREPORTS_AUTODELETE'] = "Effacement automatique des RE trop anciens (configurable depuis l'admin de OGSpy).";
 $lang['MOD_XTENSE_SERVER_NAME'] = "Serveur de jeu";

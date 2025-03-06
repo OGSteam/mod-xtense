@@ -1,0 +1,262 @@
+/* ===========================
+   FLEXBOX BASICS
+   =========================== */
+
+/* Base container rule for Flexbox */
+.flex-container {
+    display: flex; /* Activate Flexbox */
+    flex-direction: row; /* Set the default main axis to horizontal (row) */
+    justify-content: flex-start; /* Items align at the start of the main axis */
+    align-items: stretch; /* Items stretch to fill container (default for cross axis) */
+    flex-wrap: nowrap; /* No wrapping of items */
+    gap: 10px; /* Add space between items */
+}
+
+/* ===========================
+   FLEX DIRECTION
+   =========================== */
+
+/* Horizontal layout (row by default) */
+.flex-row {
+    flex-direction: row; /* Horizontal alignment (default) */
+}
+
+/* Horizontal layout in reverse */
+.flex-row-reverse {
+    flex-direction: row-reverse; /* Horizontal alignment reversed */
+}
+
+/* Vertical layout (column) */
+.flex-column {
+    flex-direction: column; /* Vertical alignment */
+}
+
+/* Vertical layout in reverse */
+.flex-column-reverse {
+    flex-direction: column-reverse; /* Vertical alignment reversed */
+}
+
+/* ===========================
+   JUSTIFY CONTENT
+   =========================== */
+
+/* Align items at the start of the main axis */
+.justify-start {
+    justify-content: flex-start;
+}
+
+/* Center items along the main axis */
+.justify-center {
+    justify-content: center;
+}
+
+/* Align items at the end of the main axis */
+.justify-end {
+    justify-content: flex-end;
+}
+
+/* Distribute items evenly with spaces between them */
+.justify-between {
+    justify-content: space-between;
+}
+
+/* Distribute items evenly with spaces around them */
+.justify-around {
+    justify-content: space-around;
+}
+
+/* Distribute items evenly with equal space on each side */
+.justify-evenly {
+    justify-content: space-evenly;
+}
+
+/* ===========================
+   ALIGN ITEMS (CROSS AXIS)
+   =========================== */
+
+/* Align items at the start of the cross axis */
+.align-start {
+    align-items: flex-start;
+}
+
+/* Align items in the center of the cross axis */
+.align-center {
+    align-items: center;
+}
+
+/* Align items at the end of the cross axis */
+.align-end {
+    align-items: flex-end;
+}
+
+/* Stretch items to fill the cross axis (default) */
+.align-stretch {
+    align-items: stretch;
+}
+
+/* Align items with baseline alignment in cross axis */
+.align-baseline {
+    align-items: baseline;
+}
+
+/* ===========================
+   ALIGN CONTENT (MULTILINE)
+   =========================== */
+
+/* Align content at the start of the cross axis */
+.align-content-start {
+    align-content: flex-start;
+}
+
+/* Align content in the center of the cross axis */
+.align-content-center {
+    align-content: center;
+}
+
+/* Align content at the end of the cross axis */
+.align-content-end {
+    align-content: flex-end;
+}
+
+/* Distribute content evenly with spaces between lines */
+.align-content-between {
+    align-content: space-between;
+}
+
+/* Distribute content evenly with spaces around lines */
+.align-content-around {
+    align-content: space-around;
+}
+
+/* Distribute content evenly with equal space on each side */
+.align-content-evenly {
+    align-content: space-evenly;
+}
+
+/* Stretch lines to fill the container */
+.align-content-stretch {
+    align-content: stretch;
+}
+
+/* ===========================
+   FLEX-WRAP
+   =========================== */
+
+/* Items will remain in a single line (default) */
+.flex-nowrap {
+    flex-wrap: nowrap;
+}
+
+/* Items will wrap to multiple lines */
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+/* Items will wrap and reverse in the process */
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+/* ===========================
+   FLEX ITEM PROPERTIES
+   =========================== */
+
+/* Allow item to grow */
+.flex-grow {
+    flex-grow: 1; /* Default: 0 */
+}
+
+/* Prevent item from growing */
+.flex-no-grow {
+    flex-grow: 0; /* Default: 0 */
+}
+
+/* Allow item to shrink */
+.flex-shrink {
+    flex-shrink: 1; /* Default: 1 */
+}
+
+/* Prevent item from shrinking */
+.flex-no-shrink {
+    flex-shrink: 0;
+}
+
+/* Specify item base width and flexibility */
+.flex-auto {
+    flex: 1 1 auto; /* flexible width */
+}
+
+/* Prevent item from being flexible */
+.flex-initial {
+    flex: 0 1 auto;
+}
+
+/* Set item to take up exact space */
+.flex-none {
+    flex: none;
+}
+
+/* Align a single item inside the container (cross axis only) */
+.align-self-start {
+    align-self: flex-start;
+}
+
+.align-self-center {
+    align-self: center;
+}
+
+.align-self-end {
+    align-self: flex-end;
+}
+
+.align-self-stretch {
+    align-self: stretch;
+}
+
+.align-self-baseline {
+    align-self: baseline;
+}
+
+/* ===========================
+   EXAMPLES
+   =========================== */
+
+/* Simple horizontal centering */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Simple vertical centering */
+.flex-v-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Full-page center alignment */
+.flex-full-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full height of the page */
+}
+
+/* ===========================
+   GAP MANAGEMENT
+   =========================== */
+
+/* Add space between items */
+.flex-gap-sm {
+    gap: 5px;
+}
+
+.flex-gap-md {
+    gap: 10px;
+}
+
+.flex-gap-lg {
+    gap: 20px;
+}

@@ -1,5 +1,5 @@
 <?php
-global $db;
+global $db, $database, $server_config, $databaseSpyId;
 
 /**
  * @package Xtense 2
@@ -7,17 +7,17 @@ global $db;
  * @licence GNU
  */
 
-define('IN_SPYOGAME', true);
-define('IN_XTENSE', true);
+const IN_SPYOGAME = true;
+const IN_XTENSE = true;
 
 
 date_default_timezone_set(@date_default_timezone_get());
 
 $currentFolder = getcwd();
-if (preg_match('#mod#', getcwd())) {
+if (str_contains(getcwd(), 'mod')) {
     chdir('../../');
 }
-$_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_replace('#\/mod\/(.*)\/#', '/', $_SERVER['SCRIPT_FILENAME']));
+$_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_replace('#/mod/(.*)/#', '/', $_SERVER['SCRIPT_FILENAME']));
 include_once("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT `root`, `active` FROM " . TABLE_MOD . " WHERE `action` = 'xtense'"));
 
@@ -30,16 +30,16 @@ header("Content-Type: text/plain");
 header("Access-Control-Allow-Methods: POST");
 header('X-Content-Type-Options: nosniff');
 
-require_once("mod/{$root}/includes/config.php");
-require_once("mod/{$root}/includes/functions.php");
-require_once("mod/{$root}/includes/CallbackHandler.php");
-require_once("mod/{$root}/includes/Callback.php");
-require_once("mod/{$root}/includes/Io.php");
-require_once("mod/{$root}/includes/Check.php");
-require_once("mod/{$root}/includes/auth.php");
+require_once("mod/$root/includes/config.php");
+require_once("mod/$root/includes/functions.php");
+require_once("mod/$root/includes/CallbackHandler.php");
+require_once("mod/$root/includes/Callback.php");
+require_once("mod/$root/includes/Io.php");
+require_once("mod/$root/includes/Check.php");
+require_once("mod/$root/includes/auth.php");
 
 
-$start_time = get_microtime();
+$start_time =  microtime(true) ;
 $io = new Io();
 $time = time() - 60 * 4;
 if ($time > mktime(0, 0, 0) && $time < mktime(8, 0, 0)) {
@@ -87,6 +87,7 @@ $toolbar_info = $received_game_data['toolbar_type'] . " V" . $received_game_data
 // Récupération des données de jeu
 $data = json_decode($received_game_data['data'], true);
 
+// Meilleur Endroit pour voir ce que l'on récupère de l'extension :-)
 //print_r($data);
 
 
@@ -204,9 +205,9 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords'], FILTER_DEFAULT);
-            $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-            $planet_type = filter_var($data['planetType'], FILTER_DEFAULT);
+            $coords = filter_var($data['coords']);
+            $planet_name = filter_var($data['planetName']);
+            $planet_type = filter_var($data['planetType']);
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("Buildings- Missing data");
             }
@@ -271,9 +272,9 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords'], FILTER_DEFAULT);
-            $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-            $planet_type = filter_var($data['planetType'], FILTER_DEFAULT);
+            $coords = filter_var($data['coords']);
+            $planet_name = filter_var($data['planetName']);
+            $planet_type = filter_var($data['planetType']);
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("ResourceSettings: Missing Planet Details");
             }
@@ -343,9 +344,9 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords'], FILTER_DEFAULT);
-            $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-            $planet_type = filter_var($data['planetType'], FILTER_DEFAULT);
+            $coords = filter_var($data['coords']);
+            $planet_name = filter_var($data['planetName']);
+            $planet_type = filter_var($data['planetType']);
 
             $defense = $data['defense'];
             //Stop si donnée manquante
@@ -408,12 +409,12 @@ switch ($received_game_data['type']) {
                 }
             }
 
-            $call->add('defense', array(
+            $call->add('defense', [
                 'coords' => explode(':', $coords),
                 'planet_type' => $planet_type,
                 'planet_name' => $planet_name,
                 'defense' => $defenses
-            ));
+            ]);
 
             add_log('defense', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
         }
@@ -422,15 +423,12 @@ switch ($received_game_data['type']) {
     case 'researchs': //PAGE RECHERCHE
 
         if (!$user_data['grant']['empire']) {
-            $io->set(array(
-                'type' => 'plugin grant',
-                'access' => 'empire'
-            ));
+            $io->set(['type' => 'plugin grant', 'access' => 'empire']);
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords'], FILTER_DEFAULT);
-            $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-            $planet_type = filter_var($data['planetType'], FILTER_DEFAULT);
+            $coords = filter_var($data['coords']);
+            $planet_name = filter_var($data['planetName']);
+            $planet_type = filter_var($data['planetType']);
             $researchs = $data['researchs'];
 
 
@@ -442,10 +440,10 @@ switch ($received_game_data['type']) {
 
 
             if ($db->sql_numrows($db->sql_query('SELECT `user_id` FROM ' . TABLE_USER_TECHNOLOGY . ' WHERE `user_id` = ' . $user_data['user_id']))) {
-                $set = array();
+                $set = [];
                 foreach ($database['labo'] as $code) {
                     if (isset($researchs[$code])) {
-                        $set[] = $code . ' = ' . (int)$researchs[$code];
+                        $set[] = "$code = " . (int)$researchs[$code];
                     }
                 }
 
@@ -489,9 +487,9 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords'], FILTER_DEFAULT);
-            $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-            $planet_type = filter_var($data['planetType'], FILTER_DEFAULT);
+            $coords = filter_var($data['coords']);
+            $planet_name = filter_var($data['planetName']);
+            $planet_type = filter_var($data['planetType']);
             $fleet = $data['fleet'];
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("Fleet: Missing Planet Details");
@@ -563,15 +561,18 @@ switch ($received_game_data['type']) {
                 if (isset($rows[$i])) {
                     $line = $rows[$i];
 
-                    $line['player_name'] = filter_var($line['player_name'], FILTER_DEFAULT);
-                    $line['planet_name'] = filter_var($line['planet_name'], FILTER_DEFAULT);
-                    $line['ally_tag'] = filter_var($line['ally_tag'], FILTER_DEFAULT);
+                    $line['player_name'] = filter_var($line['player_name']);
+                    $line['planet_name'] = filter_var($line['planet_name']);
+                    $line['ally_tag'] = filter_var($line['ally_tag']);
 
                     if (isset($line['debris'])) {
-                        filter_var($line['debris']);
+                        $line['debris'] = filter_var_array($line['debris'], [
+                            'metal' => FILTER_SANITIZE_NUMBER_INT,
+                            'crystal' => FILTER_SANITIZE_NUMBER_INT
+                        ]);
                     }
                     if (isset($line['status'])) {
-                        filter_var($line['status']);
+                        $line['status'] = filter_var($line['status']);
                     }
                     $system_data[$i] = $line;
                 } else {
@@ -594,8 +595,8 @@ switch ($received_game_data['type']) {
                 //default player_id/ally_id à -1 (cf shemas SQL)
                 $v['player_id'] = (isset($v['player_id']) ? (int)$v['player_id'] : -1);
                 $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
-                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id']; 
-          
+                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id'];
+
                 //Lors de l'insert ou de l'update il y a l'insert ou l'update de la table game_ally et game_player
                 // phase transitoire avec doublon d information antre table universe(1) et game_player(2)
                 //Table universe(1)
@@ -612,7 +613,7 @@ switch ($received_game_data['type']) {
                 if( $v['player_id'] != -1)
                 {
                     $db->sql_query(
-                        "REPLACE INTO " . TABLE_GAME_PLAYER . " 
+                        "REPLACE INTO " . TABLE_GAME_PLAYER . "
                         ( player_id , player, status , ally_id , datadate )
                         VALUES
                         ( " . $v['player_id'] . " , '" . $v['player_name'] . "' , '" . $statusTemp . "' ,  " . $v['ally_id'] . " , " . $time . ")
@@ -650,11 +651,12 @@ switch ($received_game_data['type']) {
         break;
 
     case 'ranking': //PAGE STATS
-        $type1 = filter_var($data['type1'], FILTER_DEFAULT);
-        $type2 = filter_var($data['type2'], FILTER_DEFAULT);
-        $type3 = filter_var($data['type3'], FILTER_DEFAULT)  ?? 0;
+
+        $type1 = filter_var($data['type1']);
+        $type2 = filter_var($data['type2']);
+        $type3 = filter_var($data['type3'])  ?? 0;
         $offset = filter_var($data['offset'], FILTER_SANITIZE_NUMBER_INT);
-        $date = filter_var($data['time'], FILTER_DEFAULT);
+        $date = filter_var($data['time']);
 
         if (!isset($type1, $type2, $offset, $data['n'], $date)) {
             throw new UnexpectedValueException("Rankings: Incomplete Ranking");
@@ -671,115 +673,74 @@ switch ($received_game_data['type']) {
                 throw new UnexpectedValueException("Ranking: Unexpected Ranking type1");
             }
         }
-            //Vérification Offset
-            if ((($offset - 1) % 100) != 0) {
-                throw new UnexpectedValueException("Ranking: Offset not found");
+        //Vérification Offset
+        if ((($offset - 1) % 100) != 0) {
+            throw new UnexpectedValueException("Ranking: Offset not found");
+        }
+
+        $n =  $data['n'];
+        $total = 0;
+        $count = count($n);
+
+        if ($type1 == 'player') {
+            $table = match ($type2) {
+                'points' => TABLE_RANK_PLAYER_POINTS,
+                'economy' => TABLE_RANK_PLAYER_ECO,
+                'research' => TABLE_RANK_PLAYER_TECHNOLOGY,
+                'fleet' => match ($type3) {
+                    '5' => TABLE_RANK_PLAYER_MILITARY_BUILT,
+                    '6' => TABLE_RANK_PLAYER_MILITARY_DESTRUCT,
+                    '4' => TABLE_RANK_PLAYER_MILITARY_LOOSE,
+                    '7' => TABLE_RANK_PLAYER_HONOR,
+                    default => throw new OutOfRangeException("Ranking Player: Unexpected Ranking type for type3: " . $type3),
+                },
+                default => throw new UnexpectedValueException("Ranking Player: Unexpected Ranking type for type2: " . $type2),
+            };
+        } else {
+            $table = match ($type2) {
+                'points' => TABLE_RANK_ALLY_POINTS,
+                'economy' => TABLE_RANK_ALLY_ECO,
+                'research' => TABLE_RANK_ALLY_TECHNOLOGY,
+                'fleet' => match ($type3) {
+                    '5' => TABLE_RANK_ALLY_MILITARY_BUILT,
+                    '6' => TABLE_RANK_ALLY_MILITARY_DESTRUCT,
+                    '4' => TABLE_RANK_ALLY_MILITARY_LOOSE,
+                    '7' => TABLE_RANK_ALLY_HONOR,
+                    default => throw new OutOfRangeException("Ranking Ally: Unexpected Ranking type for type3: " . $type3),
+                },
+                default => throw new UnexpectedValueException("Ranking Ally: Unexpected Ranking type for type2: " . $type2),
+            };
+        }
+
+        $query = array();
+
+        if ($type1 == 'player') {
+            foreach ($n as $data) {
+                $data['player_name'] = filter_var($data['player_name']);
+                $data['ally_tag'] = filter_var($data['ally_tag']);
+
+                if (isset($data['points'])) {
+                    $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
+                }
+
+                if (isset($data['ally_id'])) {
+                    $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
+                    if ($data['ally_id'] === '') { $data['ally_id'] = -1; }
+                }
+
+                if (isset($data['player_id'])) {
+                    $data['player_id'] = filter_var($data['player_id'], FILTER_SANITIZE_NUMBER_INT);
+                    if ($data['player_id'] === '') { $data['player_id'] = -1; }
+                }
+
+                if ($table == TABLE_RANK_PLAYER_MILITARY) {
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']}, {$data['nb_spacecraft']} )";
+                } else {
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']} )";
+                }
+                $total++;
+                $datas[] = $data;
             }
-
-            $n =  $data['n'];
-            $total = 0;
-            $count = count($n);
-
-            if ($type1 == 'player') {
-                switch ($type2) {
-                    case 'points':
-                        $table = TABLE_RANK_PLAYER_POINTS; //Type2 =0
-                        break;
-                    case 'economy':
-                        $table = TABLE_RANK_PLAYER_ECO; //Type2 =1
-                        break;
-                    case 'research':
-                        $table = TABLE_RANK_PLAYER_TECHNOLOGY; //Type2 =2
-                        break;
-                    case 'fleet':        //Type2 =3
-                        switch ($type3) {
-                            case '5':
-                                $table = TABLE_RANK_PLAYER_MILITARY_BUILT;
-                                break;
-                            case '6':
-                                $table = TABLE_RANK_PLAYER_MILITARY_DESTRUCT;
-                                break;
-                            case '4':
-                                $table = TABLE_RANK_PLAYER_MILITARY_LOOSE;
-                                break;
-                            case '7':
-                                $table = TABLE_RANK_PLAYER_HONOR;
-                                break;
-                            default:
-                                throw new OutOfRangeException("Ranking Player: Unexpected Ranking type for type3: ".$type3);
-                                break;
-                        }
-                        break;
-                    default:
-                        throw new UnexpectedValueException("Ranking Player: Unexpected Ranking type for type2: ".$type2);
-                        break;
-                }
-            } else {
-                switch ($type2) {
-                    case 'points':
-                        $table = TABLE_RANK_ALLY_POINTS;
-                        break;
-                    case 'economy':
-                        $table = TABLE_RANK_ALLY_ECO;
-                        break;
-                    case 'research':
-                        $table = TABLE_RANK_ALLY_TECHNOLOGY;
-                        break;
-                    case 'fleet': //Type2 =3
-                        switch ($type3) {
-                            case '5':
-                                $table = TABLE_RANK_ALLY_MILITARY_BUILT;
-                                break;
-                            case '6':
-                                $table = TABLE_RANK_ALLY_MILITARY_DESTRUCT;
-                                break;
-                            case '4':
-                                $table = TABLE_RANK_ALLY_MILITARY_LOOSE;
-                                break;
-                            case '7':
-                                $table = TABLE_RANK_ALLY_HONOR;
-                                break;
-                            default:
-                                throw new OutOfRangeException("Ranking Ally: Unexpected Ranking type for type3: ".$type3);
-                                break;
-                        }
-                        break;
-                    default:
-                        throw new UnexpectedValueException("Ranking Ally: Unexpected Ranking type for type2: ".$type2);
-                        break;
-                }
-            }
-
-            $query = array();
-
-            if ($type1 == 'player') {
-                foreach ($n as $i => $val) {
-                    $data = $n[$i];
-                    $data['player_name'] = filter_var($data['player_name'], FILTER_DEFAULT);
-                    $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_DEFAULT);
-
-                    if (isset($data['points'])) {
-                        $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
-                    }
-
-                    if (isset($data['ally_id'])) {
-                        $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
-                        if ($data['ally_id'] === '') { $data['ally_id'] = -1; }
-                    }
-
-                    if (isset($data['player_id'])) {
-                        $data['player_id'] = filter_var($data['player_id'], FILTER_SANITIZE_NUMBER_INT);
-                        if ($data['player_id'] === '') { $data['player_id'] = -1; }
-                    }
-
-                    if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                        $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']}, {$data['nb_spacecraft']} )";
-                    } else {
-                        $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']} )";
-                    }
-                    $total++;
-                    $datas[] = $data;
-                }
                 if (!empty($query)) {
                     if ($table == TABLE_RANK_PLAYER_MILITARY) {
                         $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`, `nb_spacecraft`) VALUES " . implode(',', $query));
@@ -787,80 +748,68 @@ switch ($received_game_data['type']) {
                         $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`) VALUES " . implode(',', $query));
                     }
                 }
-            } else {
-                $Ranks_fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
-                $Game_Ally_fields = 'datadate, ally_id, ally, tag,   number_member';
-                foreach ($n as $i => $val) {
-                    $data = $n[$i];
-                    $data['ally_tag'] = filter_var($data['ally_tag'], FILTER_DEFAULT);
+        } else {
+            $fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
+            foreach ($n as $data) {
+                $data['ally_tag'] = filter_var($data['ally_tag']);
 
-                    if (isset($data['ally'])) {
-                        $data['ally'] = filter_var($data['ally'], FILTER_DEFAULT);
-                    } else {
-                        throw new UnexpectedValueException("Ranking Ally: Alliance Name not found");
-                    }
-                    if (isset($data['ally_id'])) {
-                        $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
-                    } else {
-                        throw new UnexpectedValueException("Ranking Ally: Alliance Id not found");
-                    }
-                    if (isset($data['points'])) {
-                        $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
-                    } else {
-                        throw new UnexpectedValueException("Ranking Ally: No points sent");
-                    }
-                    if (isset($data['mean'])) {
-                        $data['mean'] = filter_var($data['mean'], FILTER_SANITIZE_NUMBER_INT);
-                    } else {
-                        throw new UnexpectedValueException("Ranking Ally: No mean found");
-                    }
-                    if (isset($data['members'])) {
-                        $data['members'] = filter_var($data['members'], FILTER_SANITIZE_NUMBER_INT);
-                    } else {
-                        throw new UnexpectedValueException("Ranking Ally: Nb players not found");
-                    }
+                if (!isset($data['ally_id'])) {
+                    throw new UnexpectedValueException("Ranking Ally: Alliance Id not found");
+                }
+                $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
 
-                    $Ranks_query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
-                    $Game_Ally_query[] = "({$timestamp}, {$data['ally_id']} , '{$data['ally']}' , '{$data['ally_tag']}' ,  {$data['members']} )";
-                    $datas[] = $data;
-                    $total++;
+                if (!isset($data['points'])) {
+                    throw new UnexpectedValueException("Ranking Ally: No points sent");
                 }
-                //Table Rank
-                if (!empty($Ranks_query)) {
-                    $db->sql_query("REPLACE INTO " . $table . " (" . $Ranks_fields . ") VALUES " . implode(',', $Ranks_query));
+                $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
+
+                if (!isset($data['mean'])) {
+                    throw new UnexpectedValueException("Ranking Ally: No mean found");
                 }
-                //Table game_ally
-                if (!empty($Ranks_query)) {
-                    $db->sql_query("REPLACE INTO " . TABLE_GAME_ALLY . " (" . $Game_Ally_fields . ") VALUES " . implode(',', $Game_Ally_query));
+                $data['mean'] = filter_var($data['mean'], FILTER_SANITIZE_NUMBER_INT);
+
+                if (!isset($data['members'])) {
+                    throw new UnexpectedValueException("Ranking Ally: Nb players not found");
                 }
+                $data['members'] = filter_var($data['members'], FILTER_SANITIZE_NUMBER_INT);
+
+
+                $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                $datas[] = $data;
+                $total++;
+            }
+
+            if (!empty($query)) {
+                $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
             }
 
             $db->sql_query("UPDATE " . TABLE_USER . " SET rank_added_ogs = rank_added_ogs + " . $total . " WHERE user_id = " . $user_data['user_id']);
+        }
 
-            $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
+        $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
 
-            $call->add('ranking_' . $type1 . '_' . $type2, array(
-                'data' => $datas,
-                'offset' => $offset,
-                'time' => $timestamp
-            ));
+        $call->add('ranking_' . $type1 . '_' . $type2, array(
+            'data' => $datas,
+            'offset' => $offset,
+            'time' => $timestamp
+        ));
 
-            $io->set(array(
-                'type' => 'ranking',
-                'type1' => $type1,
-                'type2' => $type2,
-                'offset' => $offset
-            ));
+        $io->set(array(
+            'type' => 'ranking',
+            'type1' => $type1,
+            'type2' => $type2,
+            'offset' => $offset
+        ));
 
-            update_statistic('rankimport_ogs', 100);
-            add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $timestamp, 'toolbar' => $toolbar_info));
+        update_statistic('rankimport_ogs', 100);
+        add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $timestamp, 'toolbar' => $toolbar_info));
 
-    break;
+        break;
 
     case 'rc': //PAGE RC
     case 'rc_shared':
         $json = filter_var($data['json']);
-        $ogapilnk = filter_var($data['ogapilnk'], FILTER_DEFAULT);
+        $ogapilnk = filter_var($data['ogapilnk']);
 
         if (!isset($json)) {
             throw new UnexpectedValueException("Combat Report: JSON Report not sent");
@@ -884,20 +833,12 @@ switch ($received_game_data['type']) {
             $exist = $db->sql_fetch_row($db->sql_query("SELECT `id_rc` FROM " . TABLE_PARSEDRC . " WHERE `dateRC` = '" . $jsonObj->event_timestamp . "'"));
 
             if (!isset($exist[0])) {
-                switch ($jsonObj->result) {
-                    case 'draw':
-                        $winner = 'N';
-                        break;
-                    case 'attacker':
-                        $winner = 'A';
-                        break;
-                    case 'defender':
-                        $winner = 'D';
-                        break;
-                    default:
-                        throw new UnexpectedValueException("Combat Report: Result not found");
-                        break;
-                }
+                $winner = match ($jsonObj->result) {
+                    'draw' => 'N',
+                    'attacker' => 'A',
+                    'defender' => 'D',
+                    default => throw new UnexpectedValueException("Combat Report: Result not found"),
+                };
                 $nbRounds = count($jsonObj->combatRounds) - 1;
                 $moon = (int)($jsonObj->moon->genesis);
                 $coordinates = "{$jsonObj->coordinates->galaxy}:{$jsonObj->coordinates->system}:{$jsonObj->coordinates->position}";
@@ -1074,7 +1015,7 @@ RocketLauncher': 401,
             }
 
             if (!isset($data['tag'])) { break; } //Pas d'alliance
-            $tag = filter_var($data['tag'], FILTER_DEFAULT);
+            $tag = filter_var($data['tag']);
             $list = array();
 
             foreach ($data['allyList'] as $data) {
@@ -1084,7 +1025,7 @@ RocketLauncher': 401,
                 }
 
                 $list[] = array(
-                    'pseudo' => filter_var($data['player'], FILTER_DEFAULT),
+                    'pseudo' => filter_var($data['player']),
                     'points' => filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT),
                     'coords' => explode(':', $data['coords']),
                     'rang' => filter_var($data['rank'], FILTER_SANITIZE_NUMBER_INT)
@@ -1124,9 +1065,9 @@ RocketLauncher': 401,
                         throw new UnexpectedValueException("Personal Message: Incomplete Metadata ");
                     }
                     $line['coords'] = Check::coords($line['coords']);
-                    $line['from'] = filter_var($line['from'], FILTER_DEFAULT);
-                    $line['message'] = filter_var($line['message'], FILTER_DEFAULT);
-                    $line['subject'] = filter_var($line['subject'], FILTER_DEFAULT);
+                    $line['from'] = filter_var($line['from']);
+                    $line['message'] = filter_var($line['message']);
+                    $line['subject'] = filter_var($line['subject']);
 
                     $msg = array(
                         'coords' => explode(':', $line['coords']),
@@ -1144,9 +1085,9 @@ RocketLauncher': 401,
                         throw new UnexpectedValueException("Alliance Message: Incomplete Metadata ");
                     }
 
-                    $line['from'] = filter_var($line['from'], FILTER_DEFAULT);
-                    $line['tag'] = filter_var($line['tag'], FILTER_DEFAULT);
-                    $line['message'] = filter_var($line['message'], FILTER_DEFAULT);
+                    $line['from'] = filter_var($line['from']);
+                    $line['tag'] = filter_var($line['tag']);
+                    $line['message'] = filter_var($line['message']);
 
                     $ally_msg = array(
                         'from' => $line['from'],
@@ -1168,10 +1109,10 @@ RocketLauncher': 401,
                     }
 
                     $coords = Check::coords($line['coords']);
-                    $content = filter_var_array($line['content'], FILTER_DEFAULT);
-                    $playerName = filter_var($line['playerName'], FILTER_DEFAULT);
-                    $planetName = filter_var($line['planetName'], FILTER_DEFAULT);
-                    $moon = filter_var($line['isMoon'], FILTER_DEFAULT);
+                    $content = filter_var_array($line['content']);
+                    $playerName = filter_var($line['playerName']);
+                    $planetName = filter_var($line['planetName']);
+                    $moon = filter_var($line['isMoon']);
                     $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
                     $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT);
                     $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT);
@@ -1189,11 +1130,9 @@ RocketLauncher': 401,
                     );
                     $call->add($line['type'], $spy);
 
-                    $spyDB = array();
+                    $spyDB = [];
                     foreach ($databaseSpyId as $arr) {
-                        foreach ($arr as $index => $v) {
-                            $spyDB[$index] = $v;
-                        }
+                        $spyDB = array_merge($spyDB, $arr);
                     }
                     $coords = $spy['coords'][0] . ':' . $spy['coords'][1] . ':' . $spy['coords'][2];
                     $matches = array();
@@ -1300,7 +1239,7 @@ RocketLauncher': 401,
                         throw new UnexpectedValueException("Expedition Message: Incomplete Metadata ");
                     }
 
-                    $line['content'] = filter_var($line['content'], FILTER_DEFAULT);
+                    $line['content'] = filter_var($line['content']);
                     $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expédition
 
                     $expedition = array(
@@ -1325,7 +1264,7 @@ RocketLauncher': 401,
 
 $call->apply();
 
-$io->set('execution', str_replace(',', '.', round((get_microtime() - $start_time) * 1000, 2)));
+$io->set('execution', str_replace(',', '.', round(( microtime(true) - $start_time) * 1000, 2)));
 $io->send();
 $db->sql_close();
 
