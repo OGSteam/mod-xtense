@@ -72,15 +72,6 @@ if ($is_ok) {
 
 		//---- Creation configuration Xtense
 		$db->sql_query("REPLACE INTO " . TABLE_CONFIG . " (config_name, config_value) VALUES
-			('xtense_allow_connections', '1'),
-			('xtense_log_empire', '0'),
-			('xtense_log_ranking', '1'),
-			('xtense_log_spy', '1'),
-			('xtense_log_system', '1'),
-			('xtense_log_ally_list', '1'),
-			('xtense_log_messages', '1'),
-			('xtense_log_reverse', '0'),
-			('xtense_strict_admin', '0'),
 			('xtense_universe', 'https://sxx-fr.ogame.gameforge.com'),
 			('xtense_spy_autodelete', '1')
 		");

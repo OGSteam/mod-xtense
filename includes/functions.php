@@ -7,86 +7,6 @@
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
-/**
- * Fonctions commune d'installation des callbacks des mods
- *
- * @param string $action - Action du mod
- * @param array $data - Appels à installer
- * @param string $version - Optionnel, version miniale requise de xtense
- * @return false/int - Retourne false si il y a une erreur ou le nombre d'appels ajoutés
- */
-function install_callbacks ($action, $data, $version = null) {
-	global $db, $table_prefix;
-
-	define('XTENSE_LITE_CONFIG', 1);
-	require_once('mod/xtense/includes/config.php');
-
-	if ($version != null && version_compare($version, MOD_VERSION, '<=')) return false;
-
-	$query = $db->sql_query('SELECT `id` FROM '.TABLE_MOD.' WHERE `action` = "'.$action.'"');
-	list($mod_id) = $db->sql_fetch_row($query);
-
-	$replace = array();
-	foreach ($data as $k => $call) {
-		if (!isset($call['function'], $call['type'])) return false;
-		if (!isset($call['active'])) $call['active'] = 1;
-		$replace[] = '('.$mod_id.', "'.$call['function'].'", "'.$call['type'].'", '.$call['active'].')';
-	}
-
-	$db->sql_query('INSERT IGNORE INTO '.TABLE_XTENSE_CALLBACKS.' (`mod_id`, `function`, `type`, `active`) VALUES '.implode(',', $replace));
-	return $db->sql_affectedrows();
-}
-
-/**
- * @param $string
- * @return mixed
- */
-function js_compatibility($string){
-	return str_replace('<br>','\n',(htmlspecialchars_decode($string)));
-}
-
-/**
- * @param $date
- * @return int
- */
-function parseOgameDate($date) {
-	preg_match('!([0-9]+)-([0-9]+) ([0-9]+):([0-9]+):([0-9]+)!i', $date, $parts);
-	return mktime($parts[3], $parts[4], $parts[5], $parts[1], $parts[2], date('Y') - ($parts[1] == 12 && date('n') == 1 ? 1 : 0));
-}
-
-/**
- * @param $str
- * @return int
- */
-function clean_nb($str) {
-	return (int)str_replace('.', '', $str);
-}
-
-/**
- * Amélioration de var_dump()
- *
- */
-function dump() {
-	$n = func_num_args();
-	ob_start();
-	for ($i = 0; $i < $n; $i++)
-		var_dump(func_get_arg($i));
-	$content = ob_get_clean()."\n";
-	//echo str_replace(array('<', '>'), array('&lt;', '&gt;'), $content)."\n";
-	echo $content."\n";
-}
-
-
-/**
- * Echappement forcé pour la syntaxe Json
- *
- * @param string $str
- * @return string
- */
-function json_quote($str) {
-	return str_replace('"', '\\"', $str);
-}
-
 
 /**
  * Verification de l'empire (Mise à jour, rajout, empire plein)
@@ -99,21 +19,22 @@ function json_quote($str) {
 function home_check($type, $coords) {
 	global $db, $user_data;
 
-	$empty_planets 	= array(101=>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
-	$empty_moons 	= array(201=>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
-	$planets = $moons = array();
+    $empty_planets = range(101, 199);
+    $empty_moons = range(201, 299);
+    $planets = $moons = [];
 	$offset = ($type == TYPE_PLANET ? 100 : 200);
 
 	$query = $db->sql_query("SELECT `planet_id`, `coordinates` FROM ".TABLE_USER_BUILDING." WHERE `user_id` = ".$user_data['user_id']." ORDER BY `planet_id`");
 	while ($data = $db->sql_fetch_assoc($query)) {
-		if ($data['planet_id'] < 200) {
-			$planets[$data['planet_id']] = $data['coordinates'];
-			unset($empty_planets[$data['planet_id']], $empty_moons[$data['planet_id']+100]);
-		}
-		else {
-			$moons[$data['planet_id']] = $data['coordinates'];
-			unset($empty_moons[$data['planet_id']], $empty_planets[$data['planet_id']-100]);
-		}
+        $id = $data['planet_id'];
+        $coords = $data['coordinates'];
+        if ($id < 200) {
+            $planets[$id] = $coords;
+            unset($empty_planets[$id], $empty_moons[$id + 100]);
+        } else {
+            $moons[$id] = $coords;
+            unset($empty_moons[$id], $empty_planets[$id - 100]);
+        }
 	}
 	foreach ($planets as $id => $p) {
 		if ($p == $coords || $coords == "unknown") {
@@ -144,40 +65,16 @@ function home_check($type, $coords) {
 	}
 }
 
-/**
- * @param     $coords
- * @param int $exp
- * @return bool
- */
-function check_coords($coords, $exp = 0) {
-	global $server_config;
-	if (!preg_match('!^([0-9]{1,2}):([0-9]{1,3}):([0-9]{1,2})$!Usi', $coords, $match)) return false;
-	//$row_error = ($exp ? ($match[3] != 16) : ($match[3] > 15) );
-	//if ($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15))) return false;
-	return !($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15)));
-	//return true;
-}
-
-/**
- * @return float
- */
-function get_microtime() {
-	$t = explode(' ', microtime());
-	return ((float)$t[1] + (float)$t[0]);
-}
-
 
 /**
  * @param      $type
  * @param null $data
  */
-function add_log($type, $data = null) {
+function add_log($type, $data) {
 	global $server_config, $user_data, $root;
 	$message = '';
 	if(!isset($data['toolbar'])) {$data['toolbar'] = "";}
 	if ($type == 'buildings' || $type == 'overview' || $type == 'defense' || $type == 'research' || $type == 'fleet'||$type == 'info') {
-		if (!$server_config['xtense_log_empire']) return;
-
 		if ($type == 'buildings') 	$message = 'envoie les batiments de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'overview') 	$message = 'envoie les informations de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
 		if ($type == 'defense') 	$message = 'envoie les defenses de sa planète '.$data['planet_name'].' ('.$data['coords'].')';
@@ -187,14 +84,10 @@ function add_log($type, $data = null) {
 	}
 
 	if ($type == 'system') {
-		if (!$server_config['xtense_log_system']) return;
-
 		$message = 'envoie le système solaire '.$data['coords'];
 	}
 
 	if ($type == 'ranking') {
-		if (!$server_config['xtense_log_ranking']) return;
-
 		$message = 'envoie le classement '.$data['type2'].' des '.$data['type1'].' ('.$data['offset'].'-'.($data['offset']+99).') : '.date('H', $data['time']).'h';
 	}
 
@@ -238,30 +131,23 @@ function add_log($type, $data = null) {
     }
 }
 
-/**
- * @param $size
- * @return string
- */
-function format_size ($size) {
-	if ($size < 1024) $size .= ' octets';
-	elseif ($size < 1024*1024) $size = round($size/1024, 2).' Ko';
-	else $size = round($size/1024/1024, 2).'Mo';
-	return $size;
-}
 
 /**
  * @param $stats
  * @param $value
  */
 function update_statistic($stats, $value){
-	global $db;
-	$request = "update ".TABLE_STATISTIC." set statistic_value = statistic_value + {$value}";
-	$request .= " where statistic_name = '{$stats}'";
-	$db->sql_query($request);
-	if ($db->sql_affectedrows() == 0) {
-		$request = "insert ignore into ".TABLE_STATISTIC." values ('{$stats}', '{$value}')";
-		$db->sql_query($request);
-	}
+    global $db;
+    $query = sprintf(
+        "INSERT INTO %s (statistic_name, statistic_value) VALUES ('%s', %d)
+        ON DUPLICATE KEY UPDATE statistic_value = statistic_value + %d",
+        TABLE_STATISTIC,
+        $db->sql_escape_string($stats),
+        $value,
+        $value
+    );
+
+    $db->sql_query($query);
 }
 
 /**
