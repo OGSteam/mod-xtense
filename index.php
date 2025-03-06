@@ -138,6 +138,7 @@ $db->sql_close();
 
             <table class="og-table og-full-table">
                 <thead>
+                <tr><th></th></tr>
                 </thead>
                 <tbody>
                 <tr>
@@ -294,7 +295,7 @@ $db->sql_close();
             <div class="og-msg ">
                 <h3 class="og-title"><?=$lang['MOD_XTENSE_AUTHOR']?></h3>
                 <p class="og-content"><?= $lang['MOD_XTENSE_FORUM']; ?> : <a href="https://forum.ogsteam.eu/"  target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_TITLE']); ?></a></p>
-                <p class="og-content"><a href="https://wiki.ogsteam.eu/doku.php?id=fr:ogspy:documentationxtense" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p>
+                <p class="og-content"><a href="https://wiki.ogsteam.eu/doku.php?id=ogspy:documentationxtense" target="_blank" rel="noopener"><?php echo ($lang['MOD_XTENSE_INSTALL_HELP']); ?></a></p>
                 <p class="og-content"><a href="https://github.com/OGSteam/mod-xtense/releases/"><?php echo ($lang['MOD_XTENSE_CHANGELOG']); ?></a></p>
             </div>
         </div>
