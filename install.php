@@ -9,6 +9,14 @@ global $db;
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
+global $table_prefix;
+
+define('TABLE_XTENSE_GROUPS', $table_prefix.'xtense_groups');
+define('TABLE_XTENSE_CALLBACKS', $table_prefix.'xtense_callbacks');
+define('TABLE_PARSEDREC', $table_prefix.'parsedRec');
+define('TABLE_PARSEDSPYEN', $table_prefix.'parsedSpyEn');
+
+
 $install_ogspy = false;
 $is_ok = false;
 $mod_folder = "xtense";
@@ -18,12 +26,6 @@ $db->sql_query("UPDATE " . TABLE_MOD . " SET menu = 'Xtense' WHERE title = 'xten
 
 
 if ($is_ok) {
-	if (file_exists(str_replace('install', '', getcwd()) . 'mod/' . $root . '/includes/config.php'))
-	{
-		require_once(str_replace('install', '', getcwd()) . 'mod/' . $root . '/includes/config.php');
-		$install_ogspy = true;
-	} else {
-		require_once('mod/' . $root . '/includes/config.php');
 
 		//---- Creation de la table des recyclages
 		$db->sql_query("CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDREC . " (
@@ -79,5 +81,5 @@ if ($is_ok) {
 		$db->sql_query("REPLACE INTO " .TABLE_XTENSE_GROUPS. " (`group_id`, `system`, `ranking`, `empire`, `messages`) VALUES
 			('1', '1', '1', '1', '1')");
 
-	}
+
 }
