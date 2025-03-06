@@ -595,8 +595,8 @@ switch ($received_game_data['type']) {
                 //default player_id/ally_id à -1 (cf shemas SQL)
                 $v['player_id'] = (isset($v['player_id']) ? (int)$v['player_id'] : -1);
                 $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
-                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id']; 
-          
+                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id'];
+
                 //Lors de l'insert ou de l'update il y a l'insert ou l'update de la table game_ally et game_player
                 // phase transitoire avec doublon d information antre table universe(1) et game_player(2)
                 //Table universe(1)
@@ -613,7 +613,7 @@ switch ($received_game_data['type']) {
                 if( $v['player_id'] != -1)
                 {
                     $db->sql_query(
-                        "REPLACE INTO " . TABLE_GAME_PLAYER . " 
+                        "REPLACE INTO " . TABLE_GAME_PLAYER . "
                         ( player_id , player, status , ally_id , datadate )
                         VALUES
                         ( " . $v['player_id'] . " , '" . $v['player_name'] . "' , '" . $statusTemp . "' ,  " . $v['ally_id'] . " , " . $time . ")
@@ -772,18 +772,19 @@ switch ($received_game_data['type']) {
                     throw new UnexpectedValueException("Ranking Ally: Nb players not found");
                 }
                 $data['members'] = filter_var($data['members'], FILTER_SANITIZE_NUMBER_INT);
-            }
+
 
                 $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
                 $datas[] = $data;
                 $total++;
-        }
+            }
 
-        if (!empty($query)) {
-            $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
-        }
+            if (!empty($query)) {
+                $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
+            }
 
-        $db->sql_query("UPDATE " . TABLE_USER . " SET rank_added_ogs = rank_added_ogs + " . $total . " WHERE user_id = " . $user_data['user_id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET rank_added_ogs = rank_added_ogs + " . $total . " WHERE user_id = " . $user_data['user_id']);
+        }
 
         $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
 
