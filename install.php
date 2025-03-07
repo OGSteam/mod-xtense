@@ -77,7 +77,7 @@ if ($is_ok) {
 			('xtense_universe', 'https://sxx-fr.ogame.gameforge.com'),
 			('xtense_spy_autodelete', '1')
 		");
-		generate_config_cache();
+        generate_all_cache();
 		$db->sql_query("REPLACE INTO " .TABLE_XTENSE_GROUPS. " (`group_id`, `system`, `ranking`, `empire`, `messages`) VALUES
 			('1', '1', '1', '1', '1')");
 

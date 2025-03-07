@@ -14,6 +14,8 @@ define("TABLE_XTENSE_CALLBACKS", $table_prefix . "xtense_callbacks");
 $mod_folder = "xtense";
 $mod_name = "xtense";
 
+global $table_prefix;
+
 $db->sql_query("UPDATE " . TABLE_MOD . " SET menu = 'Xtense' WHERE title = 'xtense'");
 
 $db->sql_query("ALTER TABLE ".$table_prefix."parsedRec"." CONVERT TO CHARACTER SET utf8");
@@ -33,4 +35,4 @@ if(version_compare($version, '2.7.2', '<')){
 }
 
 update_mod($mod_folder, $mod_name);
-
+generate_all_cache();
