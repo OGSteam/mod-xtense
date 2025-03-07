@@ -65,6 +65,13 @@ function home_check($type, $coords) {
 	}
 }
 
+/**
+ * @param $name
+ */
+function icon($name): void
+{
+    echo "<img src='mod/xtense/img/icons/$name.png' class='icon' style='vertical-align: middle' alt='$name' >";
+}
 
 /**
  * @param      $type

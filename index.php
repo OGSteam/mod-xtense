@@ -12,7 +12,6 @@ if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 const FIREFOX_URL = 'https://addons.mozilla.org/fr/firefox/addon/xtense-we/';
 const CHROME_URL = 'https://chrome.google.com/webstore/detail/xtense-gm/mkcgnadlbcakpmmmdfijdekknodapcgl?hl=fr';
 
-
 if (!function_exists('json_decode')) {
     die("Xtense cannot work without the PHP Module JSON Library");
 }
@@ -40,20 +39,11 @@ if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
 }
 $my_user_token = get_user_profile_token($user_data['user_id']);
 
-
-$checkboxes = array('allow_connections', 'strict_admin', 'log_reverse', 'plugin_root', 'log_empire', 'log_system', 'log_spy', 'log_ranking', 'log_ally_list', 'log_messages', 'spy_autodelete');
-
 if (isset($pub_universe)) {
     $universe = Check::universe($pub_universe);
     if ($universe === false) $universe = 'https://sxx-yy.ogame.gameforge.com';
 
-    $replace = '';
-    foreach ($checkboxes as $name) {
-        $server_config['xtense_' . $name] = (isset($_POST[$name]) ? 1 : 0);
-        $replace .= ' ,("xtense_' . $name . '", "' . $server_config['xtense_' . $name] . '")';
-    }
-
-    $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (`config_name`, `config_value`) VALUES ("xtense_universe", "' . $universe . '")' . $replace);
+    $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (`config_name`, `config_value`) VALUES ("xtense_universe", "' . $universe . '")');
     generate_config_cache();
     $server_config['xtense_universe'] = $universe;
 
@@ -259,10 +249,12 @@ $db->sql_close();
                     <table class="og-table og-full-table">
                     <thead>
                     <tr>
+                        <th>#</th>
                         <th><?php echo ($lang['MOD_XTENSE_CALLBACK_MODNAME']); ?></th>
                         <th><?php echo ($lang['MOD_XTENSE_CALLBACK_DATATYPE']); ?></th>
                         <th><?php echo ($lang['MOD_XTENSE_CALLBACK_STATUSMOD']); ?></th>
                         <th><?php echo ($lang['MOD_XTENSE_CALLBACK_STATUSLINK']); ?></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
