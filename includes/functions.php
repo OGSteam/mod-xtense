@@ -7,64 +7,6 @@
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
-
-/**
- * Verification de l'empire (Mise à jour, rajout, empire plein)
- *
- * @param int $type
- * @param string $coords
- * @return mixed(bool/int)
- */
-
-function home_check($type, $coords) {
-	global $db, $user_data;
-
-    $empty_planets = range(101, 199);
-    $empty_moons = range(201, 299);
-    $planets = $moons = [];
-	$offset = ($type == TYPE_PLANET ? 100 : 200);
-
-	$query = $db->sql_query("SELECT `planet_id`, `coordinates` FROM ".TABLE_USER_BUILDING." WHERE `user_id` = ".$user_data['user_id']." ORDER BY `planet_id`");
-	while ($data = $db->sql_fetch_assoc($query)) {
-        $id = $data['planet_id'];
-        $coords = $data['coordinates'];
-        if ($id < 200) {
-            $planets[$id] = $coords;
-            unset($empty_planets[$id], $empty_moons[$id + 100]);
-        } else {
-            $moons[$id] = $coords;
-            unset($empty_moons[$id], $empty_planets[$id - 100]);
-        }
-	}
-	foreach ($planets as $id => $p) {
-		if ($p == $coords || $coords == "unknown") {
-			// Si c'est une lune on check si une lune existe déjà
-			if ($type == TYPE_MOON) {
-				if (isset($moons[$id+100])) return array('update', 'id' => $id+100);
-				else return array('add', 'id' => $id+100);
-			}
-
-			return array('update', 'id' => $id);
-		}
-	}
-
-	// Si une lune correspond a la planete, on place la planete sous la lune
-	foreach ($moons as $id => $m) {
-		if ($m == $coords) {
-			return array($type == TYPE_PLANET ? 'add' : 'update', 'id' => $id-200+$offset);
-		}
-	}
-
-	if ($type == TYPE_PLANET) {
-		if (count($empty_planets) == 0) return array('full');
-		foreach ($empty_planets as $p) return array('add', 'id' => $p+$offset);
-	}
-	else {
-		if (count($empty_moons) == 0) return array('full');
-		foreach ($empty_moons as $p) return array('add', 'id' => $p+$offset);
-	}
-}
-
 /**
  * @param $name
  */

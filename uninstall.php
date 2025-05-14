@@ -14,6 +14,6 @@ $mod_uninstall_name = "xtense";
 $mod_uninstall_table = $table_prefix."xtense_groups".','.$table_prefix."xtense_callbacks".','.$table_prefix."parsedRec".','.$table_prefix."parsedSpyEn";
 uninstall_mod ($mod_uninstall_name, $mod_uninstall_table);
 
-$db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE `config_name` LIKE "xtense_%"');
+$db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE `name` LIKE "xtense_%"');
 generate_all_cache();
 

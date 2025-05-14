@@ -67,13 +67,13 @@ function xtense_check_auth ($token){
 
     if($token_user_id !== false) {
 
-        $query = $db->sql_query("SELECT `user_id`, `user_name`, `user_password`, `user_active`, `user_stat_name` FROM " . TABLE_USER . " WHERE `user_id` = {$token_user_id}");
+        $query = $db->sql_query("SELECT `id`, `name`, `active` FROM " . TABLE_USER . " WHERE `id` = {$token_user_id}");
 
         $user_data = $db->sql_fetch_assoc($query);
 
         if ( $user_data !== false) {
 
-            if ($user_data['user_active'] == 0) {
+            if ($user_data['active'] == 0) {
                 $io->set(array(
                     'type' => 'user active'
                 ));
@@ -99,8 +99,13 @@ function xtense_check_user_rights($user_data) {
     global $db, $server_config, $io;
 
     // Verification des droits de l'user
-    $query = $db->sql_query("SELECT `system`, `ranking`, `empire`, `messages` FROM " . TABLE_USER_GROUP . " u LEFT JOIN " . TABLE_GROUP . " g ON g.`group_id` = u.`group_id` LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.`group_id` = g.`group_id` WHERE u.`user_id` = '" . $user_data['user_id'] . "'");
-    $user_data['grant'] = $db->sql_fetch_assoc($query);
+    $query = $db->sql_query("
+    SELECT `system`, `ranking`, `empire`, `messages`
+    FROM " . TABLE_USER_GROUP . " u
+    LEFT JOIN " . TABLE_GROUP . " g ON g.`id` = u.`group_id`
+    LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.`group_id` = g.`id`
+    WHERE u.`user_id` = '" . $user_data['id'] . "'
+");    $user_data['grant'] = $db->sql_fetch_assoc($query);
 
     // Si Xtense demande la verification du serveur, renvoi des droits de l'utilisateur
     if (isset($pub_server_check)) {

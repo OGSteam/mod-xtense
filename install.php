@@ -73,7 +73,7 @@ if ($is_ok) {
 			) DEFAULT CHARSET=utf8;");
 
 		//---- Creation configuration Xtense
-		$db->sql_query("REPLACE INTO " . TABLE_CONFIG . " (config_name, config_value) VALUES
+		$db->sql_query("REPLACE INTO " . TABLE_CONFIG . " (name, value) VALUES
 			('xtense_universe', 'https://sxx-fr.ogame.gameforge.com'),
 			('xtense_spy_autodelete', '1')
 		");
