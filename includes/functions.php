@@ -71,7 +71,7 @@ function add_log($type, $data) {
             @chmod('journal/'.$dir, 0777);
             $fp = @fopen('journal/'.$dir.'/'.$file, 'a+');
             if ($fp) {
-                fwrite($fp, '/*'.date('d/m/Y H:i:s').'*/'.'[Xtense]'.'['.$data['toolbar'].'] '.$user_data['user_name'].' '.$message."\n");
+                fwrite($fp, '/*'.date('d/m/Y H:i:s').'*/'.'[Xtense]'.'['.$data['toolbar'].'] '.$user_data['name'].' '.$message."\n");
                 fclose($fp);
                 @chmod('journal/'.$dir.'/'.$file, 0777);
             }

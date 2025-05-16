@@ -6,13 +6,14 @@
  */
 
 use Ogsteam\Ogspy\Model\Tokens_Model;
+use Ogsteam\Ogspy\Model\Config_Model;
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
 
 function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $univers)
 {
-    global $server_config, $io;
+    global $server_config, $io, $db;
 
     if (version_compare($toolbar_version, TOOLBAR_MIN_VERSION, '<')) {
         $io->set(array(
@@ -43,6 +44,19 @@ function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $
             'reason' => $server_config['reason']
         ));
         $io->send(0, true);
+    }
+
+    // Vérifier et mettre à jour xtense_universe s'il a sa valeur par défaut (vide)
+    // et si l'univers fourni est valide.
+    if ($server_config['xtense_universe'] == 'https://sxx-fr.ogame.gameforge.com') {
+        // Mettre à jour la configuration dans la base de données
+        $config_model = new Config_Model();
+        $config_model->update_one($univers, 'xtense_universe');
+
+        // Mettre à jour la configuration en mémoire pour la requête actuelle
+        $server_config['xtense_universe'] = $univers;
+
+        generate_config_cache();
     }
 
     if (strtolower($server_config['xtense_universe']) != strtolower($univers)) {

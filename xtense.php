@@ -164,17 +164,65 @@ switch ($received_game_data['type']) {
                     $userclass = 'EXP';
                 }
 
-                //Officers
-                $db->sql_query("UPDATE " . TABLE_USER . " SET `user_class` = '$userclass', `off_commandant` = '{$player_details['player_officer_commander']}', `off_amiral` = '{$player_details['player_officer_amiral']}', `off_ingenieur` = '{$player_details['player_officer_engineer']}', `off_geologue` = '{$player_details['player_officer_geologist']}', `off_technocrate` = '{$player_details['player_officer_technocrate']}'");
+                // Met à jour les informations du joueur dans la table ogspy_game_player (TABLE_GAME_PLAYER)
+                // et lie l'ID du joueur de jeu à l'utilisateur OGSpy dans la table ogspy_user (TABLE_USER)
+                $gamePlayerId = (int)$player_details['player_id'];
+                if ($gamePlayerId > 0) { // S'assurer que player_id est valide
+                    $gamePlayerName = $db->sql_escape_string($player_details['player_name']);
+                    $officerCommander = (int)$player_details['player_officer_commander'];
+                    $officerAmiral = (int)$player_details['player_officer_amiral'];
+                    $officerEngineer = (int)$player_details['player_officer_engineer'];
+                    $officerGeologist = (int)$player_details['player_officer_geologist'];
+                    $officerTechnocrate = (int)$player_details['player_officer_technocrate'];
+                    $ogameTimestamp = (int)$uni_details['uni_time'];
+                    $currentOgspyUserId = (int)$user_data['id']; // ID de l'utilisateur OGSpy
+
+                    $queryGamePlayer = "
+                        INSERT INTO " . TABLE_GAME_PLAYER . " (
+                            `id`, `name`, `class`,
+                            `off_commandant`, `off_amiral`, `off_ingenieur`, `off_geologue`, `off_technocrate`,
+                            `datadate`, `ogspy_user_id`,
+                            `status`, `ally_id`
+                        ) VALUES (
+                            {$gamePlayerId},
+                            '{$gamePlayerName}',
+                            '{$userclass}',
+                            {$officerCommander},
+                            {$officerAmiral},
+                            {$officerEngineer},
+                            {$officerGeologist},
+                            {$officerTechnocrate},
+                            {$ogameTimestamp},
+                            {$currentOgspyUserId},
+                            '',
+                            -1
+                        )
+                        ON DUPLICATE KEY UPDATE
+                            `name` = VALUES(`name`),
+                            `class` = VALUES(`class`),
+                            `off_commandant` = VALUES(`off_commandant`),
+                            `off_amiral` = VALUES(`off_amiral`),
+                            `off_ingenieur` = VALUES(`off_ingenieur`),
+                            `off_geologue` = VALUES(`off_geologue`),
+                            `off_technocrate` = VALUES(`off_technocrate`),
+                            `datadate` = VALUES(`datadate`),
+                            `ogspy_user_id` = VALUES(`ogspy_user_id`)";
+                    $log->debug("Query Game Player: " . $queryGamePlayer);
+
+                    $db->sql_query($queryGamePlayer);
+
+                    // Met à jour TABLE_USER pour stocker le player_id (ID du joueur dans le jeu)
+                    $db->sql_query("UPDATE " . TABLE_USER . " SET `player_id` = {$gamePlayerId} WHERE `id` = {$currentOgspyUserId}");
+                }
 
                 //Uni Speed
-                $db->sql_query("UPDATE " . TABLE_CONFIG . " SET `config_value` = '{$uni_details['uni_speed']}' WHERE `config_name` = 'speed_uni' ");
+                $db->sql_query("INSERT INTO " . TABLE_CONFIG . " (name, value) VALUES ('speed_uni', '{$uni_details['uni_speed']}') ON DUPLICATE KEY UPDATE value = VALUES(value)");
                 //Uni Speed Peaceful
-                $db->sql_query("UPDATE " . TABLE_CONFIG . " SET `config_value` = '{$uni_details['uni_speed_fleet_peaceful']}' WHERE `config_name` = 'speed_fleet_peaceful' ");
+                $db->sql_query("INSERT INTO " . TABLE_CONFIG . " (name, value) VALUES ('speed_fleet_peaceful', '{$uni_details['uni_speed_fleet_peaceful']}') ON DUPLICATE KEY UPDATE value = VALUES(value)");
                 //Uni Speed War
-                $db->sql_query("UPDATE " . TABLE_CONFIG . " SET `config_value` = '{$uni_details['uni_speed_fleet_war']}' WHERE `config_name` = 'speed_fleet_war' ");
+                $db->sql_query("INSERT INTO " . TABLE_CONFIG . " (name, value) VALUES ('speed_fleet_war', '{$uni_details['uni_speed_fleet_war']}') ON DUPLICATE KEY UPDATE value = VALUES(value)");
                 //Uni Speed holding
-                $db->sql_query("UPDATE " . TABLE_CONFIG . " SET `config_value` = '{$uni_details['uni_speed_fleet_holding']}' WHERE `config_name` = 'speed_fleet_holding' ");
+                $db->sql_query("INSERT INTO " . TABLE_CONFIG . " (name, value) VALUES ('speed_fleet_holding', '{$uni_details['uni_speed_fleet_holding']}') ON DUPLICATE KEY UPDATE value = VALUES(value)");
                 //Update Config Cache
                 generate_config_cache();
 
@@ -187,9 +235,9 @@ switch ($received_game_data['type']) {
                 }
                 //Empire
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                                (`user_id`, `planet_id`, `coordinates`, `planet_name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
+                                (`player_id`, `planet_id`, `coordinates`, `planet_name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
                             VALUES
-                                ({$user_data['user_id']}, {$planet_id}, '{$coords}', '{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
+                                ({$gamePlayerId}, {$planet_id}, '{$coords}', '{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
                             ON DUPLICATE KEY UPDATE
                                 planet_name = VALUES(planet_name),
                                 fields = VALUES(fields),
@@ -248,8 +296,8 @@ switch ($received_game_data['type']) {
             $buildingValues = [];
 
 // Préparation des colonnes de base
-            $buildingColumns[] = 'user_id';
-            $buildingValues[] = $user_data['user_id'];
+            $buildingColumns[] = 'player_id';
+            $buildingValues[] = $user_data['player_id'];
 
             $buildingColumns[] = 'planet_id';
             $buildingValues[] = $planet_id;
@@ -330,8 +378,8 @@ switch ($received_game_data['type']) {
                 }
             }
 
-            $columns = "`user_id`, `planet_id`, `coordinates`, `planet_name`";
-            $values = "{$user_data['user_id']}, {$data['planetId']}, '{$coords}', '{$planet_name}'";
+            $columns = "`player_id`, `planet_id`, `coordinates`, `planet_name`";
+            $values = "{$user_data['player_id']}, {$data['planetId']}, '{$coords}', '{$planet_name}'";
 
             if (!empty($set)) {
                 $columns .= ", `" . implode("`, `", array_keys($resourceSettings)) . "`";
@@ -396,7 +444,7 @@ switch ($received_game_data['type']) {
                 }
             }
             // UPSERT pour la table USER_DEFENCE
-            $db->sql_query("INSERT INTO " . TABLE_USER_DEFENCE . "
+            $db->sql_query("INSERT INTO " . TABLE_USER_DEFENSE . "
                 (`user_id`, `planet_id`$fields)
                 VALUES
                 ({$user_data['user_id']}, {$planet_id}$values)
@@ -405,9 +453,9 @@ switch ($received_game_data['type']) {
 
             // UPSERT pour la table USER_BUILDING
             $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                (`user_id`, `planet_id`, `coordinates`, `planet_name`)
+                (`player_id`, `planet_id`, `coordinates`, `planet_name`)
                 VALUES
-                ({$user_data['user_id']}, {$planet_id}, '{$coords}', '{$planet_name}')
+                ({$user_data['player_id']}, {$planet_id}, '{$coords}', '{$planet_name}')
                 ON DUPLICATE KEY UPDATE
                 planet_name = '{$planet_name}'");
 
