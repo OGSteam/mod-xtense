@@ -1,5 +1,5 @@
 <?php
-global $db, $database, $server_config, $databaseSpyId;
+global $db, $database, $server_config, $databaseSpyId, $log;
 
 /**
  * @package Xtense 2
@@ -181,7 +181,7 @@ switch ($received_game_data['type']) {
                         INSERT INTO " . TABLE_GAME_PLAYER . " (
                             `id`, `name`, `class`,
                             `off_commandant`, `off_amiral`, `off_ingenieur`, `off_geologue`, `off_technocrate`,
-                            `datadate`, `ogspy_user_id`,
+                            `datadate`,
                             `status`, `ally_id`
                         ) VALUES (
                             {$gamePlayerId},
@@ -193,7 +193,6 @@ switch ($received_game_data['type']) {
                             {$officerGeologist},
                             {$officerTechnocrate},
                             {$ogameTimestamp},
-                            {$currentOgspyUserId},
                             '',
                             -1
                         )
@@ -205,15 +204,12 @@ switch ($received_game_data['type']) {
                             `off_ingenieur` = VALUES(`off_ingenieur`),
                             `off_geologue` = VALUES(`off_geologue`),
                             `off_technocrate` = VALUES(`off_technocrate`),
-                            `datadate` = VALUES(`datadate`),
-                            `ogspy_user_id` = VALUES(`ogspy_user_id`)";
-                    $log->debug("Query Game Player: " . $queryGamePlayer);
-
+                            `datadate` = VALUES(`datadate`)";
                     $db->sql_query($queryGamePlayer);
-
-                    // Met à jour TABLE_USER pour stocker le player_id (ID du joueur dans le jeu)
-                    $db->sql_query("UPDATE " . TABLE_USER . " SET `player_id` = {$gamePlayerId} WHERE `id` = {$currentOgspyUserId}");
                 }
+
+                // Met à jour TABLE_USER pour stocker le player_id (ID du joueur dans le jeu)
+                $db->sql_query("UPDATE " . TABLE_USER . " SET `player_id` = {$gamePlayerId} WHERE `id` = {$currentOgspyUserId}");
 
                 //Uni Speed
                 $db->sql_query("INSERT INTO " . TABLE_CONFIG . " (name, value) VALUES ('speed_uni', '{$uni_details['uni_speed']}') ON DUPLICATE KEY UPDATE value = VALUES(value)");
@@ -234,16 +230,20 @@ switch ($received_game_data['type']) {
                     $boosters = booster_encodev(0, 0, 0, 0, 0, 0, 0, 0); /* si aucun booster détecté*/
                 }
                 //Empire
+                list($g, $s, $r) = explode(':', $coords);
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                                (`player_id`, `planet_id`, `coordinates`, `planet_name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
+                                (`player_id`, `id`, `galaxy`, `system`, `row`, `name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
                             VALUES
-                                ({$gamePlayerId}, {$planet_id}, '{$coords}', '{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
+                                ({$gamePlayerId}, {$planet_id}, {$g}, {$s}, {$r}, '{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
                             ON DUPLICATE KEY UPDATE
-                                planet_name = VALUES(planet_name),
+                                name = VALUES(name),
                                 fields = VALUES(fields),
                                 boosters = VALUES(boosters),
                                 temperature_min = VALUES(temperature_min),
-                                temperature_max = VALUES(temperature_max)");
+                                temperature_max = VALUES(temperature_max),
+                                galaxy = VALUES(galaxy),
+                                system = VALUES(system),
+                                row = VALUES(row)");
 
                 $io->set(array(
                     'type' => 'home updated',
@@ -289,25 +289,26 @@ switch ($received_game_data['type']) {
             $buildings = $data['buildings'];
 
             $coords = Check::coords($coords);
+            list($g, $s, $r) = explode(':', $coords); // ADDED: Parse coordinates
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
 
             // Construction d'une requête UPSERT pour les bâtiments de la planète
             $buildingColumns = [];
             $buildingValues = [];
 
-// Préparation des colonnes de base
-            $buildingColumns[] = 'player_id';
-            $buildingValues[] = $user_data['player_id'];
+            // Préparation des colonnes de base
 
-            $buildingColumns[] = 'planet_id';
-            $buildingValues[] = $planet_id;
+            $buildingColumns[] = 'id'; // ADDED
+            $buildingValues[] = $planet_id;        // ADDED
+            $buildingColumns[] = 'galaxy'; // ADDED
+            $buildingValues[] = $g;        // ADDED
+            $buildingColumns[] = 'system'; // ADDED
+            $buildingValues[] = $s;        // ADDED
+            $buildingColumns[] = 'row';    // ADDED
+            $buildingValues[] = $r;        // ADDED
 
-            $buildingColumns[] = 'coordinates';
-            $buildingValues[] = $coords;
-
-            $buildingColumns[] = 'planet_name';
+            $buildingColumns[] = 'name'; // RENAMED from 'planet_name'
             $buildingValues[] = $planet_name;
-
 
             // Ajout des bâtiments
             foreach ($database['buildings'] as $code) {
@@ -317,12 +318,13 @@ switch ($received_game_data['type']) {
 
             // Préparation des champs pour la clause ON DUPLICATE KEY UPDATE
             $updatePairs = [];
-            $updatePairs[] = "planet_name = '$planet_name'";
+            $updatePairs[] = "name = VALUES(name)"; // CHANGED and RENAMED
+            $updatePairs[] = "galaxy = VALUES(galaxy)"; // ADDED
+            $updatePairs[] = "system = VALUES(system)"; // ADDED
+            $updatePairs[] = "row = VALUES(row)";       // ADDED
 
             foreach ($database['buildings'] as $code) {
-                if (isset($buildings[$code])) {
-                    $updatePairs[] = "`$code` = " . (int)$buildings[$code];
-                }
+                $updatePairs[] = "`$code` = VALUES(`$code`)"; // CHANGED to use VALUES()
             }
 
             // Construction de la requête complète

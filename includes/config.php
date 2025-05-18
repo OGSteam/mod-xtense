@@ -15,8 +15,8 @@ define('TABLE_XTENSE_CALLBACKS', $table_prefix.'xtense_callbacks');
 define('TABLE_PARSEDREC', $table_prefix.'parsedRec');
 define('TABLE_PARSEDSPYEN', $table_prefix.'parsedSpyEn');
 
-define('TYPE_PLANET', 0);
-define('TYPE_MOON', 1);
+define('TYPE_PLANET', 'planet');
+define('TYPE_MOON', 'moon');
 
 if (file_exists ("../mod/{$root}/version.txt"))
 	list($mod_name, $mod_version, $mod_install, $ogspy_min_version, $toolbar_min_version) = file("../mod/{$root}/version.txt");
@@ -48,5 +48,3 @@ $callbackTypesNames = array(
 	'overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy','ennemy_spy','rc',
 	'rc_cdr', 'msg', 'ally_msg', 'expedition','ranking'
 );
-
-
