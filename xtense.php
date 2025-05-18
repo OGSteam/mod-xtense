@@ -362,54 +362,93 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords']);
+            $coords_str = filter_var($data['coords']);
             $planet_name = filter_var($data['planetName']);
-            $planet_type = filter_var($data['planetType']);
-            if (!isset($coords, $planet_name, $planet_type)) {
-                throw new UnexpectedValueException("ResourceSettings: Missing Planet Details");
-            }
-            $resourceSettings = $data['resourceSettings'];
+            $planet_type_int = filter_var($data['planetType'], FILTER_VALIDATE_INT);
+            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
+            $resourceSettings_data = isset($data['resourceSettings']) && is_array($data['resourceSettings']) ? $data['resourceSettings'] : null;
 
-            $coords = Check::coords($coords);
-            $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
-
-            $set = '';
-            foreach ($database['ressources_p'] as $code) {
-                if (isset($resourceSettings[$code])) {
-                    $set .= ", `$code` = " . (int)$resourceSettings[$code];
-                }
+            if (
+                !isset($coords_str, $planet_name, $data['planetType']) ||
+                $planet_id === false || $planet_type_int === false || $resourceSettings_data === null
+            ) {
+                throw new UnexpectedValueException("ResourceSettings: Missing or invalid planet details or resourceSettings data");
             }
 
-            $columns = "`player_id`, `planet_id`, `coordinates`, `planet_name`";
-            $values = "{$user_data['player_id']}, {$data['planetId']}, '{$coords}', '{$planet_name}'";
+            $coords = Check::coords($coords_str);
+            list($g, $s, $r) = explode(':', $coords);
 
-            if (!empty($set)) {
-                $columns .= ", `" . implode("`, `", array_keys($resourceSettings)) . "`";
-                $values .= ", " . implode(", ", array_map(fn($code) => isset($resourceSettings[$code]) ? (int)$resourceSettings[$code] : 0, array_keys($resourceSettings)));
+            // Constante pour le callback (ex: TYPE_PLANET, TYPE_MOON)
+            $planet_type_const = ($planet_type_int == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+            // Chaîne pour la base de données ('planet', 'moon')
+            $astro_object_type_str = ($planet_type_int == TYPE_PLANET ? 'planet' : 'moon');
+
+            $columns = [];
+            $values = [];
+
+            // Colonnes de base pour TABLE_USER_BUILDING (ogspy_game_astro_object)
+            $columns[] = 'id'; $values[] = $planet_id;
+            $columns[] = 'galaxy'; $values[] = (int)$g;
+            $columns[] = 'system'; $values[] = (int)$s;
+            $columns[] = 'row'; $values[] = (int)$r;
+            $columns[] = 'name'; $values[] = $db->sql_escape_string($planet_name);
+            $columns[] = 'type'; $values[] = $db->sql_escape_string($astro_object_type_str);
+
+            // Colonnes pour les pourcentages de ressources
+            // Clé JSON => Colonne DB
+            $resource_settings_map = [
+                'M_percentage'   => 'M_percentage',
+                'C_Percentage'   => 'C_Percentage',
+                'D_percentage'   => 'D_percentage',
+                'CES_percentage' => 'CES_percentage',
+                'CEF_percentage' => 'CEF_percentage',
+                'SAT_percentage' => 'Sat_percentage', // Correction de casse pour la DB
+                'FOR_percentage' => 'FOR_percentage'
+            ];
+
+            foreach ($resource_settings_map as $json_key => $db_col_name) {
+                $columns[] = $db_col_name;
+                // Si la clé n'est pas dans les données JSON, mettre 0 (comme pour 'buildings')
+                $values[] = isset($resourceSettings_data[$json_key]) ? (int)$resourceSettings_data[$json_key] : 0;
             }
 
-            $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . " ($columns)
-                            VALUES ($values)
-                            ON DUPLICATE KEY UPDATE
-                            `planet_name` = '{$planet_name}'" . $set);
+            // Préparation des champs pour la clause ON DUPLICATE KEY UPDATE
+            $updatePairs = [];
+            $updatePairs[] = "name = VALUES(name)";
+            $updatePairs[] = "galaxy = VALUES(galaxy)";
+            $updatePairs[] = "system = VALUES(system)";
+            $updatePairs[] = "row = VALUES(row)";
+            $updatePairs[] = "type = VALUES(type)";
 
+            foreach ($resource_settings_map as $json_key => $db_col_name) {
+                $updatePairs[] = "`$db_col_name` = VALUES(`$db_col_name`)";
+            }
+
+            // Construction de la requête complète
+            $query = "INSERT INTO " . TABLE_USER_BUILDING . " (`" . implode('`, `', $columns) . "`)
+                      VALUES (" . implode(', ', array_map(function ($val) {
+                                        // Les valeurs numériques sont directes, les chaînes (déjà échappées) sont entourées d'apostrophes
+                                        return is_numeric($val) ? $val : "'" . $val . "'";
+                                    }, $values)) . ")
+                      ON DUPLICATE KEY UPDATE " . implode(', ', $updatePairs);
+
+            $db->sql_query($query);
 
             $io->set(array(
                 'type' => 'home updated',
-                'page' => 'buildings',
+                'page' => 'buildings', // Conformément au code existant pour resourceSettings et à la demande de reproduire 'buildings'
                 'planet' => $coords
             ));
 
+            // Appel fonction de callback
+            $call->add('resourceSettings', array( // Nom de callback spécifique
+                'coords' => explode(':', $coords),
+                'planet_type' => $planet_type_const, // Utiliser la constante (ex: TYPE_PLANET)
+                'planet_name' => $planet_name,
+                'resourceSettings' => $resourceSettings_data // Renvoyer les données JSON originales
+            ));
 
-            // Callback to be enabled ?
-            // $call->add('buildings', array(
-            //     'coords' => explode(':', $coords),
-            //     'planet_type' => $planet_type,
-            //     'planet_name' => $planet_name,
-            //     'buildings' => $resourceSetting
-            // ));
-
-            add_log('buildings', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
+            add_log('resourceSettings', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
         }
 
         break;
