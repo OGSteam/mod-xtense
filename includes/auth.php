@@ -81,7 +81,7 @@ function xtense_check_auth ($token){
 
     if($token_user_id !== false) {
 
-        $query = $db->sql_query("SELECT `id`, `name`, `active` FROM " . TABLE_USER . " WHERE `id` = {$token_user_id}");
+        $query = $db->sql_query("SELECT `id`, `name`, `active`, `player_id` FROM " . TABLE_USER . " WHERE `id` = {$token_user_id}");
 
         $user_data = $db->sql_fetch_assoc($query);
 

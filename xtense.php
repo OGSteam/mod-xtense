@@ -560,32 +560,44 @@ switch ($received_game_data['type']) {
             $planet_type = filter_var($data['planetType']);
             $researchs = $data['researchs'];
 
-
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("Researchs: Missing Planet Details");
             }
             $coords = Check::coords($coords);
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
 
-            $fields = '';
-            $values = '';
+            // Vérifier que l'ID du joueur est disponible
+            if (!isset($user_data['player_id']) || $user_data['player_id'] <= 0) {
+                throw new UnexpectedValueException("Researchs: Player ID not available");
+            }
+
+            $player_id = (int)$user_data['player_id'];
+
+            // Préparer les champs pour la requête d'insertion/mise à jour des technologies
+            $fields = [];
+            $values = [];
             $update_parts = [];
 
             foreach ($database['labo'] as $code) {
                 if (isset($researchs[$code])) {
-                    $fields .= ", `$code`";
-                    $values .= ", " . (int)$researchs[$code];
+                    $fields[] = "`$code`";
+                    $values[] = (int)$researchs[$code];
                     $update_parts[] = "`$code` = " . (int)$researchs[$code];
                 }
             }
 
-            $db->sql_query("INSERT INTO " . TABLE_USER_TECHNOLOGY . "
-                (`user_id`$fields)
-                VALUES
-                ({$user_data['user_id']}$values)
-                ON DUPLICATE KEY UPDATE
-                " . implode(", ", $update_parts));
+            // Construction de la requête UPSERT pour les technologies
+            if (!empty($fields)) {
+                $fields_str = implode(', ', $fields);
+                $values_str = implode(', ', $values);
 
+                $db->sql_query("INSERT INTO " . TABLE_USER_TECHNOLOGY . "
+                    (`player_id`, {$fields_str})
+                    VALUES
+                    ({$player_id}, {$values_str})
+                    ON DUPLICATE KEY UPDATE
+                    " . implode(", ", $update_parts));
+            }
 
             $io->set(array(
                 'type' => 'home updated',
