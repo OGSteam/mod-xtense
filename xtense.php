@@ -625,14 +625,89 @@ switch ($received_game_data['type']) {
             $coords = filter_var($data['coords']);
             $planet_name = filter_var($data['planetName']);
             $planet_type = filter_var($data['planetType']);
+            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
             $fleet = $data['fleet'];
+
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("Fleet: Missing Planet Details");
             }
             $coords = Check::coords($coords);
+            list($g, $s, $r) = explode(':', $coords); // Extraire les coordonnées
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+            $planet_type_str = ((int)$planet_type == TYPE_PLANET ? 'planet' : 'moon');
 
-            // Flotte à mettre à insérer si table disponible ? Pour l'instant on ne fait rien :-)
+            // S'assurer que l'objet astro existe dans la base de données
+            $astro_object_query = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
+                                              WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+
+            // Si l'objet astro n'existe pas, on le crée
+            if ($db->sql_numrows($astro_object_query) == 0) {
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                            (id, type, galaxy, system, row, name, player_id)
+                            VALUES
+                            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})");
+            } else {
+                // Mise à jour du nom de la planète si nécessaire
+                $db->sql_query("UPDATE " . TABLE_USER_BUILDING . "
+                            SET name = '{$planet_name}'
+                            WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+            }
+
+            // Récupérer l'ID de l'objet astro (nécessaire pour la table flotte)
+            $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
+                                          WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+            $astro_object_id = $db->sql_fetch_row($astro_id_result)[0] ?? $planet_id;
+
+            // Préparer les champs pour la requête d'insertion/mise à jour de la flotte
+            $fleet_fields = [];
+            $fleet_values = [];
+            $update_pairs = [];
+
+            foreach ($database['fleet'] as $code) {
+                if (isset($fleet[$code])) {
+                    $fleet_fields[] = "`$code`";
+                    $fleet_values[] = (int)$fleet[$code];
+                    $update_pairs[] = "`$code` = " . (int)$fleet[$code];
+                }
+            }
+
+            // Construction de la requête UPSERT pour la flotte
+            if (!empty($fleet_fields)) {
+                $fields_str = implode(', ', $fleet_fields);
+                $values_str = implode(', ', $fleet_values);
+
+                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_FLEET . "
+                            (astro_object_id, {$fields_str})
+                            VALUES
+                            ({$astro_object_id}, {$values_str})
+                            ON DUPLICATE KEY UPDATE
+                            " . implode(", ", $update_pairs));
+            }
+
+            // Mettre à jour les informations de la flotte de production
+
+            foreach ($database['fleet_production'] as $code) {
+                if (isset($fleet[$code])) {
+                    $fleet_production_fields[] = "`$code`";
+                    $fleet_production_values[] = (int)$fleet[$code];
+                    $update_prod_pairs[] = "`$code` = " . (int)$fleet[$code];
+                }
+            }
+
+            // Construction de la requête UPSERT pour la flotte
+            if (!empty($fleet_production_fields)) {
+                $fields_str = implode(', ', $fleet_production_fields);
+                $values_str = implode(', ', $fleet_production_values);
+
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                            (id, {$fields_str})
+                            VALUES
+                            ({$astro_object_id}, {$values_str})
+                            ON DUPLICATE KEY UPDATE
+                            " . implode(", ", $update_prod_pairs));
+            }
+
+
             $io->set(array(
                 'type' => 'home updated',
                 'page' => 'fleet',
