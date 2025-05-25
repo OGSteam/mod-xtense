@@ -472,33 +472,57 @@ switch ($received_game_data['type']) {
                 throw new UnexpectedValueException("Defense: Missing Planet Details");
             }
             $coords = Check::coords($coords);
+            list($g, $s, $r) = explode(':', $coords); // Extraire les coordonnées
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+            $planet_type_str = ((int)$planet_type == TYPE_PLANET ? 'planet' : 'moon');
 
-            $fields = '';
-            $values = '';
-            $update_pairs = []; // Initialiser le tableau avant utilisation
+            // S'assurer que l'objet astro existe dans la base de données
+            $astro_object_query = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
+                                              WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+
+            // Si l'objet astro n'existe pas, on le crée
+            if ($db->sql_numrows($astro_object_query) == 0) {
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                            (id, type, galaxy, system, row, name, player_id)
+                            VALUES
+                            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})");
+            } else {
+                // Mise à jour du nom de la planète si nécessaire
+                $db->sql_query("UPDATE " . TABLE_USER_BUILDING . "
+                            SET name = '{$planet_name}'
+                            WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+            }
+
+            // Récupérer l'ID de l'objet astro (nécessaire pour la table défense)
+            $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
+                                          WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+            $astro_object_id = $db->sql_fetch_row($astro_id_result)[0] ?? $planet_id;
+
+            // Préparer les champs pour la requête d'insertion/mise à jour des défenses
+            $defense_fields = [];
+            $defense_values = [];
+            $update_pairs = [];
+
             foreach ($database['defense'] as $code) {
                 if (isset($defense[$code])) {
-                    $fields .= ", `$code`";
-                    $values .= ", " . (int)$defense[$code];
+                    $defense_fields[] = "`$code`";
+                    $defense_values[] = (int)$defense[$code];
                     $update_pairs[] = "`$code` = " . (int)$defense[$code];
                 }
             }
-            // UPSERT pour la table USER_DEFENCE
-            $db->sql_query("INSERT INTO " . TABLE_USER_DEFENSE . "
-                (`user_id`, `planet_id`$fields)
-                VALUES
-                ({$user_data['user_id']}, {$planet_id}$values)
-                ON DUPLICATE KEY UPDATE
-                " . implode(", ", $update_pairs));
 
-            // UPSERT pour la table USER_BUILDING
-            $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                (`player_id`, `planet_id`, `coordinates`, `planet_name`)
-                VALUES
-                ({$user_data['player_id']}, {$planet_id}, '{$coords}', '{$planet_name}')
-                ON DUPLICATE KEY UPDATE
-                planet_name = '{$planet_name}'");
+            // Construction de la requête UPSERT pour les défenses
+            if (!empty($defense_fields)) {
+                $fields_str = implode(', ', $defense_fields);
+                $values_str = implode(', ', $defense_values);
+
+                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_DEFENSE . "
+                            (astro_object_id, {$fields_str})
+                            VALUES
+                            ({$astro_object_id}, {$values_str})
+                            ON DUPLICATE KEY UPDATE
+                            " . implode(", ", $update_pairs));
+            }
 
             $io->set(array(
                 'type' => 'home updated',
@@ -506,7 +530,7 @@ switch ($received_game_data['type']) {
                 'planet' => $coords
             ));
 
-
+            // Préparer les données pour le callback
             $defenses = array();
             foreach ($database['defense'] as $code) {
                 if (isset($defense[$code])) {
