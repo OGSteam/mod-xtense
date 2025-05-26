@@ -483,22 +483,12 @@ switch ($received_game_data['type']) {
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $planet_type_str = ((int)$planet_type == TYPE_PLANET ? 'planet' : 'moon');
 
-            // S'assurer que l'objet astro existe dans la base de données
-            $astro_object_query = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
-                                              WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
-
-            // Si l'objet astro n'existe pas, on le crée
-            if ($db->sql_numrows($astro_object_query) == 0) {
-                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                            (id, type, galaxy, system, row, name, player_id)
-                            VALUES
-                            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})");
-            } else {
-                // Mise à jour du nom de la planète si nécessaire
-                $db->sql_query("UPDATE " . TABLE_USER_BUILDING . "
-                            SET name = '{$planet_name}'
-                            WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
-            }
+            $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+            (id, type, galaxy, system, row, name, player_id)
+            VALUES
+            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})
+            ON DUPLICATE KEY UPDATE
+            name = '{$planet_name}'");
 
             // Récupérer l'ID de l'objet astro (nécessaire pour la table défense)
             $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
@@ -747,7 +737,7 @@ switch ($received_game_data['type']) {
             $delete = [];
             $update = [];
 
-            $query = "SELECT `row` FROM " . TABLE_UNIVERSE . " WHERE `galaxy` = {$galaxy}  AND `system` =  {$system}";
+            $query = "SELECT `row` FROM " . TABLE_USER_BUILDING . " WHERE `galaxy` = {$galaxy}  AND `system` =  {$system}";
             $check = $db->sql_query($query);
             while ($value = $db->sql_fetch_assoc($check)) {
                 $update[$value['row']] = true;
@@ -761,6 +751,7 @@ switch ($received_game_data['type']) {
 
                     $line['player_name'] = filter_var($line['player_name']);
                     $line['planet_name'] = filter_var($line['planet_name']);
+                    $line['planet_id'] = filter_var($line['planet_id'], FILTER_VALIDATE_INT);
                     $line['ally_tag'] = filter_var($line['ally_tag']);
 
                     if (isset($line['debris'])) {
@@ -777,6 +768,7 @@ switch ($received_game_data['type']) {
                 } else {
                     $delete[] = $i;
                     $system_data[$i] = array(
+                        'planet_id' => '',
                         'planet_name' => '',
                         'player_name' => '',
                         'status' => '',
@@ -793,27 +785,21 @@ switch ($received_game_data['type']) {
 
                 //default player_id/ally_id à -1 (cf shemas SQL)
                 $v['player_id'] = (isset($v['player_id']) ? (int)$v['player_id'] : -1);
+                $v['planet_id'] = (isset($v['planet_id']) ? (int)$v['planet_id'] : -1);
                 $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
                 $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id'];
 
-                //Lors de l'insert ou de l'update il y a l'insert ou l'update de la table game_ally et game_player
-                // phase transitoire avec doublon d information antre table universe(1) et game_player(2)
-                //Table universe(1)
-                // UPSERT pour la table universe
-                $db->sql_query("INSERT INTO " . TABLE_UNIVERSE . "
-                    (`galaxy`, `system`, `row`, `name`, `player`, `player_id`, `ally`, `ally_id`, `status`, `last_update`, `last_update_user_id`, `moon`)
+                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                    (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update`, `last_update_user_id`)
                     VALUES
-                    ({$galaxy}, {$system}, {$row}, '{$v['planet_name']}', '{$v['player_name']}', {$v['player_id']}, '{$v['ally_tag']}', {$v['ally_id']}, '{$statusTemp}', " . time() . ", {$user_data['user_id']}, '{$v['moon']}')
+                    ({$v['planet_id']},{$galaxy}, {$system}, {$row}, '{$v['planet_name']}', {$v['player_id']}, {$v['ally_id']},  " . time() . ", {$user_data['id']} )
                     ON DUPLICATE KEY UPDATE
                     `name` = '{$v['planet_name']}',
-                    `player` = '{$v['player_name']}',
                     `player_id` = {$v['player_id']},
-                    `ally` = '{$v['ally_tag']}',
                     `ally_id` = {$v['ally_id']},
-                    `status` = '{$statusTemp}',
                     `last_update` = " . time() . ",
-                    `last_update_user_id` = {$user_data['user_id']},
-                    `moon` = '{$v['moon']}'");
+                    `last_update_user_id` = {$user_data['id']}");
+
 
                 // UPSERT pour la table game_player
                 if ($v['player_id'] != -1) {
@@ -825,11 +811,11 @@ switch ($received_game_data['type']) {
                     $allyId = (int)$v['ally_id'];
 
                     $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER . "
-                                (`player_id`, `player`, `status`, `ally_id`, `datadate`)
+                                (`id`, `name`, `status`, `ally_id`, `datadate`)
                                 VALUES
                                 ($playerId, '$playerName', '$status', $allyId, $currentTime)
                                 ON DUPLICATE KEY UPDATE
-                                `player` = '$playerName',
+                                `name` = '$playerName',
                                 `status` = '$status',
                                 `ally_id` = $allyId,
                                 `datadate` = $currentTime");
@@ -846,7 +832,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("UPDATE " . TABLE_PARSEDSPY . " SET `active` = 0 WHERE `coordinates` IN ('" . implode("', '", $toDelete) . "')");
             }
 
-            $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `user_id` = " . $user_data['user_id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . $user_data['id']);
 
             $call->add('system', array(
                 'data' => $data['rows'],
@@ -966,7 +952,6 @@ switch ($received_game_data['type']) {
                        tag = VALUES(tag),
                        datadate = VALUES(datadate)");
                 }
-
 
 
                 if ($table == TABLE_RANK_PLAYER_MILITARY) {
