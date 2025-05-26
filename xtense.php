@@ -152,7 +152,7 @@ switch ($received_game_data['type']) {
                 $fields = filter_var($data['fields'], FILTER_VALIDATE_INT);
 
                 $coords = Check::coords($data['coords']);
-                $planet_type = ((int)$data['planetType'] == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
+                $planet_type = ((int)$data['planetType'] == 0 ? TYPE_PLANET : TYPE_MOON);
                 $ogame_timestamp = $uni_details['uni_time'];
 
                 $userclass = 'none';
@@ -232,10 +232,11 @@ switch ($received_game_data['type']) {
                 //Empire
                 list($g, $s, $r) = explode(':', $coords);
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                                (`player_id`, `id`, `galaxy`, `system`, `row`, `name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
+                                (`player_id`, `id`, `type`, `galaxy`, `system`, `row`, `name`, `fields`, `boosters`, `temperature_min`, `temperature_max`)
                             VALUES
-                                ({$gamePlayerId}, {$planet_id}, {$g}, {$s}, {$r}, '{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
+                                ({$gamePlayerId}, {$planet_id}, '{$planet_type}' , {$g}, {$s}, {$r},'{$planet_name}', {$fields}, '{$boosters}', {$temperature_min}, {$temperature_max})
                             ON DUPLICATE KEY UPDATE
+                                type = VALUES(type),
                                 name = VALUES(name),
                                 fields = VALUES(fields),
                                 boosters = VALUES(boosters),
@@ -387,19 +388,25 @@ switch ($received_game_data['type']) {
             $values = [];
 
             // Colonnes de base pour TABLE_USER_BUILDING (ogspy_game_astro_object)
-            $columns[] = 'id'; $values[] = $planet_id;
-            $columns[] = 'galaxy'; $values[] = (int)$g;
-            $columns[] = 'system'; $values[] = (int)$s;
-            $columns[] = 'row'; $values[] = (int)$r;
-            $columns[] = 'name'; $values[] = $db->sql_escape_string($planet_name);
-            $columns[] = 'type'; $values[] = $db->sql_escape_string($astro_object_type_str);
+            $columns[] = 'id';
+            $values[] = $planet_id;
+            $columns[] = 'galaxy';
+            $values[] = (int)$g;
+            $columns[] = 'system';
+            $values[] = (int)$s;
+            $columns[] = 'row';
+            $values[] = (int)$r;
+            $columns[] = 'name';
+            $values[] = $db->sql_escape_string($planet_name);
+            $columns[] = 'type';
+            $values[] = $db->sql_escape_string($astro_object_type_str);
 
             // Colonnes pour les pourcentages de ressources
             // Clé JSON => Colonne DB
             $resource_settings_map = [
-                'M_percentage'   => 'M_percentage',
-                'C_Percentage'   => 'C_Percentage',
-                'D_percentage'   => 'D_percentage',
+                'M_percentage' => 'M_percentage',
+                'C_Percentage' => 'C_Percentage',
+                'D_percentage' => 'D_percentage',
                 'CES_percentage' => 'CES_percentage',
                 'CEF_percentage' => 'CEF_percentage',
                 'SAT_percentage' => 'Sat_percentage', // Correction de casse pour la DB
@@ -427,9 +434,9 @@ switch ($received_game_data['type']) {
             // Construction de la requête complète
             $query = "INSERT INTO " . TABLE_USER_BUILDING . " (`" . implode('`, `', $columns) . "`)
                       VALUES (" . implode(', ', array_map(function ($val) {
-                                        // Les valeurs numériques sont directes, les chaînes (déjà échappées) sont entourées d'apostrophes
-                                        return is_numeric($val) ? $val : "'" . $val . "'";
-                                    }, $values)) . ")
+                    // Les valeurs numériques sont directes, les chaînes (déjà échappées) sont entourées d'apostrophes
+                    return is_numeric($val) ? $val : "'" . $val . "'";
+                }, $values)) . ")
                       ON DUPLICATE KEY UPDATE " . implode(', ', $updatePairs);
 
             $db->sql_query($query);
@@ -636,22 +643,12 @@ switch ($received_game_data['type']) {
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
             $planet_type_str = ((int)$planet_type == TYPE_PLANET ? 'planet' : 'moon');
 
-            // S'assurer que l'objet astro existe dans la base de données
-            $astro_object_query = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
-                                              WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
+            $query = "INSERT INTO " . TABLE_USER_BUILDING . " (id, type, galaxy, system, row, name, player_id)
+                           VALUES ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})
+                           ON DUPLICATE KEY
+                           UPDATE name = '{$planet_name}'";
 
-            // Si l'objet astro n'existe pas, on le crée
-            if ($db->sql_numrows($astro_object_query) == 0) {
-                $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                            (id, type, galaxy, system, row, name, player_id)
-                            VALUES
-                            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})");
-            } else {
-                // Mise à jour du nom de la planète si nécessaire
-                $db->sql_query("UPDATE " . TABLE_USER_BUILDING . "
-                            SET name = '{$planet_name}'
-                            WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
-            }
+            $db->sql_query($query);
 
             // Récupérer l'ID de l'objet astro (nécessaire pour la table flotte)
             $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
@@ -934,69 +931,84 @@ switch ($received_game_data['type']) {
 
         if ($type1 == 'player') {
             foreach ($n as $data) {
+
+                // Vérification des données essentielles
                 $data['player_name'] = filter_var($data['player_name']);
                 $data['ally_tag'] = filter_var($data['ally_tag']);
 
-                if (isset($data['points'])) {
-                    $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
+                if (!empty($data['points'])) {
+                    $data['points'] = (int)$data['points'];
                 }
 
-                if (isset($data['ally_id'])) {
-                    $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
-                    if ($data['ally_id'] === '') {
-                        $data['ally_id'] = -1;
-                    }
+                $data['ally_id'] = !empty($data['ally_id']) ? (int)$data['ally_id'] : -1;
+                $data['player_id'] = !empty($data['player_id']) ? (int)$data['player_id'] : -1;
+
+                //Compléter table GAME PLAYER pour les joueurs qui n'ont pas de compte
+
+                if ($data['player_id'] > 0 && !empty($data['player_name'])) {
+                    $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER . "
+                   (id, name, ally_id, datadate)
+                   VALUES
+                   ({$data['player_id']}, '{$data['player_name']}', {$data['ally_id']}, " . time() . ")
+                   ON DUPLICATE KEY UPDATE
+                   name = VALUES(name),
+                   ally_id = VALUES(ally_id),
+                   datadate = VALUES(datadate)");
+                }
+                //Compléter table GAME ALLY pour les alliances qui n'ont pas de compte
+                // Insert or update alliance data in the GAME ALLY table
+                if ($data['ally_id'] > 0 && !empty($data['ally_tag'])) {
+                    $db->sql_query("INSERT INTO " . TABLE_GAME_ALLY . "
+                       (id, tag, datadate)
+                       VALUES
+                       ({$data['ally_id']}, '{$data['ally_tag']}', " . time() . ")
+                       ON DUPLICATE KEY UPDATE
+                       tag = VALUES(tag),
+                       datadate = VALUES(datadate)");
                 }
 
-                if (isset($data['player_id'])) {
-                    $data['player_id'] = filter_var($data['player_id'], FILTER_SANITIZE_NUMBER_INT);
-                    if ($data['player_id'] === '') {
-                        $data['player_id'] = -1;
-                    }
-                }
+
 
                 if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']}, {$data['nb_spacecraft']} )";
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['id']}, {$data['nb_spacecraft']} )";
                 } else {
-                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['user_id']} )";
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['id']} )";
                 }
                 $total++;
                 $datas[] = $data;
-            }
-            if (!empty($query)) {
-                if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                    $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`, `nb_spacecraft`) VALUES " . implode(',', $query));
-                } else {
-                    $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`) VALUES " . implode(',', $query));
+
+                if (!empty($query)) {
+                    if ($table == TABLE_RANK_PLAYER_MILITARY) {
+                        $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`, `nb_spacecraft`) VALUES " . implode(',', $query));
+                    } else {
+                        $db->sql_query("REPLACE INTO " . $table . " (`datadate`, `rank`, `player`, `player_id`, `ally`, `ally_id`, `points`, `sender_id`) VALUES " . implode(',', $query));
+                    }
                 }
             }
         } else {
             $fields = 'datadate, rank, ally, ally_id, points, sender_id, number_member, points_per_member';
             foreach ($n as $data) {
                 $data['ally_tag'] = filter_var($data['ally_tag']);
+                $data['ally_name'] = filter_var($data['ally']);
+                $data['ally_id'] = filter_var($data['ally_id'] ?? throw new UnexpectedValueException("Ranking Ally: Alliance Id not found"), FILTER_SANITIZE_NUMBER_INT);
+                $data['points'] = filter_var($data['points'] ?? throw new UnexpectedValueException("Ranking Ally: No points sent"), FILTER_SANITIZE_NUMBER_INT);
+                $data['mean'] = filter_var($data['mean'] ?? throw new UnexpectedValueException("Ranking Ally: No mean found"), FILTER_SANITIZE_NUMBER_INT);
+                $data['members'] = filter_var($data['members'] ?? throw new UnexpectedValueException("Ranking Ally: Nb players not found"), FILTER_SANITIZE_NUMBER_INT);
 
-                if (!isset($data['ally_id'])) {
-                    throw new UnexpectedValueException("Ranking Ally: Alliance Id not found");
+                // Insert or update alliance data in the GAME ALLY table
+                if ($data['ally_id'] > 0 && !empty($data['ally_tag'] && !empty($data['ally_name']))) {
+                    $db->sql_query("INSERT INTO " . TABLE_GAME_ALLY . "
+                       (id, name, tag, datadate)
+                       VALUES
+                       ({$data['ally_id']}, '{$data['ally_name']}', '{$data['ally_tag']}', " . time() . ")
+                       ON DUPLICATE KEY UPDATE
+                          name = VALUES(name),
+                            tag = VALUES(tag),
+                       datadate = VALUES(datadate)");
                 }
-                $data['ally_id'] = filter_var($data['ally_id'], FILTER_SANITIZE_NUMBER_INT);
-
-                if (!isset($data['points'])) {
-                    throw new UnexpectedValueException("Ranking Ally: No points sent");
-                }
-                $data['points'] = filter_var($data['points'], FILTER_SANITIZE_NUMBER_INT);
-
-                if (!isset($data['mean'])) {
-                    throw new UnexpectedValueException("Ranking Ally: No mean found");
-                }
-                $data['mean'] = filter_var($data['mean'], FILTER_SANITIZE_NUMBER_INT);
-
-                if (!isset($data['members'])) {
-                    throw new UnexpectedValueException("Ranking Ally: Nb players not found");
-                }
-                $data['members'] = filter_var($data['members'], FILTER_SANITIZE_NUMBER_INT);
 
 
-                $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['user_id']} , {$data['members']} ,{$data['mean']} )";
+                $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['id']} , {$data['members']} ,{$data['mean']} )";
                 $datas[] = $data;
                 $total++;
             }
@@ -1005,7 +1017,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
             }
 
-            $db->sql_query("UPDATE " . TABLE_USER . " SET rank_imports = rank_imports + " . $total . " WHERE user_id = " . $user_data['user_id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET rank_imports = rank_imports + " . $total . " WHERE id = " . $user_data['id']);
         }
 
         $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
@@ -1028,7 +1040,7 @@ switch ($received_game_data['type']) {
 
         break;
 
-    case 'rc': //PAGE RC
+    case 'rc'://PAGE RC
     case 'rc_shared':
         $json = filter_var($data['json']);
         $ogapilnk = filter_var($data['ogapilnk']);
