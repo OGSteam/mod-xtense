@@ -786,6 +786,8 @@ switch ($received_game_data['type']) {
                 //default player_id/ally_id à -1 (cf shemas SQL)
                 $v['player_id'] = (isset($v['player_id']) ? (int)$v['player_id'] : -1);
                 $v['planet_id'] = (isset($v['planet_id']) ? (int)$v['planet_id'] : -1);
+                $v['moon'] = (isset($v['moon']) ? (int)$v['moon'] : -1);
+                $v['moon_id'] = (isset($v['moon_id']) ? (int)$v['moon_id'] : -1);
                 $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
                 $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id'];
 
@@ -800,8 +802,23 @@ switch ($received_game_data['type']) {
                     `last_update` = " . time() . ",
                     `last_update_user_id` = {$user_data['id']}");
 
+                // Création des lignes pour les lunes
 
-                // UPSERT pour la table game_player
+                if (isset($v['moon_id']) && $v['moon'] == 1) {
+                    $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                        (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update_moon`, `last_update_user_id`)
+                        VALUES
+                        ({$v['moon_id']}, 'moon',{$galaxy}, {$system}, {$row}, '{$v['planet_name']}  - Moon', {$v['player_id']}, {$v['ally_id']}, " . time() . ", {$user_data['id']} )
+                        ON DUPLICATE KEY UPDATE
+                        `name` = '{$v['planet_name']} - Moon',
+                        `player_id` = {$v['player_id']},
+                        `ally_id` = {$v['ally_id']},
+                        `last_update_moon` = " . time() . ",
+                        `last_update_user_id` = {$user_data['id']}");
+                }
+
+
+                // UPSERT pour la table game_player pour mettre à jour le statut
                 if ($v['player_id'] != -1) {
 
                     $currentTime = time();
