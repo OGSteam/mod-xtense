@@ -10,7 +10,19 @@ use Ogsteam\Ogspy\Model\Config_Model;
 
 if (!defined('IN_SPYOGAME')) die("Hacking Attempt!");
 
-
+/**
+ * Vérifie les versions et la configuration avant l'authentification.
+ *
+ * Cette fonction vérifie si les versions de la barre d'outils et du plugin sont compatibles,
+ * si le plugin est actif, si le serveur est actif, et si l'univers fourni correspond à celui
+ * configuré. Elle met à jour la configuration de l'univers si nécessaire.
+ *
+ * @param string $toolbar_version Version de la barre d'outils.
+ * @param string $mod_min_version Version minimale requise du plugin.
+ * @param int $active Indique si le plugin est actif (1 pour actif, 0 pour inactif).
+ * @param string $univers URL de l'univers fourni.
+ * @return void Envoie une réponse via `$io` en cas d'erreur ou de non-conformité.
+ */
 function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $univers)
 {
     global $server_config, $io, $db;
@@ -69,9 +81,14 @@ function xtense_check_before_auth($toolbar_version, $mod_min_version, $active, $
  }
 
 /**
- * @param $token
- * @return bool
- * @throws Exception
+ * Vérifie l'authentification d'un utilisateur via un jeton.
+ *
+ * Cette fonction utilise un jeton pour identifier un utilisateur et vérifier son statut.
+ * Si l'utilisateur est inactif ou si le jeton est invalide, une réponse est envoyée via `$io`.
+ *
+ * @param string $token Jeton d'authentification.
+ * @return array|bool Retourne les données de l'utilisateur si le jeton est valide, sinon `false`.
+ * @throws Exception En cas d'erreur lors de la vérification du jeton.
  */
 function xtense_check_auth ($token){
 
@@ -107,7 +124,18 @@ function xtense_check_auth ($token){
     }
     return false;
 }
-
+/**
+ * Vérifie les droits d'un utilisateur et retourne ses permissions.
+ *
+ * Cette fonction récupère les droits d'accès d'un utilisateur en fonction de son groupe
+ * et les retourne sous forme de tableau. Elle peut également envoyer les informations
+ * du serveur et les droits de l'utilisateur si une vérification publique du serveur est demandée.
+ *
+ * @param array $user_data Tableau associatif contenant les informations de l'utilisateur,
+ *                         incluant son identifiant (`id`).
+ * @return array Tableau associatif contenant les informations de l'utilisateur mises à jour
+ *               avec ses droits d'accès (`grant`).
+ */
 function xtense_check_user_rights($user_data) {
 
     global $db, $server_config, $io;

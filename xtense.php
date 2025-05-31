@@ -50,7 +50,6 @@ require_once("mod/$root/includes/Io.php");
 require_once("mod/$root/includes/Check.php");
 require_once("mod/$root/includes/auth.php");
 
-
 $start_time = microtime(true);
 $io = new Io();
 $time = time() - 60 * 4;
@@ -86,13 +85,13 @@ if (!isset($received_game_data['type'])) {
 }
 
 xtense_check_before_auth($received_game_data['toolbar_version'], $received_game_data['mod_min_version'], $active, $received_game_data['univers']);
-$user_data = xtense_check_auth($received_game_data['password']);
-$user_data = xtense_check_user_rights($user_data);
+$xtense_user_data = xtense_check_auth($received_game_data['password']);
+$xtense_user_data = xtense_check_user_rights($xtense_user_data);
 
 $call = new CallbackHandler();
 
 // Xtense : Ajout de la version et du type de barre utilisée par l'utilisateur
-$current_user_id = $user_data['id'];
+$current_user_id = $xtense_user_data['id'];
 $db->sql_query("UPDATE " . TABLE_USER . " SET `xtense_version` = '" . $received_game_data['toolbar_version'] . "', `xtense_type` = '" . $received_game_data['toolbar_type'] . "' WHERE `id` =  $current_user_id");
 $toolbar_info = $received_game_data['toolbar_type'] . " V" . $received_game_data['toolbar_version'];
 
@@ -106,7 +105,7 @@ $data = json_decode($received_game_data['data'], true);
 switch ($received_game_data['type']) {
     case 'overview':
         { //PAGE OVERVIEW
-            if (!$user_data['grant']['empire']) {
+            if (!$xtense_user_data['grant']['empire']) {
                 $io->set(array(
                     'type' => 'plugin grant',
                     'access' => 'empire'
@@ -175,7 +174,7 @@ switch ($received_game_data['type']) {
                     $officerGeologist = (int)$player_details['player_officer_geologist'];
                     $officerTechnocrate = (int)$player_details['player_officer_technocrate'];
                     $ogameTimestamp = (int)$uni_details['uni_time'];
-                    $currentOgspyUserId = (int)$user_data['id']; // ID de l'utilisateur OGSpy
+                    $currentOgspyUserId = (int)$xtense_user_data['id']; // ID de l'utilisateur OGSpy
 
                     $queryGamePlayer = "
                         INSERT INTO " . TABLE_GAME_PLAYER . " (
@@ -273,7 +272,7 @@ switch ($received_game_data['type']) {
     case
     'buildings': //PAGE BATIMENTS
 
-        if (!$user_data['grant']['empire']) {
+        if (!$xtense_user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'empire'
@@ -313,8 +312,10 @@ switch ($received_game_data['type']) {
 
             // Ajout des bâtiments
             foreach ($database['buildings'] as $code) {
-                $buildingColumns[] = $code;
-                $buildingValues[] = isset($buildings[$code]) ? (int)$buildings[$code] : 0;
+                if (isset($buildings[$code])) {
+                    $buildingColumns[] = $code;
+                    $buildingValues[] = (int)$buildings[$code];
+                }
             }
 
             // Préparation des champs pour la clause ON DUPLICATE KEY UPDATE
@@ -325,7 +326,9 @@ switch ($received_game_data['type']) {
             $updatePairs[] = "row = VALUES(row)";       // ADDED
 
             foreach ($database['buildings'] as $code) {
-                $updatePairs[] = "`$code` = VALUES(`$code`)"; // CHANGED to use VALUES()
+                if (isset($buildings[$code])) {
+                    $updatePairs[] = "`$code` = VALUES(`$code`)"; // CHANGED to use VALUES()
+                }
             }
 
             // Construction de la requête complète
@@ -356,7 +359,7 @@ switch ($received_game_data['type']) {
         break;
 
     case 'resourceSettings':
-        if (!$user_data['grant']['empire']) {
+        if (!$xtense_user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'empire'
@@ -461,7 +464,7 @@ switch ($received_game_data['type']) {
         break;
 
     case 'defense': //PAGE DEFENSE
-        if (!$user_data['grant']['empire']) {
+        if (!$xtense_user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'empire'
@@ -486,7 +489,7 @@ switch ($received_game_data['type']) {
             $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
             (id, type, galaxy, system, row, name, player_id)
             VALUES
-            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})
+            ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$xtense_user_data['player_id']})
             ON DUPLICATE KEY UPDATE
             name = '{$planet_name}'");
 
@@ -548,7 +551,7 @@ switch ($received_game_data['type']) {
 
     case 'researchs': //PAGE RECHERCHE
 
-        if (!$user_data['grant']['empire']) {
+        if (!$xtense_user_data['grant']['empire']) {
             $io->set(['type' => 'plugin grant', 'access' => 'empire']);
             $io->status(0);
         } else {
@@ -564,11 +567,11 @@ switch ($received_game_data['type']) {
             $planet_type = ((int)$planet_type == TYPE_PLANET ? TYPE_PLANET : TYPE_MOON);
 
             // Vérifier que l'ID du joueur est disponible
-            if (!isset($user_data['player_id']) || $user_data['player_id'] <= 0) {
+            if (!isset($xtense_user_data['player_id']) || $xtense_user_data['player_id'] <= 0) {
                 throw new UnexpectedValueException("Researchs: Player ID not available");
             }
 
-            $player_id = (int)$user_data['player_id'];
+            $player_id = (int)$xtense_user_data['player_id'];
 
             // Préparer les champs pour la requête d'insertion/mise à jour des technologies
             $fields = [];
@@ -612,7 +615,7 @@ switch ($received_game_data['type']) {
 
     case 'fleet': //PAGE FLOTTE
 
-        if (!$user_data['grant']['empire']) {
+        if (!$xtense_user_data['grant']['empire']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'empire'
@@ -634,7 +637,7 @@ switch ($received_game_data['type']) {
             $planet_type_str = ((int)$planet_type == TYPE_PLANET ? 'planet' : 'moon');
 
             $query = "INSERT INTO " . TABLE_USER_BUILDING . " (id, type, galaxy, system, row, name, player_id)
-                           VALUES ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$user_data['player_id']})
+                           VALUES ({$planet_id}, '{$planet_type_str}', {$g}, {$s}, {$r}, '{$planet_name}', {$xtense_user_data['player_id']})
                            ON DUPLICATE KEY
                            UPDATE name = '{$planet_name}'";
 
@@ -713,7 +716,7 @@ switch ($received_game_data['type']) {
         break;
 
     case 'system': //PAGE SYSTEME SOLAIRE
-        if (!$user_data['grant']['system']) {
+        if (!$xtense_user_data['grant']['system']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'system'
@@ -794,13 +797,13 @@ switch ($received_game_data['type']) {
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
                     (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update`, `last_update_user_id`)
                     VALUES
-                    ({$v['planet_id']},{$galaxy}, {$system}, {$row}, '{$v['planet_name']}', {$v['player_id']}, {$v['ally_id']},  " . time() . ", {$user_data['id']} )
+                    ({$v['planet_id']},{$galaxy}, {$system}, {$row}, '{$v['planet_name']}', {$v['player_id']}, {$v['ally_id']},  " . time() . ", {$xtense_user_data['id']} )
                     ON DUPLICATE KEY UPDATE
                     `name` = '{$v['planet_name']}',
                     `player_id` = {$v['player_id']},
                     `ally_id` = {$v['ally_id']},
                     `last_update` = " . time() . ",
-                    `last_update_user_id` = {$user_data['id']}");
+                    `last_update_user_id` = {$xtense_user_data['id']}");
 
                 // Création des lignes pour les lunes
 
@@ -808,13 +811,13 @@ switch ($received_game_data['type']) {
                     $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
                         (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update_moon`, `last_update_user_id`)
                         VALUES
-                        ({$v['moon_id']}, 'moon',{$galaxy}, {$system}, {$row}, '{$v['planet_name']}  - Moon', {$v['player_id']}, {$v['ally_id']}, " . time() . ", {$user_data['id']} )
+                        ({$v['moon_id']}, 'moon',{$galaxy}, {$system}, {$row}, '{$v['planet_name']}  - Moon', {$v['player_id']}, {$v['ally_id']}, " . time() . ", {$xtense_user_data['id']} )
                         ON DUPLICATE KEY UPDATE
                         `name` = '{$v['planet_name']} - Moon',
                         `player_id` = {$v['player_id']},
                         `ally_id` = {$v['ally_id']},
                         `last_update_moon` = " . time() . ",
-                        `last_update_user_id` = {$user_data['id']}");
+                        `last_update_user_id` = {$xtense_user_data['id']}");
                 }
 
 
@@ -849,7 +852,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("UPDATE " . TABLE_PARSEDSPY . " SET `active` = 0 WHERE `coordinates` IN ('" . implode("', '", $toDelete) . "')");
             }
 
-            $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . $user_data['id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . $xtense_user_data['id']);
 
             $call->add('system', array(
                 'data' => $data['rows'],
@@ -863,7 +866,7 @@ switch ($received_game_data['type']) {
                 'system' => $system
             ));
 
-            update_statistic('planetimport_ogs', 15);
+            update_statistic('planetimports', 15);
             add_log('system', array('coords' => $galaxy . ':' . $system, 'toolbar' => $toolbar_info));
         }
         break;
@@ -880,7 +883,7 @@ switch ($received_game_data['type']) {
             throw new UnexpectedValueException("Rankings: Incomplete Ranking");
         }
 
-        if (!$user_data['grant']['ranking']) {
+        if (!$xtense_user_data['grant']['ranking']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'ranking'
@@ -972,9 +975,9 @@ switch ($received_game_data['type']) {
 
 
                 if ($table == TABLE_RANK_PLAYER_MILITARY) {
-                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['id']}, {$data['nb_spacecraft']} )";
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$xtense_user_data['id']}, {$data['nb_spacecraft']} )";
                 } else {
-                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$user_data['id']} )";
+                    $query[] = "({$timestamp}, {$data['rank']}, '{$data['player_name']}' , {$data['player_id']}, '{$data['ally_tag']}', {$data['ally_id']}, {$data['points']}, {$xtense_user_data['id']} )";
                 }
                 $total++;
                 $datas[] = $data;
@@ -1010,7 +1013,7 @@ switch ($received_game_data['type']) {
                 }
 
 
-                $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$user_data['id']} , {$data['members']} ,{$data['mean']} )";
+                $query[] = "({$timestamp}, {$data['rank']} , '{$data['ally_tag']}' , {$data['ally_id']} , {$data['points']} , {$xtense_user_data['id']} , {$data['members']} ,{$data['mean']} )";
                 $datas[] = $data;
                 $total++;
             }
@@ -1019,7 +1022,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("REPLACE INTO " . $table . " (" . $fields . ") VALUES " . implode(',', $query));
             }
 
-            $db->sql_query("UPDATE " . TABLE_USER . " SET rank_imports = rank_imports + " . $total . " WHERE id = " . $user_data['id']);
+            $db->sql_query("UPDATE " . TABLE_USER . " SET rank_imports = rank_imports + " . $total . " WHERE id = " . $xtense_user_data['id']);
         }
 
         $type2 = (($type2 == 'fleet') ? $type2 . $type3 : $type2);
@@ -1037,7 +1040,7 @@ switch ($received_game_data['type']) {
             'offset' => $offset
         ));
 
-        update_statistic('rankimport_ogs', 100);
+        update_statistic('rankimports', 100);
         add_log('ranking', array('type1' => $type1, 'type2' => $type2, 'offset' => $offset, 'time' => $timestamp, 'toolbar' => $toolbar_info));
 
         break;
@@ -1052,7 +1055,7 @@ switch ($received_game_data['type']) {
         }
         $ogapilnk = $ogapilnk ?? '';
 
-        if (!$user_data['grant']['messages']) {
+        if (!$xtense_user_data['grant']['messages']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'messages'
@@ -1239,7 +1242,7 @@ RocketLauncher': 401,
         break;
 
     case 'ally_list': //PAGE ALLIANCE
-        if (!$user_data['grant']['ranking']) {
+        if (!$xtense_user_data['grant']['ranking']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'ranking'
@@ -1289,7 +1292,7 @@ RocketLauncher': 401,
 
     case 'messages': //PAGE MESSAGES
 
-        if (!$user_data['grant']['messages']) {
+        if (!$xtense_user_data['grant']['messages']) {
             $io->set(array(
                 'type' => 'plugin grant',
                 'access' => 'messages'
@@ -1378,7 +1381,7 @@ RocketLauncher': 401,
                     $values = $fields = '';
 
                     $fields .= 'planet_name, coordinates, sender_id, proba, activite, dateRE';
-                    $values .= '"' . trim($spy['planet_name']) . '", "' . $coords . '", ' . $user_data['user_id'] . ', ' . $spy['proba'] . ', ' . $spy['activite'] . ', ' . $spy['time'] . ' ';
+                    $values .= '"' . trim($spy['planet_name']) . '", "' . $coords . '", ' . $xtense_user_data['user_id'] . ', ' . $spy['proba'] . ', ' . $spy['activite'] . ', ' . $spy['time'] . ' ';
 
                     foreach ($spy['content'] as $code => $value) {
                         // La table RE ne supporte pas les CDR dans le rapport
@@ -1403,14 +1406,14 @@ RocketLauncher': 401,
                                     (isset($spy['content'][42]) ? $phalanx = $spy['content'][42] : $phalanx = 0);
                                     (isset($spy['content'][43]) ? $gate = $spy['content'][43] : $gate = 0);
                                     //log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `moon` = "1", `phalanx` = ' . $phalanx . ', `gate` = "' . $gate . '", `last_update_moon` = ' . $date . ', `last_update_user_id` = ' . $user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `moon` = "1", `phalanx` = ' . $phalanx . ', `gate` = "' . $gate . '", `last_update_moon` = ' . $date . ', `last_update_user_id` = ' . $xtense_user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
                                 } else { //we do nothing if buildings are not in the report
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `name` = "' . $spy['planet_name'] . '", `last_update_user_id` = ' . $user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
+                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `name` = "' . $spy['planet_name'] . '", `last_update_user_id` = ' . $xtense_user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
                                 }
                             }
                         }
-                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_imports` = spy_imports + 1 WHERE `user_id` = ' . $user_data['user_id']);
-                        update_statistic('spyimport_ogs', '1');
+                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_imports` = spy_imports + 1 WHERE `user_id` = ' . $xtense_user_data['user_id']);
+                        update_statistic('spyimports', '1');
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $coords, 'toolbar' => $toolbar_info));
                     }
                     break;
@@ -1424,9 +1427,9 @@ RocketLauncher': 401,
                     $line['from'] = Check::coords($line['from']);
                     $line['to'] = Check::coords($line['to']);
 
-                    $query = "SELECT spy_id FROM " . TABLE_PARSEDSPYEN . " WHERE sender_id = '" . $user_data['user_id'] . "' AND dateSpy = '{$line['date']}'";
+                    $query = "SELECT spy_id FROM " . TABLE_PARSEDSPYEN . " WHERE sender_id = '" . $xtense_user_data['user_id'] . "' AND dateSpy = '{$line['date']}'";
                     if ($db->sql_numrows($db->sql_query($query)) == 0) {
-                        $db->sql_query("INSERT INTO " . TABLE_PARSEDSPYEN . " (`dateSpy`, `from`, `to`, `proba`, `sender_id`) VALUES ('" . $line['date'] . "', '" . $line['from'] . "', '" . $line['to'] . "', '" . $line['proba'] . "', '" . $user_data['user_id'] . "')");
+                        $db->sql_query("INSERT INTO " . TABLE_PARSEDSPYEN . " (`dateSpy`, `from`, `to`, `proba`, `sender_id`) VALUES ('" . $line['date'] . "', '" . $line['from'] . "', '" . $line['to'] . "', '" . $line['proba'] . "', '" . $xtense_user_data['user_id'] . "')");
                     }
                     $ennemy_spy = array(
                         'from' => explode(':', $line['from']),
@@ -1456,9 +1459,9 @@ RocketLauncher': 401,
                     $line['M_total'] = filter_var($line['M_total'], FILTER_SANITIZE_NUMBER_INT);
                     $line['C_total'] = filter_var($line['C_total'], FILTER_SANITIZE_NUMBER_INT);
 
-                    $query = "SELECT `id_rec` FROM " . TABLE_PARSEDREC . " WHERE `sender_id` = '" . $user_data['user_id'] . "' AND `dateRec` = '{$line['date']}'";
+                    $query = "SELECT `id_rec` FROM " . TABLE_PARSEDREC . " WHERE `sender_id` = '" . $xtense_user_data['user_id'] . "' AND `dateRec` = '{$line['date']}'";
                     if ($db->sql_numrows($db->sql_query($query)) == 0) {
-                        $db->sql_query("INSERT INTO " . TABLE_PARSEDREC . " (`dateRec`, `coordinates`, `nbRec`, `M_total`, `C_total`, `M_recovered`, `C_recovered`, `sender_id`) VALUES ('" . $line['date'] . "', '" . $line['coords'] . "', '" . $line['nombre'] . "', '" . $line['M_total'] . "', '" . $line['C_total'] . "', '" . $line['M_recovered'] . "', '" . $line['C_recovered'] . "', '" . $user_data['user_id'] . "')");
+                        $db->sql_query("INSERT INTO " . TABLE_PARSEDREC . " (`dateRec`, `coordinates`, `nbRec`, `M_total`, `C_total`, `M_recovered`, `C_recovered`, `sender_id`) VALUES ('" . $line['date'] . "', '" . $line['coords'] . "', '" . $line['nombre'] . "', '" . $line['M_total'] . "', '" . $line['C_total'] . "', '" . $line['M_recovered'] . "', '" . $line['C_recovered'] . "', '" . $xtense_user_data['user_id'] . "')");
                     }
                     $rc_cdr = array(
                         'nombre' => (int)$line['nombre'],
