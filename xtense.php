@@ -419,7 +419,7 @@ switch ($received_game_data['type']) {
             foreach ($resource_settings_map as $json_key => $db_col_name) {
                 $columns[] = $db_col_name;
                 // Si la clé n'est pas dans les données JSON, mettre 0 (comme pour 'buildings')
-                $values[] = isset($resourceSettings_data[$json_key]) ? (int)$resourceSettings_data[$json_key] : 0;
+                $values[] = isset($resourceSettings_data[$json_key]) ? (int)$resourceSettings_data[$json_key] : 100;
             }
 
             // Préparation des champs pour la clause ON DUPLICATE KEY UPDATE
@@ -792,16 +792,15 @@ switch ($received_game_data['type']) {
                 $v['moon'] = (isset($v['moon']) ? (int)$v['moon'] : -1);
                 $v['moon_id'] = (isset($v['moon_id']) ? (int)$v['moon_id'] : -1);
                 $v['ally_id'] = (isset($v['ally_id']) ? (int)$v['ally_id'] : -1);
-                $v['ally_id'] = ((int)$v['ally_id'] == 0) ? -1 : $v['ally_id'];
+                $v['ally_tag'] = $v['ally_tag'] ?? '';
 
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                    (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update`, `last_update_user_id`)
+                    (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update`, `last_update_user_id`)
                     VALUES
-                    ({$v['planet_id']},{$galaxy}, {$system}, {$row}, '{$v['planet_name']}', {$v['player_id']}, {$v['ally_id']},  " . time() . ", {$xtense_user_data['id']} )
+                    ({$v['planet_id']},{$galaxy}, {$system}, {$row}, '{$v['planet_name']}', {$v['player_id']},  " . time() . ", {$xtense_user_data['id']} )
                     ON DUPLICATE KEY UPDATE
                     `name` = '{$v['planet_name']}',
                     `player_id` = {$v['player_id']},
-                    `ally_id` = {$v['ally_id']},
                     `last_update` = " . time() . ",
                     `last_update_user_id` = {$xtense_user_data['id']}");
 
@@ -809,13 +808,12 @@ switch ($received_game_data['type']) {
 
                 if (isset($v['moon_id']) && $v['moon'] == 1) {
                     $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                        (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `ally_id`, `last_update_moon`, `last_update_user_id`)
+                        (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update_moon`, `last_update_user_id`)
                         VALUES
-                        ({$v['moon_id']}, 'moon',{$galaxy}, {$system}, {$row}, '{$v['planet_name']}  - Moon', {$v['player_id']}, {$v['ally_id']}, " . time() . ", {$xtense_user_data['id']} )
+                        ({$v['moon_id']}, 'moon',{$galaxy}, {$system}, {$row}, '{$v['planet_name']}  - Moon', {$v['player_id']}, " . time() . ", {$xtense_user_data['id']} )
                         ON DUPLICATE KEY UPDATE
                         `name` = '{$v['planet_name']} - Moon',
                         `player_id` = {$v['player_id']},
-                        `ally_id` = {$v['ally_id']},
                         `last_update_moon` = " . time() . ",
                         `last_update_user_id` = {$xtense_user_data['id']}");
                 }
@@ -841,6 +839,21 @@ switch ($received_game_data['type']) {
                                 `datadate` = $currentTime");
                 }
                 //La table game ally ne peut se mettre à jour, champs ally non alimenté (toutes les infos sont dans page rank)
+                // UPSERT pour la table game_player pour mettre à jour le statut
+                if ($v['ally_id'] > 0) {
+
+                    $currentTime = time();
+                    $allytag = $v['ally_tag'];
+                    $allyId = $v['ally_id'];
+
+                    $db->sql_query("INSERT INTO " . TABLE_GAME_ALLY . "
+                                (`id`, `tag`, `datadate`)
+                                VALUES
+                                ($allyId, '$allytag', $currentTime)
+                                ON DUPLICATE KEY UPDATE
+                                `tag` = '$allytag',
+                                `datadate` = $currentTime");
+                }
             }
 
             if (!empty($delete)) {
@@ -848,8 +861,6 @@ switch ($received_game_data['type']) {
                 foreach ($delete as $n) {
                     $toDelete[] = $galaxy . ':' . $system . ':' . $n;
                 }
-
-                $db->sql_query("UPDATE " . TABLE_PARSEDSPY . " SET `active` = 0 WHERE `coordinates` IN ('" . implode("', '", $toDelete) . "')");
             }
 
             $db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . $xtense_user_data['id']);
