@@ -902,7 +902,7 @@ switch ($received_game_data['type']) {
             $io->status(0);
         } else {
             if ($type1 != ('player' || 'ally')) {
-                throw new UnexpectedValueException("Ranking: Unexpected Ranking type1");
+                throw new UnexpectedValueException("Ranking: Unexpected Ranking type for type1");
             }
         }
         //Vérification Offset
@@ -1352,80 +1352,130 @@ RocketLauncher': 401,
 
                 case 'spy': //RAPPORT ESPIONNAGE
                 case 'spy_shared':
-                    if (!isset($line['coords'],
-                        $line['content'],
-                        $line['planetName'],
+                    if (!isset(
+                        $line['player']['name'],
+                        $line['planet']['name'],
+                        $line['planet']['coordinates'],
+                        $line['planet']['id'],
+                        $line['resources'],
                         $line['proba'],
-                        $line['activity'])) {
-                        throw new UnexpectedValueException("Shared Spy: Incomplete Metadata ");
+                        $line['activity'],
+                        $line['date']
+                        )) {
+                        throw new UnexpectedValueException("Spy: Incomplete Metadata ");
                     }
 
-                    $coords = Check::coords($line['coords']);
-                    $content = filter_var_array($line['content']);
-                    $playerName = filter_var($line['playerName']);
-                    $planetName = filter_var($line['planetName']);
-                    $moon = filter_var($line['isMoon']);
-                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
-                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT);
-                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT);
+                    $coords = Check::coords($line['planet']['coordinates']); // Modifié: Source des coordonnées
+                    // Construction de $content à partir des nouvelles sections du JSON
+                    $content = array();
+                    if (isset($line['resources']) && is_array($line['resources'])) {
+                        $content = $content + $line['resources'];
+                    }
+                    if (isset($line['buildings']) && is_array($line['buildings'])) {
+                        $content =  $content + $line['buildings'];
+                    }
+                    if (isset($line['lfBuildings']) && is_array($line['lfBuildings'])) {
+                        $content =  $content + $line['lfBuildings'];
+                    }
+                    if (isset($line['research']) && is_array($line['research'])) {
+                        $content =  $content + $line['research'];
+                    }
+                    if (isset($line['lfResearch']) && is_array($line['lfResearch'])) {
+                        $content =  $content + $line['lfResearch'];
+                    }
+                    if (isset($line['fleet']) && is_array($line['fleet'])) {
+                        $content =  $content + $line['fleet'];
+                    }
+                    if (isset($line['defense']) && is_array($line['defense'])) {
+                        $content =  $content + $line['defense'];
+                    }
+
+                    $playerName = filter_var($line['player']['name']);
+                    $planetName = filter_var($line['planet']['name']);
+                    $moon = ($line['planet']['type'] === "3");
+                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT); // Modifié: Source de proba
+                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT); // Modifié: Source de activity
+                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT); // Source de date (supposée existante)
 
                     $proba = $proba > 100 ? 100 : $proba;
                     $activite = $activite > 59 ? 59 : $activite;
                     $spy = array(
                         'proba' => $proba,
                         'activite' => $activite,
-                        'coords' => explode(':', $coords),
+                        'coords' => $coords,
                         'content' => $content,
                         'time' => $date,
                         'player_name' => $playerName,
-                        'planet_name' => $planetName
+                        'planet_name' => $planetName,
+                        'planet_id' => $line['planet']['id']
                     );
                     $call->add($line['type'], $spy);
 
                     $spyDB = [];
                     foreach ($databaseSpyId as $arr) {
-                        $spyDB = array_merge($spyDB, $arr);
+                        $spyDB = $spyDB + $arr; // Fusionner les tableaux pour obtenir les codes d'espionnage
                     }
-                    $coords = $spy['coords'][0] . ':' . $spy['coords'][1] . ':' . $spy['coords'][2];
-                    $matches = array();
-                    $data = array();
-                    $values = $fields = '';
 
-                    $fields .= 'planet_name, coordinates, sender_id, proba, activite, dateRE';
-                    $values .= '"' . trim($spy['planet_name']) . '", "' . $coords . '", ' . $xtense_user_data['user_id'] . ', ' . $spy['proba'] . ', ' . $spy['activite'] . ', ' . $spy['time'] . ' ';
+                    $log->debug("spyDB: " . print_r($spyDB, true));
 
-                    foreach ($spy['content'] as $code => $value) {
-                        // La table RE ne supporte pas les CDR dans le rapport
-                        if ($code === 701 || $code === 702) {
+                    // Initialisation des tableaux pour les champs et les valeurs
+                    $query_fields = [];
+                    $query_values = [];
+
+                    // Champs de base et valeurs correspondantes
+                    // Note: les noms de champs ici ne sont pas entourés de backticks car implode les ajoutera si nécessaire,
+                    // ou ils sont déjà des noms valides. Si des backticks sont requis pour tous, ajustez ici.
+                    $query_fields = [
+                        'astro_object_id', 'planet_name', 'metal', 'cristal', 'deuterium',
+                        'sender_id', 'proba', 'activite', 'dateRE'
+                    ];
+                    $query_values = [
+                        $spy['planet_id'],
+                        $spy['planet_name'],
+                        (isset($spy['content']['metal']) ? (int)$spy['content']['metal'] : 0),
+                        (isset($spy['content']['crystal']) ? (int)$spy['content']['crystal'] : 0),
+                        (isset($spy['content']['deuterium']) ? (int)$spy['content']['deuterium'] : 0),
+                        $xtense_user_data['id'],
+                        $spy['proba'],
+                        $spy['activite'],
+                        $spy['time']
+                    ];
+
+                    // On traite le contenu additionnel du rapport d'espionnage
+                        // Exclure les champs de base déjà traités (metal, crystal, deuterium)
+                    foreach ($spyDB as $code => $name) {
+                        $log->debug('Traitement du code d\'espionnage: ' . $code . ' avec la valeur: ' . $name);
+                        if ($name === 'metal' || $name === 'crystal' || $name === 'deuterium') {
                             continue;
                         }
-                        $field = $spyDB[$code];
-                        $fields .= ', `' . $field . '`';
-                        $values .= ', ' . $value;
-                    }
-                    //log_('debug', "INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
-                    $spy_time = $spy['time'];
-                    $test = $db->sql_numrows($db->sql_query("SELECT `id_spy` FROM " . TABLE_PARSEDSPY . " WHERE `coordinates` = '$coords' AND `dateRE` = '$spy_time'"));
-                    if (!$test) {
-                        $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields . ") VALUES (" . $values . ")");
-                        $query = $db->sql_query('SELECT `last_update`' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
-                        //log_('debug', 'SELECT last_update' . ($moon ? '_moon' : '') . ' FROM ' . TABLE_UNIVERSE . ' WHERE galaxy = ' . $spy['coords'][0] . ' AND system = ' . $spy['coords'][1] . ' AND row = ' . $spy['coords'][2]);
-                        if ($db->sql_numrows($query) > 0) {
-                            $assoc = $db->sql_fetch_assoc($query);
-                            if ($assoc['last_update' . ($moon ? '_moon' : '')] < $spy_time) {
-                                if ($moon) {
-                                    (isset($spy['content'][42]) ? $phalanx = $spy['content'][42] : $phalanx = 0);
-                                    (isset($spy['content'][43]) ? $gate = $spy['content'][43] : $gate = 0);
-                                    //log_('debug', "Lune détectée avec phalange $phalanx et porte $gate");
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `moon` = "1", `phalanx` = ' . $phalanx . ', `gate` = "' . $gate . '", `last_update_moon` = ' . $date . ', `last_update_user_id` = ' . $xtense_user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
-                                } else { //we do nothing if buildings are not in the report
-                                    $db->sql_query('UPDATE ' . TABLE_UNIVERSE . ' SET `name` = "' . $spy['planet_name'] . '", `last_update_user_id` = ' . $xtense_user_data['user_id'] . ' WHERE `galaxy` = ' . $spy['coords'][0] . ' AND `system` = ' . $spy['coords'][1] . ' AND `row` = ' . $spy['coords'][2]);
-                                }
-                            }
+                        if (isset($spy['content'][$code])) { // Vérifier si le code est mappé $spy['content']
+                            $field = $name;
+                            $query_fields[] = '`' . $field . '`'; // Ajoute le nom du champ protégé par des backticks
+                            $query_values[] = (int)$spy['content'][$code];     // Ajoute la valeur convertie en entier
+                        } else {
+                            $log->warning("Code d\'espionnage inconnu: $name");
                         }
-                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_imports` = spy_imports + 1 WHERE `user_id` = ' . $xtense_user_data['user_id']);
+                    }
+
+                    // Construction des chaînes finales pour la requête SQL
+                    $fields_for_db = implode(', ', $query_fields);
+                    $values_for_db = implode(', ', $query_values);
+
+                    $spy_time = $spy['time'];
+                    $test = $db->sql_numrows($db->sql_query("SELECT `id` FROM " . TABLE_PARSEDSPY . " WHERE `astro_object_id` = '{$spy['planet_id']}' AND `dateRE` = '$spy_time'"));
+                    if (!$test) {
+                        $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields_for_db . ") VALUES (" . $values_for_db . ")");
+
+
+                        //TODO: On mets à jour la table astro objects avec les données du rapport espionnage
+
+
+                        // On met à jour le nombre d'importations de rapports espionnage
+
+                        $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_imports` = spy_imports + 1 WHERE `id` = ' . $xtense_user_data['id']);
                         update_statistic('spyimports', '1');
-                        add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $coords, 'toolbar' => $toolbar_info));
+                        // ATTENTION: $spy[\'planet_name\'] étant vide, le log sera incomplet.
+                        add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $spy['coords'], 'toolbar' => $toolbar_info));
                     }
                     break;
 
