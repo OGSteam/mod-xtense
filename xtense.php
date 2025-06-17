@@ -143,15 +143,15 @@ switch ($received_game_data['type']) {
                     ]
                 );
 
-                $planet_name = filter_var($data['planetName'], FILTER_DEFAULT);
-                $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
+                $planet_name = filter_var($data['planet']['name'], FILTER_DEFAULT);
+                $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
                 $ressources = filter_var_array($data['ressources'], FILTER_VALIDATE_INT);
                 $temperature_min = filter_var($data['temperature_min'], FILTER_VALIDATE_INT);
                 $temperature_max = filter_var($data['temperature_max'], FILTER_VALIDATE_INT);
                 $fields = filter_var($data['fields'], FILTER_VALIDATE_INT);
 
-                $coords = Check::coords($data['coords']);
-                $planet_type = ((int)$data['planetType'] == 0 ? TYPE_PLANET : TYPE_MOON);
+                $coords = Check::coords($data['planet']['coords']);
+                $planet_type = ((int)$data['planet']['type'] == 0 ? TYPE_PLANET : TYPE_MOON);
                 $ogame_timestamp = $uni_details['uni_time'];
 
                 $userclass = 'none';
@@ -279,10 +279,10 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords']);
-            $planet_name = filter_var($data['planetName']);
-            $planet_type = filter_var($data['planetType']);
-            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
+            $coords = filter_var($data['planet']['coords']);
+            $planet_name = filter_var($data['planet']['name']);
+            $planet_type = filter_var($data['planet']['type']);
+            $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
             if (!isset($coords, $planet_name, $planet_type)) {
                 throw new UnexpectedValueException("Buildings- Missing data");
             }
@@ -366,10 +366,10 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords_str = filter_var($data['coords']);
-            $planet_name = filter_var($data['planetName']);
-            $planet_type_int = filter_var($data['planetType'], FILTER_VALIDATE_INT);
-            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
+            $coords_str = filter_var($data['planet']['coords']);
+            $planet_name = filter_var($data['planet']['name']);
+            $planet_type_int = filter_var($data['planet']['type'], FILTER_VALIDATE_INT);
+            $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
             $resourceSettings_data = isset($data['resourceSettings']) && is_array($data['resourceSettings']) ? $data['resourceSettings'] : null;
 
             if (
@@ -471,10 +471,10 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords']);
-            $planet_name = filter_var($data['planetName']);
-            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
-            $planet_type = filter_var($data['planetType']);
+            $coords = filter_var($data['planet']['coords']);
+            $planet_name = filter_var($data['planet']['name']);
+            $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
+            $planet_type = filter_var($data['planet']['type']);
 
             $defense = $data['defense'];
             //Stop si donnée manquante
@@ -555,9 +555,9 @@ switch ($received_game_data['type']) {
             $io->set(['type' => 'plugin grant', 'access' => 'empire']);
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords']);
-            $planet_name = filter_var($data['planetName']);
-            $planet_type = filter_var($data['planetType']);
+            $coords = filter_var($data['planet']['coords']);
+            $planet_name = filter_var($data['planet']['name']);
+            $planet_type = filter_var($data['planet']['type']);
             $researchs = $data['researchs'];
 
             if (!isset($coords, $planet_name, $planet_type)) {
@@ -622,10 +622,10 @@ switch ($received_game_data['type']) {
             ));
             $io->status(0);
         } else {
-            $coords = filter_var($data['coords']);
-            $planet_name = filter_var($data['planetName']);
-            $planet_type = filter_var($data['planetType']);
-            $planet_id = filter_var($data['planetId'], FILTER_VALIDATE_INT);
+            $coords = filter_var($data['planet']['coords']);
+            $planet_name = filter_var($data['planet']['name']);
+            $planet_type = filter_var($data['planet']['type']);
+            $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
             $fleet = $data['fleet'];
 
             if (!isset($coords, $planet_name, $planet_type)) {
@@ -1453,7 +1453,7 @@ RocketLauncher': 401,
                             $query_fields[] = '`' . $field . '`'; // Ajoute le nom du champ protégé par des backticks
                             $query_values[] = (int)$spy['content'][$code];     // Ajoute la valeur convertie en entier
                         } else {
-                            $log->warning("Code d\'espionnage inconnu: $name");
+                            $log->warning("Code d\'espionnage vide: $name");
                         }
                     }
 
