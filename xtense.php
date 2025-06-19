@@ -35,10 +35,9 @@ if ($origin === 'localhost' || $origin === '') {
     }
 }
 
-header("Access-Control-Allow-Origin: {$origin} ");
-header('Access-Control-Max-Age: 86400');    // cache for 1 day
-header('Access-Control-Request-Headers: Content-Type');    // cache for 1 day
-header("Content-Type: text/plain");
+header('Access-Control-Max-Age: 86400');   // cache for 1 day
+header("Access-Control-Allow-Origin: {$origin}");
+header('Access-Control-Request-Headers: Content-Type');
 header("Access-Control-Allow-Methods: POST");
 header('X-Content-Type-Options: nosniff');
 
@@ -666,8 +665,7 @@ switch ($received_game_data['type']) {
                 $fields_str = implode(', ', $fleet_fields);
                 $values_str = implode(', ', $fleet_values);
 
-                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_FLEET . "
-                            (astro_object_id, {$fields_str})
+                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_FLEET . " (astro_object_id, {$fields_str})
                             VALUES
                             ({$astro_object_id}, {$values_str})
                             ON DUPLICATE KEY UPDATE
@@ -1431,7 +1429,7 @@ RocketLauncher': 401,
                     ];
                     $query_values = [
                         $spy['planet_id'],
-                        $spy['planet_name'],
+                        '"' . $spy['planet_name'] . '"',
                         (isset($spy['content']['metal']) ? (int)$spy['content']['metal'] : 0),
                         (isset($spy['content']['crystal']) ? (int)$spy['content']['crystal'] : 0),
                         (isset($spy['content']['deuterium']) ? (int)$spy['content']['deuterium'] : 0),
@@ -1467,8 +1465,129 @@ RocketLauncher': 401,
                         $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields_for_db . ") VALUES (" . $values_for_db . ")");
 
 
-                        //TODO: On mets à jour la table astro objects avec les données du rapport espionnage
+                        // On cherche l'ID du joueur espionné
+                        $spied_player_id = -1;
+                        $spied_player_id_result = $db->sql_query("SELECT `id` FROM " . TABLE_GAME_PLAYER . " WHERE `name` = '" . $db->sql_escape_string($spy['player_name']) . "'");
+                        if ($db->sql_numrows($spied_player_id_result) > 0) {
+                            $spied_player_id = (int)$db->sql_fetch_row($spied_player_id_result)[0];
+                        }
 
+                        list($g, $s, $r) = explode(':', $spy['coords']);
+                        $planet_type = $moon ? 'moon' : 'planet';
+
+                        // Préparation de la mise à jour de TABLE_USER_BUILDING (astro_objects)
+                        $update_pairs = [];
+                        $insert_fields = ['id', 'galaxy', 'system', 'row', 'type', 'name', 'last_update', 'last_update_user_id'];
+                        $insert_values = [
+                            (int)$spy['planet_id'],
+                            (int)$g,
+                            (int)$s,
+                            (int)$r,
+                            "'" . $planet_type . "'",
+                            "'" . $db->sql_escape_string($spy['planet_name']) . "'",
+                            (int)$spy['time'],
+                            (int)$xtense_user_data['id']
+                        ];
+
+                        $update_pairs[] = 'name = VALUES(name)';
+                        $update_pairs[] = 'last_update = VALUES(last_update)';
+                        $update_pairs[] = 'last_update_user_id = VALUES(last_update_user_id)';
+                        $update_pairs[] = 'type = VALUES(type)';
+                        $update_pairs[] = 'galaxy = VALUES(galaxy)';
+                        $update_pairs[] = 'system = VALUES(system)';
+                        $update_pairs[] = 'row = VALUES(row)';
+
+                        if ($spied_player_id !== -1) {
+                            $insert_fields[] = 'player_id';
+                            $insert_values[] = (int)$spied_player_id;
+                            $update_pairs[] = 'player_id = VALUES(player_id)';
+                        }
+
+                        $log->debug("Building to Update in Astro Table: ",[$line['buildings']] );
+                        $log->debug("Building Database to Update in Astro Table: ",[$databaseSpyId['buildings']] );
+                        // Bâtiments
+                        if (isset($line['buildings']) && is_array($line['buildings'])) {
+                            foreach ($databaseSpyId['buildings'] as $code => $name) {
+                                if (isset($line['buildings'][$code])) {
+                                    $insert_fields[] = $name;
+                                    $insert_values[] = (int)$line['buildings'][$code];
+                                    $update_pairs[] = "`" . $name . "` = VALUES(`" . $name . "`)";
+                                }
+                            }
+                        }
+                        $log->debug("Building to Update: ",[$insert_fields, $insert_values] );
+
+
+                        $query = "INSERT INTO " . TABLE_USER_BUILDING . " (`" . implode('`, `', $insert_fields) . "`)
+                                  VALUES (" . implode(', ', $insert_values) . ")
+                                  ON DUPLICATE KEY UPDATE " . implode(', ', $update_pairs);
+                        $db->sql_query($query);
+
+                        // Défenses
+                        if (isset($line['defense']) && is_array($line['defense'])) {
+                            $defense_fields = [];
+                            $defense_values = [];
+                            $defense_update_pairs = [];
+
+                            foreach ($databaseSpyId['defense'] as $code => $name) {
+                                if (isset($line['defense'][$code])) {
+                                    $level = (int)$line['defense'][$code];
+                                    $defense_fields[] = "`$name`";
+                                    $defense_values[] = $level;
+                                    $defense_update_pairs[] = "`$name` = $level";
+                                }
+                            }
+
+                            if (!empty($defense_fields)) {
+                                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_DEFENSE . " (astro_object_id, " . implode(', ', $defense_fields) . ")
+                                            VALUES (" . (int)$spy['planet_id'] . ", " . implode(', ', $defense_values) . ")
+                                            ON DUPLICATE KEY UPDATE " . implode(", ", $defense_update_pairs));
+                            }
+                        }
+
+                        // Flotte
+                        if (isset($line['fleet']) && is_array($line['fleet'])) {
+                            $fleet_fields = [];
+                            $fleet_values = [];
+                            $fleet_update_pairs = [];
+
+                            foreach ($databaseSpyId['fleet'] as $code => $name) {
+                                if (isset($line['fleet'][$code])) {
+                                    $level = (int)$line['fleet'][$code];
+                                    $fleet_fields[] = "`$name`";
+                                    $fleet_values[] = $level;
+                                    $fleet_update_pairs[] = "`$name` = $level";
+                                }
+                            }
+
+                            if (!empty($fleet_fields)) {
+                                $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_FLEET . " (astro_object_id, " . implode(', ', $fleet_fields) . ")
+                                            VALUES (" . (int)$spy['planet_id'] . ", " . implode(', ', $fleet_values) . ")
+                                            ON DUPLICATE KEY UPDATE " . implode(", ", $fleet_update_pairs));
+                            }
+                        }
+
+                        // Recherches
+                        if ($spied_player_id !== -1 && isset($line['research']) && is_array($line['research'])) {
+                            $research_fields = [];
+                            $research_values = [];
+                            $research_update_parts = [];
+
+                            foreach ($databaseSpyId['labo'] as $code => $name) {
+                                if (isset($line['research'][$code])) {
+                                    $level = (int)$line['research'][$code];
+                                    $research_fields[] = "`$name`";
+                                    $research_values[] = $level;
+                                    $research_update_parts[] = "`$name` = $level";
+                                }
+                            }
+
+                            if (!empty($research_fields)) {
+                                $db->sql_query("INSERT INTO " . TABLE_USER_TECHNOLOGY . " (`player_id`, " . implode(', ', $research_fields) . ")
+                                            VALUES (" . (int)$spied_player_id . ", " . implode(', ', $research_values) . ")
+                                            ON DUPLICATE KEY UPDATE " . implode(", ", $research_update_parts));
+                            }
+                        }
 
                         // On met à jour le nombre d'importations de rapports espionnage
 
@@ -1476,6 +1595,8 @@ RocketLauncher': 401,
                         update_statistic('spyimports', '1');
                         // ATTENTION: $spy[\'planet_name\'] étant vide, le log sera incomplet.
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $spy['coords'], 'toolbar' => $toolbar_info));
+                    } else {
+                        $log->debug("Spy report already exists for planet_id: " . $spy['planet_id'] . " at time: " . $spy['time']);
                     }
                     break;
 
