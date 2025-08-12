@@ -236,6 +236,7 @@ switch ($received_game_data['type']) {
                             ON DUPLICATE KEY UPDATE
                                 type = VALUES(type),
                                 name = VALUES(name),
+                                player_id = VALUES(player_id),
                                 fields = VALUES(fields),
                                 boosters = VALUES(boosters),
                                 temperature_min = VALUES(temperature_min),
