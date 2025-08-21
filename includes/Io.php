@@ -136,7 +136,7 @@ class Io
      * @param                 $message
      * @param \Exception|null $e
      */
-    public function append_call_error($call, $message, Exception $e = null)
+    public function append_call_error($call, $message, ?Exception $e = null)
     {
         $this->append_call($call, self::ERROR);
         $this->append_call_message($message, self::ERROR, $call);
