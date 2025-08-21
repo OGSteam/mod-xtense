@@ -34,16 +34,16 @@ require_once("mod/$root/lang/" . $ui_lang . "/lang_xtense.php");
 
 if (isset($pub_action_xtense) && $pub_action_xtense = 'renew_token') {
 
-    user_profile_token_updater($user_data['user_id']);
+    user_profile_token_updater($user_data['id']);
     unset($pub_action_xtense);
 }
-$my_user_token = get_user_profile_token($user_data['user_id']);
+$my_user_token = get_user_profile_token($user_data['id']);
 
 if (isset($pub_universe)) {
     $universe = Check::universe($pub_universe);
     if ($universe === false) $universe = 'https://sxx-yy.ogame.gameforge.com';
 
-    $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (`config_name`, `config_value`) VALUES ("xtense_universe", "' . $universe . '")');
+    $db->sql_query('REPLACE INTO ' . TABLE_CONFIG . ' (`name`, `value`) VALUES ("xtense_universe", "' . $universe . '")');
     generate_config_cache();
     $server_config['xtense_universe'] = $universe;
 
@@ -67,7 +67,7 @@ if (isset($pub_groups_id)) {
 }
 
 
-$query = $db->sql_query('SELECT g.`group_id`, `group_name`,  `system`, `ranking`, `empire`, `messages` FROM ' . TABLE_GROUP . ' g LEFT JOIN ' . TABLE_XTENSE_GROUPS . ' x ON x.`group_id` = g.`group_id` ORDER BY g.`group_name`');
+$query = $db->sql_query('SELECT g.`id`, g.`name`,  xg.`system`, xg.`ranking`, xg.`empire`, xg.`messages` FROM ' . TABLE_GROUP . ' g LEFT JOIN ' . TABLE_XTENSE_GROUPS . ' xg ON g.`id` = xg.`group_id` ORDER BY g.`name`');
 $groups = array();
 $groups_id = array();
 
@@ -77,7 +77,7 @@ while ($data = $db->sql_fetch_assoc($query)) {
     }
 
     $groups[] = $data;
-    $groups_id[] = $data['group_id'];
+    $groups_id[] = $data['id'];
 
 }
 
@@ -198,27 +198,24 @@ $db->sql_close();
                     <table class="og-table og-full-table">
                         <thead>
                         <tr>
-                            <th><?php echo ($lang['MOD_XTENSE_TITLE']); ?></th>
-                            <th><?php echo ($lang['MOD_XTENSE_SOLARSYSTEMS']); ?></th>
-                            <th><?php echo ($lang['MOD_XTENSE_RANKINGS']); ?></th>
-                            <th><?php echo ($lang['MOD_XTENSE_EMPIRE']); ?></th>
-                            <th><?php echo ($lang['MOD_XTENSE_MESSAGES']); ?></th>
+                            <th><?= $lang['MOD_XTENSE_TITLE']; ?></th>
+                            <th><?= $lang['MOD_XTENSE_SOLARSYSTEMS']; ?></th>
+                            <th><?= $lang['MOD_XTENSE_RANKINGS']; ?></th>
+                            <th><?= $lang['MOD_XTENSE_EMPIRE']; ?></th>
+                            <th><?= $lang['MOD_XTENSE_MESSAGES']; ?></th>
                             <th>(X)</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($groups as $l) { ?>
                             <tr>
-                                <td><?php echo $l['group_name']; ?></td>
+                                <td><?= $l['name']; ?></td>
 
-                                <td><label for="system_<?php echo $l['group_id']; ?>"></label><input type="checkbox" name="system_<?php echo $l['group_id']; ?>" id="system_<?php echo $l['group_id']; ?>" <?php if ($l['system'] == 1) echo 'checked="checked"'; ?> /></td>
-                                <td><label for="ranking_<?php echo $l['group_id']; ?>"></label><input type="checkbox" name="ranking_<?php echo $l['group_id']; ?>" id="ranking_<?php echo $l['group_id']; ?>" <?php if ($l['ranking'] == 1) echo 'checked="checked"'; ?> /></td>
-                                <td><label for="empire_<?php echo $l['group_id']; ?>"></label><input type="checkbox" name="empire_<?php echo $l['group_id']; ?>" id="empire_<?php echo $l['group_id']; ?>" <?php if ($l['empire'] == 1) echo 'checked="checked"'; ?> /></td>
-                                <td><label for="messages_<?php echo $l['group_id']; ?>"></label><input type="checkbox" name="messages_<?php echo $l['group_id']; ?>" id="messages_<?php echo $l['group_id']; ?>" <?php if ($l['messages'] == 1) echo 'checked="checked"'; ?> /></td>
-                                <td><label>
-                                        <input type="checkbox" onclick="check_row(<?php echo $l['group_id']; ?>, this);" />
-                                    </label>
-                                </td>
+                                <td><input type="checkbox" name="system_<?= $l['id']; ?>" id="system_<?= $l['id']; ?>" <?= $l['system'] == 1 ? 'checked' : ''; ?> /></td>
+                                <td><input type="checkbox" name="ranking_<?= $l['id']; ?>" id="ranking_<?= $l['id']; ?>" <?= $l['ranking'] == 1 ? 'checked' : ''; ?> /></td>
+                                <td><input type="checkbox" name="empire_<?= $l['id']; ?>" id="empire_<?= $l['id']; ?>" <?= $l['empire'] == 1 ? 'checked' : ''; ?> /></td>
+                                <td><input type="checkbox" name="messages_<?= $l['id']; ?>" id="messages_<?= $l['id']; ?>" <?= $l['messages'] == 1 ? 'checked' : ''; ?> /></td>
+                                <td><input type="checkbox" onclick="check_row(<?= $l['id']; ?>, this);" /></td>
                             </tr>
                         <?php } ?>
 
