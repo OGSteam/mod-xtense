@@ -1,5 +1,5 @@
 Xtense
-2.11.0
+2.11.1
 Xtense,Xtense,xtense,xtense,index.php,1,1
 4.0.0-dev
 3.0.0

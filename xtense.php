@@ -269,8 +269,7 @@ switch ($received_game_data['type']) {
 
         break;
 
-    case
-    'buildings': //PAGE BATIMENTS
+    case 'buildings': //PAGE BATIMENTS
 
         if (!$xtense_user_data['grant']['empire']) {
             $io->set(array(
@@ -1057,8 +1056,8 @@ switch ($received_game_data['type']) {
 
     case 'rc'://PAGE RC
     case 'rc_shared':
-        $json = filter_var($data['json']);
-        $ogapilnk = filter_var($data['ogapilnk']);
+        $combatReport = $data;
+        $ogapilnk = filter_var($combatReport['ogapilnk']);
 
         if (!isset($json)) {
             throw new UnexpectedValueException("Combat Report: JSON Report not sent");
@@ -1077,178 +1076,379 @@ switch ($received_game_data['type']) {
                 'api' => $ogapilnk
             ));
 
-            $jsonObj = json_decode($json);
-
-            $exist = $db->sql_fetch_row($db->sql_query("SELECT `id_rc` FROM " . TABLE_PARSEDRC . " WHERE `dateRC` = '" . $jsonObj->event_timestamp . "'"));
+            $exist = $db->sql_fetch_row($db->sql_query("SELECT `id_rc` FROM " . TABLE_PARSEDRC . " WHERE `dateRC` = '" . (int)$combatReport['timestamp'] . "'"));
 
             if (!isset($exist[0])) {
-                $winner = match ($jsonObj->result) {
+// Récupération des coordonnées
+                $coordinates = $combatReport['coordinates']; // "4:252:12"
+
+// Récupération du nombre de rounds
+                $nbRounds = count($combatReport['combatRounds']);
+
+// L'objet JSON n'existe plus dans cette structure, utilisez directement $combatReport
+// Remplacez $jsonObj par $combatReport dans le code
+
+// Récupération du gagnant
+                $winner = match ($combatReport['result']['winner']) {
                     'draw' => 'N',
                     'attacker' => 'A',
                     'defender' => 'D',
                     default => throw new UnexpectedValueException("Combat Report: Result not found"),
                 };
-                $nbRounds = count($jsonObj->combatRounds) - 1;
-                $moon = (int)($jsonObj->moon->genesis);
-                $coordinates = "{$jsonObj->coordinates->galaxy}:{$jsonObj->coordinates->system}:{$jsonObj->coordinates->position}";
 
+// Récupération des ressources du butin
+                $lootMetal = 0;
+                $lootCrystal = 0;
+                $lootDeuterium = 0;
+
+                foreach ($combatReport['result']['loot']['resources'] as $resource) {
+                    switch ($resource['resource']) {
+                        case 'metal':
+                            $lootMetal = $resource['amount'];
+                            break;
+                        case 'crystal':
+                            $lootCrystal = $resource['amount'];
+                            break;
+                        case 'deuterium':
+                            $lootDeuterium = $resource['amount'];
+                            break;
+                    }
+                }
+
+// Récupération des débris (si disponibles)
+                $debrisMetal = 0;
+                $debrisCrystal = 0;
+
+                if (!empty($combatReport['result']['debris']['resources'])) {
+                    foreach ($combatReport['result']['debris']['resources'] as $debris) {
+                        switch ($debris['resource']) {
+                            case 'metal':
+                                $debrisMetal = $debris['amount'];
+                                break;
+                            case 'crystal':
+                                $debrisCrystal = $debris['amount'];
+                                break;
+                        }
+                    }
+                }
+
+// Récupération des pertes par camp
+                $lostUnitsAttacker = 0;
+                $lostUnitsDefender = 0;
+
+                foreach ($combatReport['result']['totalValueOfUnitsLost'] as $loss) {
+                    switch ($loss['side']) {
+                        case 'attacker':
+                            $lostUnitsAttacker = $loss['value'];
+                            break;
+                        case 'defender':
+                            $lostUnitsDefender = $loss['value'];
+                            break;
+                    }
+                }
+
+// Chance de création de lune
+                $moon = 0;
+                if (isset($combatReport['result']['moonCreation']) && is_array($combatReport['result']['moonCreation'])) {
+                    $moon = (int)($combatReport['result']['moonCreation']['chance'] ?? 0);
+                }
+
+// Récupération de l'astro_object_id depuis les coordonnées et le type d'objet
+                list($g, $s, $r) = explode(':', $coordinates);
+
+// Déterminer le type d'objet astro depuis les données du RC
+                $defenderSpaceObject = $combatReport['defenderSpaceObject'];
+                $astro_object_type = $defenderSpaceObject['type']; // 'planet' ou 'moon'
+
+                $astro_object_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
+                                      WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$astro_object_type}'
+                                      ORDER BY last_update DESC LIMIT 1");
+                $astro_object_row = $db->sql_fetch_row($astro_object_result);
+                $astro_object_id = $astro_object_row[0] ?? null;
+
+                if ($astro_object_id === null) {
+                    throw new UnexpectedValueException("Combat Report: Astro object not found for coordinates {$coordinates} with type {$astro_object_type}");
+                }
+
+// Mise à jour de la requête SQL
                 $db->sql_query(
                     "INSERT INTO " . TABLE_PARSEDRC . " (
-                        `dateRC`, `coordinates`, `nb_rounds`, `victoire`, `pertes_A`, `pertes_D`, `gain_M`, `gain_C`, `gain_D`, `debris_M`, `debris_C`, `lune`
-                    ) VALUES (
-                     '{$jsonObj->event_timestamp}',
-                     '{$coordinates}',
-                      '{$nbRounds}',
-                      '{$winner}',
-                      '{$jsonObj->statistic->lostUnitsAttacker}',
-                      '{$jsonObj->statistic->lostUnitsDefender}',
-                      '{$jsonObj->loot->metal}',
-                      '{$jsonObj->loot->crystal}',
-                      '{$jsonObj->loot->deuterium}',
-                      '{$jsonObj->debris->metal}',
-                      '{$jsonObj->debris->crystal}',
-                      '{$moon}'
-                    )"
+        `dateRC`, `astro_object_id`, `nb_rounds`, `victoire`, `pertes_A`, `pertes_D`, `gain_M`, `gain_C`, `gain_D`, `debris_M`, `debris_C`, `lune`
+    ) VALUES (
+     '{$combatReport['timestamp']}',
+     '{$astro_object_id}',
+      '{$nbRounds}',
+      '{$winner}',
+      '{$lostUnitsAttacker}',
+      '{$lostUnitsDefender}',
+      '{$lootMetal}',
+      '{$lootCrystal}',
+      '{$lootDeuterium}',
+      '{$debrisMetal}',
+      '{$debrisCrystal}',
+      '{$moon}'
+    )"
                 );
                 $id_rc = $db->sql_insertid();
 
-                $attackers = array();
-                foreach ($jsonObj->attacker as $attacker) {
-                    $attackers[$attacker->fleetID] = array(
-                        'coords' => $attacker->ownerCoordinates,
-                        'planetType' => $attacker->ownerPlanetType,
-                        'name' => $attacker->ownerName,
-                        'armor' => $attacker->armorPercentage,
-                        'weapon' => $attacker->weaponPercentage,
-                        'shield' => $attacker->shieldPercentage
-                    );
-                }
-                $defenders = array();
-                foreach ($jsonObj->defender as $defender) {
-                    $defenders[] = array(
-                        'coords' => $attacker->ownerCoordinates,
-                        'planetType' => $defender->ownerPlanetType,
-                        'name' => $defender->ownerName,
-                        'armor' => $defender->armorPercentage,
-                        'weapon' => $defender->weaponPercentage,
-                        'shield' => $defender->shieldPercentage
-                    );
+                foreach ($combatReport['fleets'] as $fleet) {
+                    if ($fleet['side'] === 'attacker') {
+                        // Extraire les pourcentages de recherche de combat en utilisant les IDs
+                        $armorPercent = 0;
+                        $weaponPercent = 0;
+                        $shieldPercent = 0;
+
+                        if (isset($fleet['combatResearchPercentage']) && is_array($fleet['combatResearchPercentage'])) {
+                            foreach ($fleet['combatResearchPercentage'] as $research) {
+                                switch ($research['id']) {
+                                    case 109: // Armor/Protection
+                                        $armorPercent = $research['percentage'];
+                                        break;
+                                    case 110: // Weapon/Armes
+                                        $weaponPercent = $research['percentage'];
+                                        break;
+                                    case 111: // Shield/Bouclier
+                                        $shieldPercent = $research['percentage'];
+                                        break;
+                                }
+                            }
+                        }
+
+                        $attackers[$fleet['fleetId']] = array(
+                            'coords' => $fleet['spaceObject']['coordinates']['galaxy'] . ':' .
+                                $fleet['spaceObject']['coordinates']['system'] . ':' .
+                                $fleet['spaceObject']['coordinates']['position'],
+                            'planetType' => $fleet['spaceObject']['type'],
+                            'name' => $fleet['player']['name'],
+                            'armor' => $armorPercent,
+                            'weapon' => $weaponPercent,
+                            'shield' => $shieldPercent
+                        );
+                    } else {
+                        // Extraire les pourcentages de recherche de combat en utilisant les IDs pour les défenseurs
+                        $armorPercent = 0;
+                        $weaponPercent = 0;
+                        $shieldPercent = 0;
+
+                        if (isset($fleet['combatResearchPercentage']) && is_array($fleet['combatResearchPercentage'])) {
+                            foreach ($fleet['combatResearchPercentage'] as $research) {
+                                switch ($research['id']) {
+                                    case 109: // Armor/Protection
+                                        $armorPercent = $research['percentage'];
+                                        break;
+                                    case 110: // Weapon/Armes
+                                        $weaponPercent = $research['percentage'];
+                                        break;
+                                    case 111: // Shield/Bouclier
+                                        $shieldPercent = $research['percentage'];
+                                        break;
+                                }
+                            }
+                        }
+
+                        $defenders[] = array(
+                            'coords' => $fleet['spaceObject']['coordinates']['galaxy'] . ':' .
+                                $fleet['spaceObject']['coordinates']['system'] . ':' .
+                                $fleet['spaceObject']['coordinates']['position'],
+                            'planetType' => $fleet['spaceObject']['type'],
+                            'name' => $fleet['player']['name'],
+                            'armor' => $armorPercent,
+                            'weapon' => $weaponPercent,
+                            'shield' => $shieldPercent
+                        );
+                    }
                 }
 
-                for ($i = 0; $i <= $nbRounds; $i++) {
-                    $round = $jsonObj->combatRounds[$i];
+                for ($i = 0; $i < $nbRounds; $i++) {
+                    $round = $combatReport['combatRounds'][$i];
 
-                    if (!isset($round->statistic))
-                        $a_nb = $a_shoot = $a_bcl = $d_nb = $d_shoot = $d_bcl = 0;
-                    else {
-                        $a_nb = $round->statistic->hitsAttacker;
-                        $d_nb = $round->statistic->hitsDefender;
-                        $a_shoot = $round->statistic->fullStrengthAttacker;
-                        $d_shoot = $round->statistic->fullStrengthDefender;
-                        $a_bcl = $round->statistic->absorbedDamageAttacker;
-                        $d_bcl = $round->statistic->absorbedDamageDefender;
+                    // Initialisation des variables pour les statistiques
+                    $a_nb = 0;
+                    $d_nb = 0;
+                    $a_shoot = 0;
+                    $d_shoot = 0;
+                    $a_bcl = 0;
+                    $d_bcl = 0;
+
+                    // Parcourir les statistiques pour identifier attaquant et défenseur
+                    foreach ($round['statistics'] as $stat) {
+                        if ($stat['side'] === 'attacker') {
+                            $a_nb = $stat['hits'] ?? 0;
+                            $a_shoot = $stat['strength'] ?? 0;
+                            $a_bcl = $stat['absorbedDamage'] ?? 0;
+                        } elseif ($stat['side'] === 'defender') {
+                            $d_nb = $stat['hits'] ?? 0;
+                            $d_shoot = $stat['strength'] ?? 0;
+                            $d_bcl = $stat['absorbedDamage'] ?? 0;
+                        }
                     }
 
                     $db->sql_query(
                         "INSERT INTO " . TABLE_PARSEDRCROUND . " (
-                            `id_rc`, `numround`, `attaque_tir`, `attaque_puissance`, `defense_bouclier`, `attaque_bouclier`, `defense_tir`, `defense_puissance`
-                        ) VALUE (
-                            '{$id_rc}', '{$i}', '" . $a_nb . "', '" . $a_shoot . "', '" . $d_bcl . "', '" . $a_bcl . "', '" . $d_nb . "', '" . $d_shoot . "'
-                        )"
+            `id_rc`, `numround`, `attaque_tir`, `attaque_puissance`, `defense_bouclier`, `attaque_bouclier`, `defense_tir`, `defense_puissance`
+        ) VALUES (
+            '{$id_rc}', '{$i}', '{$a_nb}', '{$a_shoot}', '{$d_bcl}', '{$a_bcl}', '{$d_nb}', '{$d_shoot}'
+        )"
                     );
                     $id_rcround = $db->sql_insertid();
 
-                    /*'SmallCargo': 202,
-         'LargeCargo': 203,
-         'LightFighter': 204,
-         'HeavyFighter': 205,
-         'Cruiser': 206,
-         'Battleship': 207,
-         'ColonyShip': 208,
-         'Recycler': 209,
-         'EspionageProbe': 210,
-         'Bomber': 211,
-         'SolarSatellite': 212,
-         'Destroyer': 213,
-         'Deathstar': 214,
-         'Battlecruiser': 215,
-
-RocketLauncher': 401,
-           'LightLaser': 402,
-           'HeavyLaser': 403,
-           'GaussCannon': 404,
-           'IonCannon': 405,
-           'PlasmaTurret': 406,
-           'SmallShieldDome': 407,
-           'LargeShieldDome': 408,
-           'AntiBallisticMissiles': 502,
-           'InterplanetaryMissiles': 503,*/
-                    $shipList = array(
-                        '202' => 'PT', '203' => 'GT', '204' => 'CLE', '205' => 'CLO', '206' => 'CR', '207' => 'VB', '208' => 'VC', '209' => 'REC',
-                        '210' => 'SE', '211' => 'BMD', '212' => 'SAT', '213' => 'DST', '214' => 'EDLM', '215' => 'TRA', '217' => 'FOR', '218' => 'FAU', '219' => 'ECL',
-                        '401' => 'LM', '402' => 'LLE', '403' => 'LLO', '404' => 'CG', '405' => 'AI', '406' => 'LP', '407' => 'PB', '408' => 'GB', '502' => 'MIC', '503' => 'MIP'
-                    );
-
-                    foreach ($round->attackerShips as $fleetId => $attackerRound) {
-                        $attackerFleet = array_fill_keys($database['fleet'], 0);
-                        foreach ((array)$attackerRound as $ship => $nbShip)
-                            $attackerFleet[$shipList[$ship]] = $nbShip;
-                        // On efface les sat qui attaquent
-                        unset($attackerFleet['SAT']);
-
-                        $attacker = $attackers[$fleetId];
-                        $fleet = '';
-                        foreach (array('PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA', 'FAU', 'ECL') as $ship)
-                            $fleet .= ", " . $attackerFleet[$ship];
-
-                        $db->sql_query("INSERT INTO " . TABLE_ROUND_ATTACK . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection`,
-                        `PT`, `GT`, `CLE`, `CLO`, `CR`, `VB`, `VC`, `REC`, `SE`, `BMD`,  `DST`, `EDLM`, `TRA`, `FAU`, `ECL`) VALUE ('{$id_rcround}', '"
-                            . $attacker['name'] . "', '"
-                            . $attacker['coords'] . "', '"
-                            . $attacker['weapon'] . "', '"
-                            . $attacker['shield'] . "', '"
-                            . $attacker['armor'] . "'"
-                            . $fleet . ")");
+                    if (!$id_rcround) {
+                        throw new UnexpectedValueException("Combat Report: Failed to insert round {$i}");
                     }
 
-                    foreach ($round->defenderShips as $fleetId => $defenderRound) {
-                        $defenderFleet = array_fill_keys(array_merge($database['fleet'], $database['defense']), 0);
-                        foreach ((array)$defenderRound as $ship => $nbShip)
-                            $defenderFleet[$shipList[$ship]] = $nbShip;
 
-                        $defender = $defenders[0];
 
-                        $columns = array(
-                            'PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'SAT', 'DST', 'EDLM', 'TRA', 'FOR', 'FAU', 'ECL',
-                            'LM', 'LLE', 'LLO', 'CG', 'AI', 'LP', 'PB', 'GB'
-                        );
+                    // Utilisation de la configuration existante pour le mapping ID -> code
+                    $fleetMapping = $databaseSpyId['fleet'];
+                    $defenseMapping = $databaseSpyId['defense'];
 
-                        $query = "INSERT INTO " . TABLE_ROUND_DEFENSE . " (`id_rcround`, `player`, `coordinates`, `Armes`, `Bouclier`, `Protection` ";
-                        foreach ($columns as $column) {
-                            $query .= ", `{$column}`";
+                    // Colonnes pour attaquants (vaisseaux uniquement)
+                    $attackerColumns = $database['fleet'];
+
+                    // Colonnes pour défenseurs (vaisseaux + défenses)
+                    $defenderColumns = array_merge($database['fleet'], ['SAT', 'FOR'], $database['defense']);
+
+                    // Traitement des flottes par round
+                    foreach ($round['fleets'] as $fleet) {
+                        if (!isset($fleet['side'], $fleet['player'])) {
+                            continue;
                         }
-                        $query .= ") VALUE ('{$id_rcround}', '"
-                            . $defender['name'] . "', '"
-                            . $defender['coords'] . "', '"
-                            . $defender['weapon'] . "', '"
-                            . $defender['shield'] . "', '"
-                            . $defender['armor'] . "'";
-                        foreach ($columns as $ship) {
-                            $query .= ", " . $defenderFleet[$ship];
-                        }
-                        $query .= ")";
 
-                        $db->sql_query($query);
+                        $playerId = isset($fleet['player']['id']) ? (int)$fleet['player']['id'] : -1;
+                        $playerName = isset($fleet['player']['name']) ? $db->sql_escape_string($fleet['player']['name']) : 'Unknown';
+
+                        if ($fleet['side'] === 'attacker') {
+                            // Traitement des attaquants - Trouver l'attaquant par nom au lieu de fleetId
+                            $attacker = null;
+                            if (isset($attackers) && is_array($attackers)) {
+                                foreach ($attackers as $att) {
+                                    if (isset($att['name']) && $att['name'] === $fleet['player']['name']) {
+                                        $attacker = $att;
+                                    }
+                                }
+                            }
+                            // Traitement des attaquants - Recherche directe par nom
+
+                            if (isset($attackers[$fleet['player']['name']])) {
+                                $attacker = $attackers[$fleet['player']['name']];
+                                // Initialiser les compteurs à 0
+                                $fleetCounts = array_fill_keys($attackerColumns, 0);
+                            }
+
+                            // Traiter les technologies du round (vaisseaux restants après combat)
+                            if (isset($fleet['technologies']) && is_array($fleet['technologies'])) {
+                                foreach ($fleet['technologies'] as $tech) {
+                                    if (!isset($tech['technologyId'])) continue;
+
+                                    $techId = (int)$tech['technologyId'];
+                                    $remaining = isset($tech['remaining']) ? (int)$tech['remaining'] : 0;
+
+                                    // Utiliser le mapping de la configuration
+                                    if (isset($fleetMapping[$techId]) && in_array($fleetMapping[$techId], $attackerColumns)) {
+                                        $shipCode = $fleetMapping[$techId];
+                                        $fleetCounts[$shipCode] = $remaining;
+                                    }
+                                }
+                            }
+
+                            // Récupérer les stats de combat
+                            $weapons = (isset($attacker) && is_array($attacker) && isset($attacker['weapon'])) ? (int)$attacker['weapon'] : 0;
+                            $shields = (isset($attacker) && is_array($attacker) && isset($attacker['shield'])) ? (int)$attacker['shield'] : 0;
+                            $armor = (isset($attacker) && is_array($attacker) && isset($attacker['armor'])) ? (int)$attacker['armor'] : 0;
+
+                            // Préparer les valeurs pour l'insertion
+                            $values = [];
+                            foreach ($attackerColumns as $column) {
+                                $values[] = $fleetCounts[$column];
+                            }
+
+                            $query = "INSERT INTO " . TABLE_ROUND_ATTACK . " (
+                                `id_rcround`, `player`, `astro_object_id`, `Armes`, `Bouclier`, `Protection`,
+                                `" . implode('`, `', $attackerColumns) . "`
+                            ) VALUES (
+                                {$id_rcround}, '{$playerName}', {$astro_object_id}, {$weapons}, {$shields}, {$armor},
+                                " . implode(', ', $values) . "
+                            )";
+
+                            $db->sql_query($query);
+
+                        } elseif ($fleet['side'] === 'defender') {
+                            // Traitement des défenseurs
+
+                            // Recherche du défenseur par nom
+                            $defender = null;
+                            if (isset($defenders) && is_array($defenders)) {
+                                foreach ($defenders as $def) {
+                                    if (isset($def['name']) && $def['name'] === $fleet['player']['name']) {
+                                        $defender = $def;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Initialiser les compteurs à 0
+                            $unitCounts = array_fill_keys($defenderColumns, 0);
+
+                            // Traiter les technologies du round (unités restantes après combat)
+                            if (isset($fleet['technologies']) && is_array($fleet['technologies'])) {
+                                foreach ($fleet['technologies'] as $tech) {
+                                    if (!isset($tech['technologyId'])) continue;
+
+                                    $techId = (int)$tech['technologyId'];
+                                    $remaining = isset($tech['remaining']) ? (int)$tech['remaining'] : 0;
+
+                                    $unitCode = null;
+                                    // Chercher dans les mappings de flotte et défense
+                                    if (isset($fleetMapping[$techId])) {
+                                        $unitCode = $fleetMapping[$techId];
+                                    } elseif (isset($defenseMapping[$techId])) {
+                                        $unitCode = $defenseMapping[$techId];
+                                    }
+
+                                    if ($unitCode && in_array($unitCode, $defenderColumns)) {
+                                        $unitCounts[$unitCode] = $remaining;
+                                    }
+                                }
+                            }
+
+                            // Récupérer les stats de combat du défenseur
+                            $weapons = (isset($defender) && is_array($defender) && isset($defender['weapon'])) ? (int)$defender['weapon'] : 0;
+                            $shields = (isset($defender) && is_array($defender) && isset($defender['shield'])) ? (int)$defender['shield'] : 0;
+                            $armor = (isset($defender) && is_array($defender) && isset($defender['armor'])) ? (int)$defender['armor'] : 0;
+
+                            // Préparer les valeurs pour l'insertion
+                            $values = [];
+                            foreach ($defenderColumns as $column) {
+                                // Traitement spécial pour les boucliers (valeurs binaires)
+                                if ($column === 'PB' || $column === 'GB') {
+                                    $values[] = ($unitCounts[$column] > 0) ? 1 : 0;
+                                } else {
+                                    $values[] = $unitCounts[$column];
+                                }
+                            }
+
+                            $query = "INSERT INTO " . TABLE_ROUND_DEFENSE . " (
+                                `id_rcround`, `player_id`, `astro_object_id`, `Armes`, `Bouclier`, `Protection`,
+                                `" . implode('`, `', $defenderColumns) . "`
+                            ) VALUES (
+                                {$id_rcround}, {$playerId}, {$astro_object_id}, {$weapons}, {$shields}, {$armor},
+                                " . implode(', ', $values) . "
+                            )";
+
+                            $db->sql_query($query);
+                        }
                     }
+
+
                 }
             }
-
             $io->set(array(
                 'type' => $received_game_data['type'],
             ));
 
             add_log($received_game_data['type'], array('toolbar' => $toolbar_info));
         }
+
         break;
 
     case 'ally_list': //PAGE ALLIANCE
@@ -1301,7 +1501,6 @@ RocketLauncher': 401,
         break;
 
     case 'messages': //PAGE MESSAGES
-
         if (!$xtense_user_data['grant']['messages']) {
             $io->set(array(
                 'type' => 'plugin grant',
@@ -1331,7 +1530,6 @@ RocketLauncher': 401,
                     break;
 
                 case 'ally_msg': //MESSAGE ALLIANCE
-
                     if (!isset($line['from'], $line['tag'], $line['message'])) {
                         throw new UnexpectedValueException("Alliance Message: Incomplete Metadata ");
                     }
@@ -1364,7 +1562,7 @@ RocketLauncher': 401,
                         throw new UnexpectedValueException("Spy: Incomplete Metadata ");
                     }
 
-                    $coords = Check::coords($line['planet']['coordinates']); // Modifié: Source des coordonnées
+                    $coords = Check::coords($line['planet']['coordinates']);
                     // Construction de $content à partir des nouvelles sections du JSON
                     $content = array();
                     if (isset($line['resources']) && is_array($line['resources'])) {
@@ -1392,9 +1590,9 @@ RocketLauncher': 401,
                     $playerName = filter_var($line['player']['name']);
                     $planetName = filter_var($line['planet']['name']);
                     $moon = ($line['planet']['type'] === "3");
-                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT); // Modifié: Source de proba
-                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT); // Modifié: Source de activity
-                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT); // Source de date (supposée existante)
+                    $proba = filter_var($line['proba'], FILTER_SANITIZE_NUMBER_INT);
+                    $activite = filter_var($line['activity'], FILTER_SANITIZE_NUMBER_INT);
+                    $date = filter_var($line['date'], FILTER_SANITIZE_NUMBER_INT);
 
                     $proba = $proba > 100 ? 100 : $proba;
                     $activite = $activite > 59 ? 59 : $activite;
@@ -1412,47 +1610,39 @@ RocketLauncher': 401,
 
                     $spyDB = [];
                     foreach ($databaseSpyId as $arr) {
-                        $spyDB = $spyDB + $arr; // Fusionner les tableaux pour obtenir les codes d'espionnage
+                        $spyDB = $spyDB + $arr;
                     }
-
-                    $log->debug("spyDB: " . print_r($spyDB, true));
 
                     // Initialisation des tableaux pour les champs et les valeurs
                     $query_fields = [];
                     $query_values = [];
 
-                    // Champs de base et valeurs correspondantes
-                    // Note: les noms de champs ici ne sont pas entourés de backticks car implode les ajoutera si nécessaire,
-                    // ou ils sont déjà des noms valides. Si des backticks sont requis pour tous, ajustez ici.
+                    // Champs de base et valeurs correspondantes avec backticks pour les noms de champs
                     $query_fields = [
-                        'astro_object_id', 'planet_name', 'metal', 'cristal', 'deuterium',
-                        'sender_id', 'proba', 'activite', 'dateRE'
+                        '`astro_object_id`', '`planet_name`', '`metal`', '`crystal`', '`deuterium`',
+                        '`sender_id`', '`proba`', '`activite`', '`dateRE`'
                     ];
                     $query_values = [
-                        $spy['planet_id'],
-                        '"' . $spy['planet_name'] . '"',
+                        (int)$spy['planet_id'],
+                        "'" . $db->sql_escape_string($spy['planet_name']) . "'",
                         (isset($spy['content']['metal']) ? (int)$spy['content']['metal'] : 0),
                         (isset($spy['content']['crystal']) ? (int)$spy['content']['crystal'] : 0),
                         (isset($spy['content']['deuterium']) ? (int)$spy['content']['deuterium'] : 0),
-                        $xtense_user_data['id'],
-                        $spy['proba'],
-                        $spy['activite'],
-                        $spy['time']
+                        (int)$xtense_user_data['id'],
+                        (int)$spy['proba'],
+                        (int)$spy['activite'],
+                        (int)$spy['time']
                     ];
 
                     // On traite le contenu additionnel du rapport d'espionnage
-                        // Exclure les champs de base déjà traités (metal, crystal, deuterium)
                     foreach ($spyDB as $code => $name) {
-                        $log->debug('Traitement du code d\'espionnage: ' . $code . ' avec la valeur: ' . $name);
                         if ($name === 'metal' || $name === 'crystal' || $name === 'deuterium') {
                             continue;
                         }
-                        if (isset($spy['content'][$code])) { // Vérifier si le code est mappé $spy['content']
+                        if (isset($spy['content'][$code])) {
                             $field = $name;
-                            $query_fields[] = '`' . $field . '`'; // Ajoute le nom du champ protégé par des backticks
-                            $query_values[] = (int)$spy['content'][$code];     // Ajoute la valeur convertie en entier
-                        } else {
-                            $log->warning("Code d\'espionnage vide: $name");
+                            $query_fields[] = '`' . $field . '`';
+                            $query_values[] = (int)$spy['content'][$code];
                         }
                     }
 
@@ -1465,7 +1655,6 @@ RocketLauncher': 401,
                     if (!$test) {
                         $db->sql_query("INSERT INTO " . TABLE_PARSEDSPY . " ( " . $fields_for_db . ") VALUES (" . $values_for_db . ")");
 
-
                         // On cherche l'ID du joueur espionné
                         $spied_player_id = -1;
                         $spied_player_id_result = $db->sql_query("SELECT `id` FROM " . TABLE_GAME_PLAYER . " WHERE `name` = '" . $db->sql_escape_string($spy['player_name']) . "'");
@@ -1476,7 +1665,7 @@ RocketLauncher': 401,
                         list($g, $s, $r) = explode(':', $spy['coords']);
                         $planet_type = $moon ? 'moon' : 'planet';
 
-                        // Préparation de la mise à jour de TABLE_USER_BUILDING (astro_objects)
+                        // Préparation de la mise à jour de TABLE_USER_BUILDING
                         $update_pairs = [];
                         $insert_fields = ['id', 'galaxy', 'system', 'row', 'type', 'name', 'last_update', 'last_update_user_id'];
                         $insert_values = [
@@ -1504,8 +1693,6 @@ RocketLauncher': 401,
                             $update_pairs[] = 'player_id = VALUES(player_id)';
                         }
 
-                        $log->debug("Building to Update in Astro Table: ",[$line['buildings']] );
-                        $log->debug("Building Database to Update in Astro Table: ",[$databaseSpyId['buildings']] );
                         // Bâtiments
                         if (isset($line['buildings']) && is_array($line['buildings'])) {
                             foreach ($databaseSpyId['buildings'] as $code => $name) {
@@ -1516,8 +1703,6 @@ RocketLauncher': 401,
                                 }
                             }
                         }
-                        $log->debug("Building to Update: ",[$insert_fields, $insert_values] );
-
 
                         $query = "INSERT INTO " . TABLE_USER_BUILDING . " (`" . implode('`, `', $insert_fields) . "`)
                                   VALUES (" . implode(', ', $insert_values) . ")
@@ -1590,14 +1775,10 @@ RocketLauncher': 401,
                             }
                         }
 
-                        // On met à jour le nombre d'importations de rapports espionnage
-
+                        // Mise à jour des statistiques
                         $db->sql_query('UPDATE ' . TABLE_USER . ' SET `spy_imports` = spy_imports + 1 WHERE `id` = ' . $xtense_user_data['id']);
                         update_statistic('spyimports', '1');
-                        // ATTENTION: $spy[\'planet_name\'] étant vide, le log sera incomplet.
                         add_log('messages', array('added_spy' => $spy['planet_name'], 'added_spy_coords' => $spy['coords'], 'toolbar' => $toolbar_info));
-                    } else {
-                        $log->debug("Spy report already exists for planet_id: " . $spy['planet_id'] . " at time: " . $spy['time']);
                     }
                     break;
 
@@ -1660,13 +1841,12 @@ RocketLauncher': 401,
 
                 case 'expedition': //RAPPORT EXPEDITION
                 case 'expedition_shared':
-
                     if (!isset($line['coords'], $line['content'])) {
                         throw new UnexpectedValueException("Expedition Message: Incomplete Metadata ");
                     }
 
                     $line['content'] = filter_var($line['content']);
-                    $line['coords'] = Check::coords($line['coords'], 1); //On ajoute 1 car c'est une expédition
+                    $line['coords'] = Check::coords($line['coords'], 1);
 
                     $expedition = array(
                         'time' => $line['date'],
@@ -1675,6 +1855,7 @@ RocketLauncher': 401,
                     );
                     $call->add($line['type'], $expedition);
                     break;
+
                 default:
                     throw new UnexpectedValueException("Message category not found " . $line['type']);
             }
