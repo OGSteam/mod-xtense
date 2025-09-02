@@ -371,8 +371,7 @@ switch ($received_game_data['type']) {
             $planet_id = filter_var($data['planet']['id'], FILTER_VALIDATE_INT);
             $resourceSettings_data = isset($data['resourceSettings']) && is_array($data['resourceSettings']) ? $data['resourceSettings'] : null;
 
-            if (
-                !isset($coords_str, $planet_name, $data['planetType']) ||
+            if (!isset($coords_str, $planet_name, $planet_type_int) ||
                 $planet_id === false || $planet_type_int === false || $resourceSettings_data === null
             ) {
                 throw new UnexpectedValueException("ResourceSettings: Missing or invalid planet details or resourceSettings data");
