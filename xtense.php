@@ -491,11 +491,6 @@ switch ($received_game_data['type']) {
             ON DUPLICATE KEY UPDATE
             name = '{$planet_name}'");
 
-            // Récupérer l'ID de l'objet astro (nécessaire pour la table défense)
-            $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
-                                          WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
-            $astro_object_id = $db->sql_fetch_row($astro_id_result)[0] ?? $planet_id;
-
             // Préparer les champs pour la requête d'insertion/mise à jour des défenses
             $defense_fields = [];
             $defense_values = [];
@@ -517,7 +512,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_DEFENSE . "
                             (astro_object_id, {$fields_str})
                             VALUES
-                            ({$astro_object_id}, {$values_str})
+                            ({$planet_id}, {$values_str})
                             ON DUPLICATE KEY UPDATE
                             " . implode(", ", $update_pairs));
             }
@@ -641,11 +636,6 @@ switch ($received_game_data['type']) {
 
             $db->sql_query($query);
 
-            // Récupérer l'ID de l'objet astro (nécessaire pour la table flotte)
-            $astro_id_result = $db->sql_query("SELECT id FROM " . TABLE_USER_BUILDING . "
-                                          WHERE galaxy = {$g} AND system = {$s} AND row = {$r} AND type = '{$planet_type_str}'");
-            $astro_object_id = $db->sql_fetch_row($astro_id_result)[0] ?? $planet_id;
-
             // Préparer les champs pour la requête d'insertion/mise à jour de la flotte
             $fleet_fields = [];
             $fleet_values = [];
@@ -666,7 +656,7 @@ switch ($received_game_data['type']) {
 
                 $db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER_FLEET . " (astro_object_id, {$fields_str})
                             VALUES
-                            ({$astro_object_id}, {$values_str})
+                            ({$planet_id}, {$values_str})
                             ON DUPLICATE KEY UPDATE
                             " . implode(", ", $update_pairs));
             }
@@ -689,7 +679,7 @@ switch ($received_game_data['type']) {
                 $db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
                             (id, {$fields_str})
                             VALUES
-                            ({$astro_object_id}, {$values_str})
+                            ({$planet_id}, {$values_str})
                             ON DUPLICATE KEY UPDATE
                             " . implode(", ", $update_prod_pairs));
             }
