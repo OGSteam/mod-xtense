@@ -13,43 +13,14 @@ global $table_prefix;
 
 define('TABLE_XTENSE_GROUPS', $table_prefix.'xtense_groups');
 define('TABLE_XTENSE_CALLBACKS', $table_prefix.'xtense_callbacks');
-define('TABLE_PARSEDREC', $table_prefix.'parsedRec');
-define('TABLE_PARSEDSPYEN', $table_prefix.'parsedSpyEn');
-
 
 $install_ogspy = false;
 $is_ok = false;
 $mod_folder = "xtense";
 $root = "xtense";
 $is_ok = install_mod($mod_folder);
-$db->sql_query("UPDATE " . TABLE_MOD . " SET menu = 'Xtense' WHERE title = 'xtense'");
-
 
 if ($is_ok) {
-
-		//---- Creation de la table des recyclages
-		$db->sql_query("CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDREC . " (
-			`id_rec` INT( 255 ) NOT NULL AUTO_INCREMENT ,
-			`dateRec` INT( 11 ) NOT NULL ,
-			`coordinates` VARCHAR( 9 ) NOT NULL ,
-			`nbRec` INT( 11 ) NOT NULL ,
-			`M_total` INT( 11 ) NOT NULL ,
-			`C_total` INT( 11 ) NOT NULL ,
-			`M_recovered` INT( 11 ) NOT NULL ,
-			`C_recovered` INT( 11 ) NOT NULL ,
-			`sender_id` INT( 11 ) NOT NULL ,
-			PRIMARY KEY ( `id_rec` )
-		) DEFAULT CHARSET=utf8;");
-
-		$db->sql_query("CREATE TABLE IF NOT EXISTS " . TABLE_PARSEDSPYEN . " (
-            `spy_id` INT( 255 ) NOT NULL AUTO_INCREMENT ,
-            `dateSpy` INT( 11 ) NOT NULL ,
-            `from` VARCHAR( 9 ) NOT NULL ,
-            `to` VARCHAR( 9 ) NOT NULL ,
-            `proba` INT( 3 ) NOT NULL ,
-            `sender_id` INT( 11 ) NOT NULL ,
-            PRIMARY KEY ( `spy_id` )
-        )DEFAULT CHARSET=utf8;");
 
 		//---- Creation de la table des Callbacks
 		$db->sql_query("CREATE TABLE IF NOT EXISTS `" . TABLE_XTENSE_CALLBACKS . "` (
@@ -80,6 +51,4 @@ if ($is_ok) {
         generate_all_cache();
 		$db->sql_query("REPLACE INTO " .TABLE_XTENSE_GROUPS. " (`group_id`, `system`, `ranking`, `empire`, `messages`) VALUES
 			('1', '1', '1', '1', '1')");
-
-
 }
