@@ -67,13 +67,13 @@ $received_content = json_decode($json, true);
 //print_r($received_content);
 
 $args = array(
-    'type' => FILTER_SANITIZE_ENCODED,
-    'toolbar_version' => FILTER_SANITIZE_ENCODED,
-    'toolbar_type' => FILTER_SANITIZE_ENCODED,
-    'mod_min_version' => FILTER_SANITIZE_ENCODED,
+    'type' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'toolbar_version' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'toolbar_type' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'mod_min_version' => FILTER_SANITIZE_SPECIAL_CHARS,
     'univers' => FILTER_VALIDATE_URL,
     'password' => FILTER_DEFAULT,
-    'data' => FILTER_REQUIRE_SCALAR
+    'data' => FILTER_DEFAULT
 );
 
 $received_game_data = filter_var_array($received_content, $args);
