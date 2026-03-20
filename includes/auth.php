@@ -147,7 +147,14 @@ function xtense_check_user_rights($user_data) {
     LEFT JOIN " . TABLE_GROUP . " g ON g.`id` = u.`group_id`
     LEFT JOIN " . TABLE_XTENSE_GROUPS . " x ON x.`group_id` = g.`id`
     WHERE u.`user_id` = '" . $user_data['id'] . "'
-");    $user_data['grant'] = $db->sql_fetch_assoc($query);
+");
+    $grant = $db->sql_fetch_assoc($query);
+    $user_data['grant'] = array(
+        'system'   => (int)($grant['system'] ?? 0),
+        'ranking'  => (int)($grant['ranking'] ?? 0),
+        'empire'   => (int)($grant['empire'] ?? 0),
+        'messages' => (int)($grant['messages'] ?? 0),
+    );
 
     // Si Xtense demande la verification du serveur, renvoi des droits de l'utilisateur
     if (isset($pub_server_check)) {
