@@ -11,7 +11,7 @@ global $db;
 
 
 $mod_folder = "xtense";
-$mod_name = "xtense";
+$mod_name = "Xtense";
 
 $db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE `name` LIKE "xtense_log"');
 $db->sql_query('DELETE FROM '.TABLE_CONFIG.' WHERE `name` LIKE "xtense_keep_log"');
