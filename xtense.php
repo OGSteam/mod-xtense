@@ -261,20 +261,20 @@ switch ($received_game_data['type']) {
                     'page' => 'overview',
                     'planet' => $coords
                 ));
+
+                // Appel fonction de callback
+                $call->add('overview', array(
+                    'coords' => explode(':', $coords),
+                    'planet_type' => $planet_type,
+                    'planet_name' => $planet_name,
+                    'fields' => $fields,
+                    'temperature_min' => $temperature_min,
+                    'temperature_max' => $temperature_max,
+                    'ressources' => $ressources
+                ));
+
+                add_log('overview', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
             }
-
-            // Appel fonction de callback
-            $call->add('overview', array(
-                'coords' => explode(':', $coords),
-                'planet_type' => $planet_type,
-                'planet_name' => $planet_name,
-                'fields' => $fields,
-                'temperature_min' => $temperature_min,
-                'temperature_max' => $temperature_max,
-                'ressources' => $ressources
-            ));
-
-            add_log('overview', array('coords' => $coords, 'planet_name' => $planet_name, 'toolbar' => $toolbar_info));
         }
 
 
