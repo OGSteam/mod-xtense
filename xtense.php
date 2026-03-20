@@ -21,25 +21,26 @@ $_SERVER['SCRIPT_FILENAME'] = str_replace(basename(__FILE__), 'index.php', preg_
 include_once("common.php");
 list($root, $active) = $db->sql_fetch_row($db->sql_query("SELECT `root`, `active` FROM " . TABLE_MOD . " WHERE `action` = 'xtense'"));
 
-// Récupérer l'origine et vérifier qu'elle existe
-$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+// CORS: allow extension and web origins; auth is in POST body, no cookies involved.
+$request_method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+header('Access-Control-Max-Age: 86400');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('X-Content-Type-Options: nosniff');
 
-// Si c'est localhost, s'assurer qu'il a le bon format (http ou https)
-if ($origin === 'localhost' || $origin === '') {
-    $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-    $origin = $scheme . 'localhost';
-
-    // Si un port est spécifié dans la requête, l'ajouter
-    if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] !== '80' && $_SERVER['SERVER_PORT'] !== '443') {
-        $origin .= ':' . $_SERVER['SERVER_PORT'];
-    }
+if ($request_method === 'OPTIONS') {
+    http_response_code(204);
+    exit;
 }
 
-header('Access-Control-Max-Age: 86400');   // cache for 1 day
-header("Access-Control-Allow-Origin: {$origin}");
-header('Access-Control-Request-Headers: Content-Type');
-header("Access-Control-Allow-Methods: POST");
-header('X-Content-Type-Options: nosniff');
+if ($request_method !== 'POST') {
+    header('Allow: POST, OPTIONS');
+    header('Content-Type: text/plain; charset=utf-8');
+    http_response_code(405);
+    echo json_encode(['status' => 0, 'error' => 'Method Not Allowed']);
+    exit;
+}
 
 require_once("mod/$root/includes/config.php");
 require_once("mod/$root/includes/functions.php");
@@ -66,21 +67,31 @@ $json = file_get_contents('php://input');
 $received_content = json_decode($json, true);
 //print_r($received_content);
 
+if (!is_array($received_content)) {
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code(400);
+    echo json_encode(['status' => 0, 'error' => 'Invalid JSON payload']);
+    exit;
+}
+
 $args = array(
-    'type' => FILTER_SANITIZE_ENCODED,
-    'toolbar_version' => FILTER_SANITIZE_ENCODED,
-    'toolbar_type' => FILTER_SANITIZE_ENCODED,
-    'mod_min_version' => FILTER_SANITIZE_ENCODED,
+    'type' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'toolbar_version' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'toolbar_type' => FILTER_SANITIZE_SPECIAL_CHARS,
+    'mod_min_version' => FILTER_SANITIZE_SPECIAL_CHARS,
     'univers' => FILTER_VALIDATE_URL,
     'password' => FILTER_DEFAULT,
-    'data' => FILTER_REQUIRE_SCALAR
+    'data' => FILTER_DEFAULT
 );
 
 $received_game_data = filter_var_array($received_content, $args);
 //print_r($received_game_data);
 
 if (!isset($received_game_data['type'])) {
-    throw new UnexpectedValueException("Xtense data not provided");
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code(400);
+    echo json_encode(['status' => 0, 'error' => 'Xtense data not provided']);
+    exit;
 }
 
 xtense_check_before_auth($received_game_data['toolbar_version'], $received_game_data['mod_min_version'], $active, $received_game_data['univers']);
