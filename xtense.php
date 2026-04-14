@@ -919,6 +919,7 @@ switch ($received_game_data['type']) {
                 'economy' => TABLE_RANK_PLAYER_ECO,
                 'research' => TABLE_RANK_PLAYER_TECHNOLOGY,
                 'fleet' => match ($type3) {
+                    '' => TABLE_RANK_PLAYER_MILITARY,
                     '5' => TABLE_RANK_PLAYER_MILITARY_BUILT,
                     '6' => TABLE_RANK_PLAYER_MILITARY_DESTRUCT,
                     '4' => TABLE_RANK_PLAYER_MILITARY_LOOSE,
@@ -933,6 +934,7 @@ switch ($received_game_data['type']) {
                 'economy' => TABLE_RANK_ALLY_ECO,
                 'research' => TABLE_RANK_ALLY_TECHNOLOGY,
                 'fleet' => match ($type3) {
+                    '' => TABLE_RANK_ALLY_MILITARY,
                     '5' => TABLE_RANK_ALLY_MILITARY_BUILT,
                     '6' => TABLE_RANK_ALLY_MILITARY_DESTRUCT,
                     '4' => TABLE_RANK_ALLY_MILITARY_LOOSE,
