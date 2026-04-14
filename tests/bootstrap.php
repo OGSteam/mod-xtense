@@ -19,8 +19,21 @@
 
 // ---------------------------------------------------------------------------
 // 1. Composer autoload
+//    Prefer mod-xtense's own vendor/ (standalone), fall back to the parent
+//    ogspy installation vendor/ when running inside the ogspy workspace.
 // ---------------------------------------------------------------------------
-require_once __DIR__ . '/../../../vendor/autoload.php';
+$xtenseRoot   = dirname(__DIR__);          // mod/xtense/
+$xtenseVendor = $xtenseRoot . '/vendor/autoload.php';
+$ogspyVendor  = dirname($xtenseRoot, 2) . '/vendor/autoload.php';  // mod/ -> ogspy/
+
+if (file_exists($xtenseVendor)) {
+    require_once $xtenseVendor;
+} elseif (file_exists($ogspyVendor)) {
+    require_once $ogspyVendor;
+} else {
+    fwrite(STDERR, "vendor/autoload.php not found. Run 'composer install' in the mod-xtense directory.\n");
+    exit(1);
+}
 
 // ---------------------------------------------------------------------------
 // 2. Entry-point guards expected by xtense source files
@@ -87,9 +100,18 @@ if (!function_exists('booster_encodev')) {
 // 6. Xtense source files  (must come before test-infrastructure classes that
 //    extend them, e.g. SpyCallbackHandler extends CallbackHandler)
 // ---------------------------------------------------------------------------
-$base = dirname(__DIR__); // resolves to mod/xtense/
+$base = $xtenseRoot; // mod/xtense/
 
+// config.php reads version.txt via relative paths designed for CWD = ogspy root.
+// When running standalone from mod/xtense/, set CWD to ogspy root temporarily
+// so that "mod/xtense/version.txt" resolves correctly, then restore.
+$_ogspyRoot = dirname($xtenseRoot, 2);   // mod/xtense/ → mod/ → ogspy/
+$_prevCwd   = getcwd();
+if (is_dir($_ogspyRoot)) {
+    chdir($_ogspyRoot);
+}
 require_once $base . '/includes/config.php';      // TYPE_PLANET, TYPE_MOON, $database
+chdir($_prevCwd);
 require_once $base . '/includes/Io.php';
 require_once $base . '/includes/Check.php';
 require_once $base . '/includes/CallbackHandler.php';

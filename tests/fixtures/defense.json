@@ -1,2 +1,9 @@
 {
+    "toolbar_version": "3.1.4",
+    "toolbar_type": "GM-FF",
+    "mod_min_version": "2.9.0",
+    "univers": "https://s277-fr.ogame.gameforge.com",
+    "type": "defense",
+    "password": "580e367364e87a117964b64a6600b0dc1c14c98d4254432de7f30cc381917389",
+    "data": "{\"planet\":{\"id\":\"33717002\",\"name\":\"planète mère\",\"coords\":\"4:246:12\",\"type\":\"0\"},\"defense\":{\"LM\":\"0\",\"LLE\":\"0\",\"LLO\":\"0\",\"CG\":\"0\",\"AI\":\"0\",\"LP\":\"0\",\"PB\":\"0\",\"GB\":\"0\",\"MIC\":\"0\",\"MIP\":\"0\"}}"
 }
