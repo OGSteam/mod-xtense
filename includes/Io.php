@@ -138,22 +138,15 @@ class Io
      */
     public function append_call_error($call, $message, ?Exception $e = null)
     {
+        global $log;
+
         $this->append_call($call, self::ERROR);
         $this->append_call_message($message, self::ERROR, $call);
 
-
-            echo "* CALL ERROR ({$call['root']}):\n  $message\n";
-
-            if ($e !== null) {
-                echo "    Exception Stacktrace\n";
-                $stacktrace = str_replace("\n", "\n      ", $e->getTraceAsString());
-                if (isset($db_password)) {
-                    $stacktrace = str_replace($db_password, "*****", $stacktrace);
-                }
-                echo "      " . $stacktrace;
-            }
-
-            echo "\n\n";
-
+        $context = ['mod' => $call['root'] ?? 'unknown'];
+        if ($e !== null) {
+            $context['exception'] = $e;
+        }
+        $log->error("Xtense callback error: $message", $context);
     }
 }
