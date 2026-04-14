@@ -27,12 +27,14 @@ abstract class Check {
 	 * Sanitize Coordinates string
 	 * @param     $string
 	 * @param int $exp
-	 * @return mixed
+	 * @return string
+	 * @throws \InvalidArgumentException
      */
 	static function coords($string, $exp = 0) {
 		global $server_config;
-		//if ($string == "unknown") return true; //cas avec une seule planète
-		if (!preg_match('!^([0-9]{1,2}):([0-9]{1,3}):([0-9]{1,2})$!Usi', $string, $match)) die("coords : Hack");
+		if (!preg_match('!^([0-9]{1,2}):([0-9]{1,3}):([0-9]{1,2})$!Usi', $string, $match)) {
+			throw new \InvalidArgumentException("Invalid coordinates format: " . substr((string)$string, 0, 30));
+		}
 		if (($match[1] < 1 || $match[2] < 1 || $match[3] < 1 || $match[1] > $server_config['num_of_galaxies'] || $match[2] > $server_config['num_of_systems'] || ($exp ? ($match[3] != 16) : ($match[3] > 15))) == false) return $string;
 	}
 
