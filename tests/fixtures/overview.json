@@ -1,0 +1,9 @@
+{
+    "toolbar_version": "3.1.4",
+    "toolbar_type": "GM-FF",
+    "mod_min_version": "2.9.0",
+    "univers": "https://s277-fr.ogame.gameforge.com",
+    "type": "overview",
+    "password": "580e367364e87a117964b64a6600b0dc1c14c98d4254432de7f30cc381917389",
+    "data": "{\"planet\":{\"id\":\"33717002\",\"name\":\"planète mère\",\"coords\":\"4:246:12\",\"type\":\"0\"},\"fields\":188,\"temperature_min\":\"-40\",\"temperature_max\":\"0\",\"ressources\":{\"metal\":20000,\"cristal\":10000,\"deut\":3271,\"antimater\":10500,\"energy\":89},\"playerdetails\":{\"player_name\":\"Marshal Galileo\",\"player_id\":\"107058\",\"playerclass_explorer\":0,\"playerclass_miner\":1,\"playerclass_warrior\":0,\"player_officer_commander\":0,\"player_officer_amiral\":0,\"player_officer_engineer\":0,\"player_officer_geologist\":0,\"player_officer_technocrate\":0},\"unidetails\":{\"uni_version\":\"12.9.0-r1\",\"uni_url\":\"s277-fr.ogame.gameforge.com\",\"uni_lang\":\"fr\",\"uni_name\":\"Veritate\",\"uni_time\":\"1776160665\",\"uni_speed\":\"8\",\"uni_speed_fleet_peaceful\":\"4\",\"uni_speed_fleet_war\":\"6\",\"uni_speed_fleet_holding\":\"6\",\"uni_donut_g\":\"1\",\"uni_donut_s\":\"1\"},\"boosters\":[]}"
+}
