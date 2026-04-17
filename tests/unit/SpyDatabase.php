@@ -31,6 +31,13 @@ class SpyDatabase
         return [null];
     }
 
+    private int $lastInsertId = 0;
+
+    public function sql_insertid(): int
+    {
+        return ++$this->lastInsertId;
+    }
+
     /** @return string[] All captured queries in order. */
     public function getQueries(): array
     {

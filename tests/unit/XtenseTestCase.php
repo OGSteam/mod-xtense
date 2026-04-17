@@ -120,6 +120,10 @@ abstract class XtenseTestCase extends TestCase
             'TABLE_RANK_ALLY_MILITARY_LOOSE'      => $p . 'game_rank_ally_military_loose',
             'TABLE_RANK_ALLY_MILITARY_DESTRUCT'   => $p . 'game_rank_ally_military_destruct',
             'TABLE_RANK_ALLY_HONOR'               => $p . 'game_rank_ally_honor',
+            'TABLE_PARSEDRC'                      => $p . 'game_rc',
+            'TABLE_PARSEDRCROUND'                 => $p . 'game_rc_round',
+            'TABLE_ROUND_ATTACK'                  => $p . 'game_rc_round_attack',
+            'TABLE_ROUND_DEFENSE'                 => $p . 'game_rc_round_defense',
         ] as $name => $value) {
             if (!defined($name)) define($name, $value);
         }
