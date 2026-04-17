@@ -1,0 +1,9 @@
+{
+    "toolbar_version": "3.1.2",
+    "toolbar_type": "GM-FF",
+    "mod_min_version": "2.9.0",
+    "univers": "https://s277-fr.ogame.gameforge.com",
+    "type": "messages",
+    "password": "580e367364e87a117964b64a6600b0dc1c14c98d4254432de7f30cc381917389",
+    "data": "{\"type\":\"spy\",\"proba\":\"0\",\"activity\":\"15\",\"date\":\"1776372546\",\"player\":{\"name\":\"Lord Kempatek\",\"status\":\"-\",\"class\":{\"character\":{\"id\":1,\"icon\":\"miner\",\"name\":\"Le collecteur\"},\"alliance\":{\"id\":3,\"icon\":\"explorer\",\"name\":\"Chercheur (alliance)\"}}},\"planet\":{\"name\":\"KEMPA III\",\"coordinates\":\"4:246:7\",\"type\":\"1\",\"id\":\"33717423\"},\"resources\":{\"metal\":\"774266\",\"crystal\":\"152040\",\"deuterium\":\"137071\",\"loot\":\"50\"},\"buildings\":{},\"lfBuildings\":{},\"research\":{},\"lfResearch\":{},\"fleet\":{},\"defense\":{}}"
+}

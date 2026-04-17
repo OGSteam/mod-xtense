@@ -111,6 +111,7 @@ $data = json_decode($received_game_data['data'], true);
 // Meilleur Endroit pour voir ce que l'on récupère de l'extension :-)
 //print_r($data);
 
+try {
 
 switch ($received_game_data['type']) {
     case 'overview':
@@ -918,6 +919,7 @@ switch ($received_game_data['type']) {
                 'economy' => TABLE_RANK_PLAYER_ECO,
                 'research' => TABLE_RANK_PLAYER_TECHNOLOGY,
                 'fleet' => match ($type3) {
+                    '' => TABLE_RANK_PLAYER_MILITARY,
                     '5' => TABLE_RANK_PLAYER_MILITARY_BUILT,
                     '6' => TABLE_RANK_PLAYER_MILITARY_DESTRUCT,
                     '4' => TABLE_RANK_PLAYER_MILITARY_LOOSE,
@@ -932,6 +934,7 @@ switch ($received_game_data['type']) {
                 'economy' => TABLE_RANK_ALLY_ECO,
                 'research' => TABLE_RANK_ALLY_TECHNOLOGY,
                 'fleet' => match ($type3) {
+                    '' => TABLE_RANK_ALLY_MILITARY,
                     '5' => TABLE_RANK_ALLY_MILITARY_BUILT,
                     '6' => TABLE_RANK_ALLY_MILITARY_DESTRUCT,
                     '4' => TABLE_RANK_ALLY_MILITARY_LOOSE,
@@ -1870,6 +1873,12 @@ switch ($received_game_data['type']) {
 }
 
 $call->apply();
+
+} catch (\Throwable $e) {
+    $log->error("Xtense error: " . $e->getMessage(), ['exception' => $e]);
+    $io->set('error', $e->getMessage());
+    $io->status(0);
+}
 
 $io->set('execution', str_replace(',', '.', round((microtime(true) - $start_time) * 1000, 2)));
 $io->send();

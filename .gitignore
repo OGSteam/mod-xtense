@@ -1,2 +1,9 @@
 
 *.zip
+
+# Composer dependencies — install with: composer install
+vendor/
+
+# PHPUnit cache
+.phpunit.result.cache
+
