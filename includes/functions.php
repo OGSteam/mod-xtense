@@ -120,12 +120,13 @@ function update_statistic($stats, $value){
  * @return array|null Tableau des boosters mis à jour ou `null` en cas d'erreur.
  */
 function update_boosters($boosterdata, $current_time ){
+	global $log;
 
 	$boosters = booster_decode();
 
 	foreach($boosterdata as $booster) {
 		if(!booster_is_uuid($booster[0])) {
-			log_("mod","Booster Inconnu");
+			$log->warning("[Xtense] Booster Inconnu", ['uuid' => $booster[0]]);
 		} else {
 			if(!isset($booster[1]))
 				$boosters = booster_uuid($boosters, $booster[0]);
