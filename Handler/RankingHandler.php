@@ -39,6 +39,9 @@ class RankingHandler extends AbstractHandler
             if (!is_array($entry)) {
                 continue;
             }
+            if ($type1 === 'ally' && !isset($entry['ally_id'], $entry['points'], $entry['mean'], $entry['members'])) {
+                throw new UnexpectedValueException('Ranking Ally: Missing alliance data');
+            }
             $entry['rank'] = (int)($entry['rank'] ?? 0);
             $entry['points'] = (int)($entry['points'] ?? 0);
 
@@ -69,11 +72,10 @@ class RankingHandler extends AbstractHandler
                 }
                 $values[] = $rowValues . ')';
             } else {
-                $allyTag = $this->db->sql_escape_string(filter_var($entry['ally_tag'] ?? '', FILTER_DEFAULT));
-                $allyName = $this->db->sql_escape_string(filter_var($entry['ally'] ?? '', FILTER_DEFAULT));
-                if (!isset($entry['ally_id'], $entry['points'], $entry['mean'], $entry['members'])) {
-                    throw new UnexpectedValueException('Ranking Ally: Missing alliance data');
-                }
+                $entry['ally_tag'] = filter_var($entry['ally_tag'] ?? '', FILTER_DEFAULT);
+                $entry['ally_name'] = filter_var($entry['ally'] ?? '', FILTER_DEFAULT);
+                $allyTag = $this->db->sql_escape_string($entry['ally_tag']);
+                $allyName = $this->db->sql_escape_string($entry['ally_name']);
                 $allyId = (int)$entry['ally_id'];
                 $points = (int)$entry['points'];
                 $mean = (int)$entry['mean'];

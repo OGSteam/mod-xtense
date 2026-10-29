@@ -20,6 +20,12 @@ class MessageSubtypeHandlerTest extends XtenseTestCase
     public function testSpyReportPersistsAndRegistersCallback(): void
     {
         $data = $this->getDecodedData('messages_spy');
+        $data['buildings'] = false;
+        $data['lfBuildings'] = false;
+        $data['research'] = false;
+        $data['lfResearch'] = false;
+        $data['fleet'] = false;
+        $data['defense'] = false;
         $handler = $this->createHandler('MessageHandler');
         $handler->handle($data);
 

@@ -91,7 +91,10 @@ class MessageHandler extends AbstractHandler
         $coordinates = Check::coords($line['planet']['coordinates']);
         $content = [];
         foreach (['resources', 'buildings', 'lfBuildings', 'research', 'lfResearch', 'fleet', 'defense'] as $section) {
-            if (isset($line[$section]) && is_array($line[$section])) {
+            if (!isset($line[$section]) || !is_array($line[$section])) {
+                $line[$section] = [];
+            }
+            if ($line[$section] !== []) {
                 $content += $line[$section];
             }
         }
@@ -108,7 +111,6 @@ class MessageHandler extends AbstractHandler
         ];
         $this->registerCallback($line['type'], $spy);
 
-    global $databaseSpyId;
     $databaseSpyId = is_array($databaseSpyId ?? null) ? $databaseSpyId : [];
         $spyDatabase = [];
         foreach ($databaseSpyId as $mapping) {
