@@ -56,6 +56,7 @@ foreach ([
     'TABLE_USER'                          => $p . 'user',
     'TABLE_MOD'                           => $p . 'mod',
     'TABLE_STATISTIC'                     => $p . 'statistics',
+        'TABLE_PARSEDSPY'                     => $p . 'game_spy',
     'TABLE_USER_BUILDING'                 => $p . 'game_astro_object',
     'TABLE_GAME_PLAYER'                   => $p . 'game_player',
     'TABLE_GAME_ALLY'                     => $p . 'game_ally',
@@ -78,6 +79,10 @@ foreach ([
     'TABLE_RANK_ALLY_MILITARY_LOOSE'      => $p . 'game_rank_ally_military_loose',
     'TABLE_RANK_ALLY_MILITARY_DESTRUCT'   => $p . 'game_rank_ally_military_destruct',
     'TABLE_RANK_ALLY_HONOR'               => $p . 'game_rank_ally_honor',
+     'TABLE_PARSEDRC'                      => $p . 'game_rc',
+     'TABLE_PARSEDRCROUND'                 => $p . 'game_rc_round',
+     'TABLE_ROUND_ATTACK'                  => $p . 'game_rc_round_attack',
+     'TABLE_ROUND_DEFENSE'                 => $p . 'game_rc_round_defense',
 ] as $constName => $constValue) {
     if (!defined($constName)) define($constName, $constValue);
 }
@@ -91,6 +96,9 @@ if (!function_exists('generate_config_cache')) {
 }
 if (!function_exists('booster_encode')) {
     function booster_encode(array $boosters): string { return ''; }
+}
+if (!function_exists('booster_decode')) {
+    function booster_decode(): array { return []; }
 }
 if (!function_exists('booster_encodev')) {
     function booster_encodev(int ...$args): string { return ''; }

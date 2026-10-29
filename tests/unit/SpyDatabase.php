@@ -26,8 +26,16 @@ class SpyDatabase
         return [];
     }
 
+    public function sql_numrows($result): int
+    {
+        return 0;
+    }
+
     public function sql_fetch_row($result): array
     {
+        if (str_contains($this->getLastQuery() ?? '', 'SELECT id FROM ogspy_game_astro_object')) {
+            return [33717423];
+        }
         return [null];
     }
 
