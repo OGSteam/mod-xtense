@@ -58,6 +58,8 @@ foreach ([
     'TABLE_STATISTIC'                     => $p . 'statistics',
         'TABLE_PARSEDSPY'                     => $p . 'game_spy',
     'TABLE_USER_BUILDING'                 => $p . 'game_astro_object',
+    'TABLE_GAME_LIFEFORM_BUILDING'        => $p . 'game_astro_object_lifeform_building',
+    'TABLE_GAME_LIFEFORM_RESEARCH'        => $p . 'game_astro_object_lifeform_research',
     'TABLE_GAME_PLAYER'                   => $p . 'game_player',
     'TABLE_GAME_ALLY'                     => $p . 'game_ally',
     'TABLE_GAME_PLAYER_DEFENSE'           => $p . 'game_player_defense',
@@ -139,7 +141,7 @@ require_once $unitDir . 'SpyCallbackHandler.php';
 //    skip gracefully before the handlers are implemented.
 // ---------------------------------------------------------------------------
 $handlerDir = $base . '/Handler/';
-foreach (['Overview', 'Buildings', 'ResourceSettings', 'Defense', 'Researchs',
+foreach (['Overview', 'Buildings', 'ResourceSettings', 'Defense', 'Researchs', 'Lifeform',
           'Fleet', 'System', 'Ranking', 'CombatReport', 'AllyList', 'Message'] as $handlerName) {
     $handlerFile = $handlerDir . $handlerName . 'Handler.php';
     if (file_exists($handlerFile)) {

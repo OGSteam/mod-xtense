@@ -99,6 +99,8 @@ abstract class XtenseTestCase extends TestCase
             'TABLE_MOD'                           => $p . 'mod',
             'TABLE_STATISTIC'                     => $p . 'statistics',
             'TABLE_USER_BUILDING'                 => $p . 'game_astro_object',
+            'TABLE_GAME_LIFEFORM_BUILDING'        => $p . 'game_astro_object_lifeform_building',
+            'TABLE_GAME_LIFEFORM_RESEARCH'        => $p . 'game_astro_object_lifeform_research',
             'TABLE_GAME_PLAYER'                   => $p . 'game_player',
             'TABLE_GAME_ALLY'                     => $p . 'game_ally',
             'TABLE_GAME_PLAYER_DEFENSE'           => $p . 'game_player_defense',
@@ -146,7 +148,7 @@ abstract class XtenseTestCase extends TestCase
 
         // Load handler files if they already exist (Phase 2+)
         $handlerDir = $base . '/Handler/';
-        foreach (['Overview', 'Buildings', 'ResourceSettings', 'Defense', 'Researchs',
+        foreach (['Overview', 'Buildings', 'ResourceSettings', 'Defense', 'Researchs', 'Lifeform',
                   'Fleet', 'System', 'Ranking', 'CombatReport', 'AllyList', 'Message'] as $name) {
             $file = $handlerDir . $name . 'Handler.php';
             if (file_exists($file)) {
