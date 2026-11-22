@@ -94,4 +94,13 @@ class LifeformHandlerTest extends XtenseTestCase
         $response = $this->getIoResponse();
         $this->assertSame('plugin grant', $response['type']);
     }
+
+    public function testRejectsAnUnsupportedLifeformCategory(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+
+        $this->createHandler('LifeformHandler')->handle([
+            '_xtense_request_type' => 'lf_unknown',
+        ]);
+    }
 }
