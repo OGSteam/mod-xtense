@@ -61,6 +61,7 @@ $handlerClasses = [
     'ResourceSettingsHandler',
     'DefenseHandler',
     'ResearchsHandler',
+    'LifeformHandler',
     'FleetHandler',
     'SystemHandler',
     'RankingHandler',
@@ -133,6 +134,7 @@ try {
         'resourceSettings' => 'ResourceSettingsHandler',
         'defense' => 'DefenseHandler',
         'researchs' => 'ResearchsHandler',
+        'lf_buildings', 'lf_research' => 'LifeformHandler',
         'fleet' => 'FleetHandler',
         'system' => 'SystemHandler',
         'ranking' => 'RankingHandler',
@@ -143,7 +145,9 @@ try {
     };
 
     $handlerData = $data;
-    if ($handlerClass === 'CombatReportHandler') {
+    if ($handlerClass === 'LifeformHandler') {
+        $handlerData['_xtense_request_type'] = $receivedGameData['type'];
+    } elseif ($handlerClass === 'CombatReportHandler') {
         $handlerData['_xtense_request_type'] = $receivedGameData['type'];
         $handlerData['_xtense_raw_payload'] = $json;
     } elseif ($handlerClass === 'MessageHandler') {
