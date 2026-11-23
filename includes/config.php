@@ -45,6 +45,6 @@ $databaseSpyId = array(
 );
 
 $callbackTypesNames = array(
-	'overview','system','ally_list','buildings','research','fleet','fleetSending','defense','spy','ennemy_spy','rc',
+	'overview','system','ally_list','buildings','research','lf_buildings','lf_research','fleet','fleetSending','defense','spy','ennemy_spy','rc',
 	'rc_cdr', 'msg', 'ally_msg', 'expedition','ranking'
 );

@@ -10,4 +10,11 @@
       <directory suffix="Test.php">./tests/unit</directory>
     </testsuite>
   </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">./Handler</directory>
+      <directory suffix=".php">./includes</directory>
+      <file>./xtense.php</file>
+    </include>
+  </source>
 </phpunit>
