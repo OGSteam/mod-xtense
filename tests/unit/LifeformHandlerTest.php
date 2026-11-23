@@ -23,7 +23,7 @@ class LifeformHandlerTest extends XtenseTestCase
         $queries = $this->db->getQueries();
         $this->assertContains('TRANSACTION BEGIN', $queries);
         $this->assertContains('TRANSACTION COMMIT', $queries);
-        $insert = $this->db->getQueriesContaining('INSERT INTO ogspy_game_astro_object_lifeform_building')[0];
+        $insert = $this->db->getQueriesContaining('INSERT INTO ogspy_game_lifeform_building')[0];
         $this->assertStringContainsString('(33717423, 11101, 12,', $insert);
         $this->assertStringContainsString('(33717423, 14101, 2,', $insert);
 
@@ -47,7 +47,7 @@ class LifeformHandlerTest extends XtenseTestCase
             'lfResearch' => $levels,
         ]);
 
-        $insert = $this->db->getQueriesContaining('INSERT INTO ogspy_game_astro_object_lifeform_research')[0];
+        $insert = $this->db->getQueriesContaining('INSERT INTO ogspy_game_lifeform_research')[0];
         $this->assertSame(18, substr_count($insert, '(33717423,'));
         $this->assertTrue($this->callbackHandler->hasCallForType('lf_research'));
     }
@@ -65,7 +65,7 @@ class LifeformHandlerTest extends XtenseTestCase
                 'lfBuildings' => $levels,
             ]);
         } finally {
-            $this->assertEmpty($this->db->getQueriesContaining('DELETE FROM ogspy_game_astro_object_lifeform_building'));
+            $this->assertEmpty($this->db->getQueriesContaining('DELETE FROM ogspy_game_lifeform_building'));
         }
     }
 
