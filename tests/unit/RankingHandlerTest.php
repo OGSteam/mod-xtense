@@ -122,6 +122,60 @@ class RankingHandlerTest extends XtenseTestCase
     // Validation
     // -------------------------------------------------------------------------
 
+    public function testAllianceRankingRejectsMissingPointsBeforeWrites(): void
+    {
+        $data = [
+            'type1' => 'ally',
+            'type2' => 'points',
+            'type3' => '',
+            'offset' => '1',
+            'time' => '1776500000',
+            'n' => [[
+                'ally_id' => 500003,
+                'rank' => 1,
+                'ally' => 'Suivre Les Directives',
+                'ally_tag' => 'SLD',
+                'mean' => 100,
+                'members' => 5,
+            ]],
+        ];
+        $handler = $this->createHandler('RankingHandler');
+
+        try {
+            $handler->handle($data);
+            self::fail('Expected missing alliance points to be rejected');
+        } catch (UnexpectedValueException $exception) {
+            $this->assertSame('Ranking Ally: Missing alliance data', $exception->getMessage());
+        }
+
+        $this->assertSame([], $this->db->getQueries());
+    }
+
+    public function testAllianceRankingCallbackPreservesAllyName(): void
+    {
+        $data = [
+            'type1' => 'ally',
+            'type2' => 'points',
+            'type3' => '',
+            'offset' => '1',
+            'time' => '1776500000',
+            'n' => [[
+                'ally_id' => 500003,
+                'rank' => 1,
+                'ally' => 'Suivre Les Directives',
+                'ally_tag' => 'SLD',
+                'points' => 12345,
+                'mean' => 2469,
+                'members' => 5,
+            ]],
+        ];
+        $handler = $this->createHandler('RankingHandler');
+        $handler->handle($data);
+
+        $calls = $this->callbackHandler->getCallsForType('ranking_ally_points');
+        $this->assertSame('Suivre Les Directives', $calls[0]['params']['data'][0]['ally_name']);
+    }
+
     public function testRankingThrowsOnInvalidOffset(): void
     {
         $data             = $this->getDecodedData('ranking_player_points');

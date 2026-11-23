@@ -16,6 +16,12 @@ class SpyDatabase
         return true;
     }
 
+    public function sql_transaction(string $status): bool
+    {
+        $this->queries[] = 'TRANSACTION ' . strtoupper($status);
+        return true;
+    }
+
     public function sql_escape_string(string $string): string
     {
         return addslashes($string);
@@ -26,8 +32,16 @@ class SpyDatabase
         return [];
     }
 
+    public function sql_numrows($result): int
+    {
+        return 0;
+    }
+
     public function sql_fetch_row($result): array
     {
+        if (preg_match('/SELECT\s+`?id`?\s+FROM\s+ogspy_game_astro_object/i', $this->getLastQuery() ?? '')) {
+            return [33717423];
+        }
         return [null];
     }
 

@@ -121,6 +121,17 @@ class CombatReportHandlerTest extends XtenseTestCase
     // Handler — main RC record (TABLE_PARSEDRC)
     // -------------------------------------------------------------------------
 
+    private function getMainReportInsert(): string
+    {
+        foreach ($this->db->getQueriesContaining('game_rc') as $query) {
+            if (stripos($query, 'INSERT INTO ogspy_game_rc (') !== false) {
+                return $query;
+            }
+        }
+
+        self::fail('Expected main combat-report INSERT');
+    }
+
     public function testHandleInsertsMainRcRecord(): void
     {
         $data    = $this->getDecodedData('rc_complex');
@@ -141,8 +152,7 @@ class CombatReportHandlerTest extends XtenseTestCase
         $handler = $this->createHandler('CombatReportHandler');
         $handler->handle($data);
 
-        $inserts = $this->db->getQueriesContaining('game_rc');
-        $sql     = $inserts[0];
+        $sql = $this->getMainReportInsert();
         $this->assertStringContainsString("'A'", $sql, "Winner must be encoded as 'A'");
     }
 
@@ -152,7 +162,7 @@ class CombatReportHandlerTest extends XtenseTestCase
         $handler = $this->createHandler('CombatReportHandler');
         $handler->handle($data);
 
-        $sql = $this->db->getQueriesContaining('game_rc')[0];
+        $sql = $this->getMainReportInsert();
         $this->assertStringContainsString('200000', $sql, 'Loot metal missing');
         $this->assertStringContainsString('150000', $sql, 'Loot crystal missing');
         $this->assertStringContainsString('50000',  $sql, 'Loot deuterium missing');
@@ -164,7 +174,7 @@ class CombatReportHandlerTest extends XtenseTestCase
         $handler = $this->createHandler('CombatReportHandler');
         $handler->handle($data);
 
-        $sql = $this->db->getQueriesContaining('game_rc')[0];
+        $sql = $this->getMainReportInsert();
         $this->assertStringContainsString('250000', $sql, 'Debris metal missing');
         $this->assertStringContainsString('120000', $sql, 'Debris crystal missing');
     }
@@ -175,7 +185,7 @@ class CombatReportHandlerTest extends XtenseTestCase
         $handler = $this->createHandler('CombatReportHandler');
         $handler->handle($data);
 
-        $sql = $this->db->getQueriesContaining('game_rc')[0];
+        $sql = $this->getMainReportInsert();
         $this->assertStringContainsString('12', $sql, 'Moon chance (12) missing from RC insert');
     }
 
@@ -185,7 +195,7 @@ class CombatReportHandlerTest extends XtenseTestCase
         $handler = $this->createHandler('CombatReportHandler');
         $handler->handle($data);
 
-        $sql = $this->db->getQueriesContaining('game_rc')[0];
+        $sql = $this->getMainReportInsert();
         $this->assertStringContainsString('2500000', $sql, 'Attacker losses missing');
         $this->assertStringContainsString('5000000', $sql, 'Defender losses missing');
     }
