@@ -1,5 +1,7 @@
 <?php
 
+use Ogsteam\Ogspy\Model\Player_Lifeform_Model;
+
 if (!defined('IN_SPYOGAME')) {
     die('Hacking Attempt!');
 }
@@ -119,6 +121,11 @@ class OverviewHandler extends AbstractHandler
                 system = VALUES(system),
                 row = VALUES(row)");
 
+        $lifeformObservation = $this->extractLifeformObservation($data);
+        if ($lifeformObservation !== []) {
+            $this->storeLifeformObservation($planetId, $lifeformObservation, $ogameTimestamp);
+        }
+
         $this->setPageUpdatedResponse('overview', $coordinates);
         $this->registerCallback('overview', [
             'coords' => explode(':', $coordinates),
@@ -130,6 +137,34 @@ class OverviewHandler extends AbstractHandler
             'ressources' => $resources,
         ]);
         $this->logAction('overview', ['coords' => $coordinates, 'planet_name' => $planetName]);
+    }
+
+    /**
+     * @return array{species?: mixed, population?: mixed, food?: mixed}
+     */
+    private function extractLifeformObservation(array $data): array
+    {
+        $observation = [];
+        if (array_key_exists('species', $data)) {
+            $observation['species'] = $data['species'];
+        }
+
+        $resources = $data['ressources'] ?? [];
+        foreach (['population', 'food'] as $field) {
+            if (array_key_exists($field, $resources)) {
+                $observation[$field] = $resources[$field];
+            }
+        }
+
+        return $observation;
+    }
+
+    /**
+     * @param array{species?: mixed, population?: mixed, food?: mixed} $observation
+     */
+    protected function storeLifeformObservation(int $planetId, array $observation, int $observedAt): void
+    {
+        (new Player_Lifeform_Model())->storeResourceObservation($planetId, $observation, $observedAt);
     }
 
     public function getType(): string

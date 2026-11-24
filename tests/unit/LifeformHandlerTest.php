@@ -11,6 +11,36 @@ class LifeformHandlerTest extends XtenseTestCase
         'type' => '0',
     ];
 
+    private function createSpeciesRecordingHandler(array &$observations): LifeformHandler
+    {
+        return new class(
+            $observations,
+            $this->db,
+            $this->log,
+            $this->io,
+            $this->callbackHandler,
+            $this->serverConfig,
+            $this->userData,
+            $this->xtenseDatabase,
+            $this->toolbarInfo
+        ) extends LifeformHandler {
+            public function __construct(
+                private array &$observations,
+                ...$dependencies
+            ) {
+                parent::__construct(...$dependencies);
+            }
+
+            protected function storeLifeformSpecies(
+                int $planetId,
+                mixed $species,
+                int $observedAt
+            ): void {
+                $this->observations[] = compact('planetId', 'species', 'observedAt');
+            }
+        };
+    }
+
     public function testStoresRealLifeformBuildingIdsTransactionally(): void
     {
         $handler = $this->createHandler('LifeformHandler');
@@ -50,6 +80,23 @@ class LifeformHandlerTest extends XtenseTestCase
         $insert = $this->db->getQueriesContaining('INSERT INTO ogspy_game_lifeform_research')[0];
         $this->assertSame(18, substr_count($insert, '(33717423,'));
         $this->assertTrue($this->callbackHandler->hasCallForType('lf_research'));
+    }
+
+    public function testStoresSpeciesSentWithLifeformBuildings(): void
+    {
+        $observations = [];
+        $handler = $this->createSpeciesRecordingHandler($observations);
+        $handler->handle([
+            '_xtense_request_type' => 'lf_buildings',
+            'planet' => $this->planet,
+            'lfBuildings' => ['12101' => '8'],
+            'species' => 'ROCKTAL',
+        ]);
+
+        $this->assertCount(1, $observations);
+        $this->assertSame(33717423, $observations[0]['planetId']);
+        $this->assertSame('ROCKTAL', $observations[0]['species']);
+        $this->assertGreaterThan(0, $observations[0]['observedAt']);
     }
 
     #[DataProvider('invalidLevelsProvider')]
