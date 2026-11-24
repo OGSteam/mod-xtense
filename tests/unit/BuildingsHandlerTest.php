@@ -98,6 +98,15 @@ class BuildingsHandlerTest extends XtenseTestCase
         $this->assertStringContainsString('`Scanner` = VALUES(`Scanner`)', $sql);
     }
 
+    public function testConfigurationMapsOgameTechnology45ToScanner(): void
+    {
+        $config = file_get_contents(dirname(__DIR__, 2) . '/includes/config.php');
+
+        $this->assertIsString($config);
+        $this->assertMatchesRegularExpression("/45\s*=>\s*'Scanner'/", $config);
+        $this->assertMatchesRegularExpression("/'buildings'\s*=>\s*array\([^\n]*'Scanner'/", $config);
+    }
+
     public function testHandlePreservesScannerWhenFieldIsAbsent(): void
     {
         $data = $this->getDecodedData('buildings_facilities');
