@@ -87,11 +87,16 @@ class LifeformHandler extends AbstractHandler
 
     protected function storeLifeformSpecies(int $planetId, mixed $species, int $observedAt): void
     {
-        (new Player_Lifeform_Model())->storeResourceObservation(
+        $this->createLifeformModel()->storeResourceObservation(
             $planetId,
             ['species' => $species],
             $observedAt
         );
+    }
+
+    protected function createLifeformModel(): object
+    {
+        return new Player_Lifeform_Model();
     }
 
     /**

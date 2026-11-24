@@ -11,8 +11,20 @@ class OverviewHandlerTest extends XtenseTestCase
 {
     private function createRecordingHandler(array &$observations): OverviewHandler
     {
+        $model = new class($observations) {
+            public function __construct(private array &$observations) {}
+
+            public function storeResourceObservation(
+                int $planetId,
+                array $observation,
+                int $observedAt
+            ): void {
+                $this->observations[] = compact('planetId', 'observation', 'observedAt');
+            }
+        };
+
         return new class(
-            $observations,
+            $model,
             $this->db,
             $this->log,
             $this->io,
@@ -23,18 +35,15 @@ class OverviewHandlerTest extends XtenseTestCase
             $this->toolbarInfo
         ) extends OverviewHandler {
             public function __construct(
-                private array &$observations,
+                private object $model,
                 ...$dependencies
             ) {
                 parent::__construct(...$dependencies);
             }
 
-            protected function storeLifeformObservation(
-                int $planetId,
-                array $observation,
-                int $observedAt
-            ): void {
-                $this->observations[] = compact('planetId', 'observation', 'observedAt');
+            protected function createLifeformModel(): object
+            {
+                return $this->model;
             }
         };
     }

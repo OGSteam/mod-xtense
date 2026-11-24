@@ -13,8 +13,24 @@ class LifeformHandlerTest extends XtenseTestCase
 
     private function createSpeciesRecordingHandler(array &$observations): LifeformHandler
     {
+        $model = new class($observations) {
+            public function __construct(private array &$observations) {}
+
+            public function storeResourceObservation(
+                int $planetId,
+                array $observation,
+                int $observedAt
+            ): void {
+                $this->observations[] = [
+                    'planetId' => $planetId,
+                    'species' => $observation['species'],
+                    'observedAt' => $observedAt,
+                ];
+            }
+        };
+
         return new class(
-            $observations,
+            $model,
             $this->db,
             $this->log,
             $this->io,
@@ -25,18 +41,15 @@ class LifeformHandlerTest extends XtenseTestCase
             $this->toolbarInfo
         ) extends LifeformHandler {
             public function __construct(
-                private array &$observations,
+                private object $model,
                 ...$dependencies
             ) {
                 parent::__construct(...$dependencies);
             }
 
-            protected function storeLifeformSpecies(
-                int $planetId,
-                mixed $species,
-                int $observedAt
-            ): void {
-                $this->observations[] = compact('planetId', 'species', 'observedAt');
+            protected function createLifeformModel(): object
+            {
+                return $this->model;
             }
         };
     }

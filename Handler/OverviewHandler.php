@@ -164,7 +164,12 @@ class OverviewHandler extends AbstractHandler
      */
     protected function storeLifeformObservation(int $planetId, array $observation, int $observedAt): void
     {
-        (new Player_Lifeform_Model())->storeResourceObservation($planetId, $observation, $observedAt);
+        $this->createLifeformModel()->storeResourceObservation($planetId, $observation, $observedAt);
+    }
+
+    protected function createLifeformModel(): object
+    {
+        return new Player_Lifeform_Model();
     }
 
     public function getType(): string
