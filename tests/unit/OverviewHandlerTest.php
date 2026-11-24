@@ -9,6 +9,45 @@
  */
 class OverviewHandlerTest extends XtenseTestCase
 {
+    private function createRecordingHandler(array &$observations): OverviewHandler
+    {
+        $model = new class($observations) {
+            public function __construct(private array &$observations) {}
+
+            public function storeResourceObservation(
+                int $planetId,
+                array $observation,
+                int $observedAt
+            ): void {
+                $this->observations[] = compact('planetId', 'observation', 'observedAt');
+            }
+        };
+
+        return new class(
+            $model,
+            $this->db,
+            $this->log,
+            $this->io,
+            $this->callbackHandler,
+            $this->serverConfig,
+            $this->userData,
+            $this->xtenseDatabase,
+            $this->toolbarInfo
+        ) extends OverviewHandler {
+            public function __construct(
+                private object $model,
+                ...$dependencies
+            ) {
+                parent::__construct(...$dependencies);
+            }
+
+            protected function createLifeformModel(): object
+            {
+                return $this->model;
+            }
+        };
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -105,6 +144,52 @@ class OverviewHandlerTest extends XtenseTestCase
         $this->assertArrayHasKey('coords',        $params);
         $this->assertArrayHasKey('planet_type',   $params);
         $this->assertArrayHasKey('ressources',    $params);
+    }
+
+    public function testHandleStoresLifeformResourcesAndSpecies(): void
+    {
+        $data = $this->getDecodedData('overview');
+        $data['species'] = 'ROCKTAL';
+        $data['ressources']['population'] = 1524;
+        $data['ressources']['food'] = 120;
+        $observations = [];
+
+        $this->createRecordingHandler($observations)->handle($data);
+
+        $this->assertSame([[
+            'planetId' => 33717002,
+            'observation' => [
+                'species' => 'ROCKTAL',
+                'population' => 1524,
+                'food' => 120,
+            ],
+            'observedAt' => 1776160665,
+        ]], $observations);
+    }
+
+    public function testHandlePreservesMissingLifeformFields(): void
+    {
+        $data = $this->getDecodedData('overview');
+        $data['ressources']['population'] = 0;
+        $observations = [];
+
+        $this->createRecordingHandler($observations)->handle($data);
+
+        $this->assertSame([[
+            'planetId' => 33717002,
+            'observation' => ['population' => 0],
+            'observedAt' => 1776160665,
+        ]], $observations);
+    }
+
+    public function testHandleSkipsLifeformStorageWhenPayloadHasNoLifeformData(): void
+    {
+        $data = $this->getDecodedData('overview');
+        $observations = [];
+
+        $this->createRecordingHandler($observations)->handle($data);
+
+        $this->assertSame([], $observations);
     }
 
     // -------------------------------------------------------------------------

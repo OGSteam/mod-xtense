@@ -1,5 +1,7 @@
 <?php
 
+use Ogsteam\Ogspy\Model\Player_Lifeform_Model;
+
 if (!defined('IN_SPYOGAME')) {
     die('Hacking Attempt!');
 }
@@ -55,6 +57,9 @@ class LifeformHandler extends AbstractHandler
                 "INSERT INTO {$table} (`astro_object_id`, `technology_id`, `level`, `last_update`) VALUES "
                 . implode(', ', $rows)
             );
+            if (array_key_exists('species', $data)) {
+                $this->storeLifeformSpecies($planetId, $data['species'], $timestamp);
+            }
             $this->db->sql_transaction('commit');
         } catch (Throwable $exception) {
             $this->db->sql_transaction('rollback');
@@ -78,6 +83,20 @@ class LifeformHandler extends AbstractHandler
     public function getRequiredGrant(): string
     {
         return 'empire';
+    }
+
+    protected function storeLifeformSpecies(int $planetId, mixed $species, int $observedAt): void
+    {
+        $this->createLifeformModel()->storeResourceObservation(
+            $planetId,
+            ['species' => $species],
+            $observedAt
+        );
+    }
+
+    protected function createLifeformModel(): object
+    {
+        return new Player_Lifeform_Model();
     }
 
     /**
