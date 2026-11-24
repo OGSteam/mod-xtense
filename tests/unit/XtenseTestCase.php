@@ -44,7 +44,7 @@ abstract class XtenseTestCase extends TestCase
     protected array $xtenseDatabase = [
         'ressources'       => ['metal', 'cristal', 'deuterium', 'energie', 'activite'],
         'ressources_p'     => ['M_percentage', 'C_Percentage', 'D_percentage', 'CES_percentage', 'CEF_percentage', 'SAT_percentage', 'FOR_percentage'],
-        'buildings'        => ['M', 'C', 'D', 'CES', 'CEF', 'UdR', 'UdN', 'CSp', 'SAT', 'HM', 'HC', 'HD', 'FOR', 'Lab', 'Ter', 'Dock', 'Silo', 'DdR', 'BaLu', 'Pha', 'PoSa'],
+        'buildings'        => ['M', 'C', 'D', 'CES', 'CEF', 'UdR', 'UdN', 'CSp', 'SAT', 'HM', 'HC', 'HD', 'FOR', 'Lab', 'Ter', 'Dock', 'Scanner', 'Silo', 'DdR', 'BaLu', 'Pha', 'PoSa'],
         'labo'             => ['Esp', 'Ordi', 'Armes', 'Bouclier', 'Protection', 'NRJ', 'Hyp', 'RC', 'RI', 'PH', 'Laser', 'Ions', 'Plasma', 'RRI', 'Graviton', 'Astrophysique'],
         'defense'          => ['LM', 'LLE', 'LLO', 'CG', 'LP', 'AI', 'PB', 'GB', 'MIC', 'MIP'],
         'fleet'            => ['PT', 'GT', 'CLE', 'CLO', 'CR', 'VB', 'VC', 'REC', 'SE', 'BMD', 'DST', 'EDLM', 'TRA', 'FAU', 'ECL'],

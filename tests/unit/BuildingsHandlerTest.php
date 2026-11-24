@@ -86,6 +86,41 @@ class BuildingsHandlerTest extends XtenseTestCase
         $this->assertStringContainsString('`Lab`', $sql); // Lab
     }
 
+    public function testHandleStoresAnomalyScannerWhenPresent(): void
+    {
+        $data = $this->getDecodedData('buildings_facilities');
+        $data['buildings']['Scanner'] = '0';
+
+        $this->createHandler('BuildingsHandler')->handle($data);
+
+        $sql = $this->db->getQueriesContaining('game_astro_object')[0];
+        $this->assertStringContainsString('`Scanner`', $sql);
+        $this->assertStringContainsString('`Scanner` = VALUES(`Scanner`)', $sql);
+    }
+
+    public function testHandlePreservesScannerWhenFieldIsAbsent(): void
+    {
+        $data = $this->getDecodedData('buildings_facilities');
+
+        $this->createHandler('BuildingsHandler')->handle($data);
+
+        $sql = $this->db->getQueriesContaining('game_astro_object')[0];
+        $this->assertStringNotContainsString('`Scanner`', $sql);
+    }
+
+    public function testHandleDoesNotAddScannerToMoonFacilities(): void
+    {
+        $data = $this->getDecodedData('buildings_facilities');
+        $data['planet']['type'] = '1';
+        $data['buildings'] = ['UdR' => '2', 'CSp' => '4', 'BaLu' => '6', 'Pha' => '8', 'PoSa' => '1'];
+
+        $this->createHandler('BuildingsHandler')->handle($data);
+
+        $sql = $this->db->getQueriesContaining('game_astro_object')[0];
+        $this->assertStringContainsString('`BaLu`', $sql);
+        $this->assertStringNotContainsString('`Scanner`', $sql);
+    }
+
     // -------------------------------------------------------------------------
     // Grant denial
     // -------------------------------------------------------------------------
