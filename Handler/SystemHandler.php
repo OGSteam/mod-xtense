@@ -27,6 +27,8 @@ class SystemHandler extends AbstractHandler
         }
 
         $rows = $data['rows'];
+        $debrisSnapshot = $this->extractDebrisSnapshot($data, $rows);
+        $currentTime = time();
         $systemData = [];
         for ($position = 1; $position < 16; $position++) {
             if (isset($rows[$position])) {
@@ -69,8 +71,6 @@ class SystemHandler extends AbstractHandler
             $moonId = isset($line['moon_id']) ? (int)$line['moon_id'] : -1;
             $allyId = isset($line['ally_id']) ? (int)$line['ally_id'] : -1;
             $allyTag = $line['ally_tag'] ?? '';
-            $currentTime = time();
-
             $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
                 (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update`, `last_update_user_id`)
                 VALUES ({$planetId}, {$galaxy}, {$system}, {$position}, '{$line['planet_name']}', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
@@ -111,6 +111,16 @@ class SystemHandler extends AbstractHandler
             }
         }
 
+        if ($debrisSnapshot !== null && defined('TABLE_GAME_DEBRIS_FIELD')) {
+            $this->storeDebrisSnapshot(
+                $galaxy,
+                $system,
+                $debrisSnapshot,
+                $currentTime,
+                (int)$this->userData['id']
+            );
+        }
+
         $this->db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . (int)$this->userData['id']);
         $this->registerCallback('system', [
             'data' => $rows,
@@ -130,5 +140,131 @@ class SystemHandler extends AbstractHandler
     public function getRequiredGrant(): string
     {
         return 'system';
+    }
+
+    /**
+     * Extracts a complete debris observation for positions 1 to 16.
+     *
+     * A top-level debris_fields key is the preferred raw format. Its presence,
+     * including an empty array, means that the extension observed debris for
+     * the whole system. The debris values nested in rows remain supported for
+     * older extension versions. When neither format is present, returning null
+     * prevents an unsupported or failed observation from clearing stored data.
+     *
+     * @param array<int|string, mixed> $data
+     * @param array<int|string, mixed> $rows
+     * @return array<int, array{metal: int, crystal: int, deuterium: int|null}>|null
+     */
+    private function extractDebrisSnapshot(array $data, array $rows): ?array
+    {
+        $rawFields = null;
+
+        if (array_key_exists('debris_fields', $data) && is_array($data['debris_fields'])) {
+            $rawFields = $data['debris_fields'];
+        } else {
+            $nestedFields = [];
+            $hasDebrisObservation = false;
+
+            foreach ($rows as $position => $line) {
+                if (!is_array($line) || !array_key_exists('debris', $line) || !is_array($line['debris'])) {
+                    continue;
+                }
+
+                $hasDebrisObservation = true;
+                $nestedFields[$position] = $line['debris'];
+            }
+
+            if ($hasDebrisObservation) {
+                $rawFields = $nestedFields;
+            }
+        }
+
+        if ($rawFields === null) {
+            return null;
+        }
+
+        $snapshot = array_fill(1, 16, [
+            'metal' => 0,
+            'crystal' => 0,
+            'deuterium' => 0,
+        ]);
+
+        foreach ($rawFields as $position => $debris) {
+            $position = (int)$position;
+            if ($position < 1 || $position > 16 || !is_array($debris)) {
+                continue;
+            }
+
+            $snapshot[$position] = $this->normalizeDebris($debris);
+        }
+
+        return $snapshot;
+    }
+
+    /**
+     * @param array<string, mixed> $debris
+     * @return array{metal: int, crystal: int, deuterium: int|null}
+     */
+    private function normalizeDebris(array $debris): array
+    {
+        $crystal = $debris['crystal'] ?? $debris['cristal'] ?? 0;
+        $hasDeuterium = array_key_exists('deuterium', $debris)
+            && $debris['deuterium'] !== null
+            && $debris['deuterium'] !== '';
+
+        return [
+            'metal' => $this->normalizeResourceAmount($debris['metal'] ?? 0),
+            'crystal' => $this->normalizeResourceAmount($crystal),
+            'deuterium' => $hasDeuterium
+                ? $this->normalizeResourceAmount($debris['deuterium'])
+                : null,
+        ];
+    }
+
+    private function normalizeResourceAmount($amount): int
+    {
+        $filtered = filter_var($amount, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0],
+        ]);
+
+        return $filtered === false ? 0 : $filtered;
+    }
+
+    /**
+     * @param array<int, array{metal: int, crystal: int, deuterium: int|null}> $snapshot
+     */
+    private function storeDebrisSnapshot(
+        int $galaxy,
+        int $system,
+        array $snapshot,
+        int $observedAt,
+        int $observerUserId
+    ): void {
+        $values = [];
+
+        foreach ($snapshot as $position => $debris) {
+            $deuterium = $debris['deuterium'] === null ? 'NULL' : (string)$debris['deuterium'];
+            $values[] = '(' . $galaxy
+                . ', ' . $system
+                . ', ' . (int)$position
+                . ', ' . $debris['metal']
+                . ', ' . $debris['crystal']
+                . ', ' . $deuterium
+                . ', ' . $observedAt
+                . ', ' . $observerUserId
+                . ')';
+        }
+
+        $this->db->sql_query(
+            'INSERT INTO ' . TABLE_GAME_DEBRIS_FIELD . ' '
+            . '(`galaxy`, `system`, `position`, `metal`, `crystal`, `deuterium`, `observed_at`, `observer_user_id`) VALUES '
+            . implode(', ', $values)
+            . ' ON DUPLICATE KEY UPDATE '
+            . '`metal` = VALUES(`metal`), '
+            . '`crystal` = VALUES(`crystal`), '
+            . '`deuterium` = VALUES(`deuterium`), '
+            . '`observed_at` = VALUES(`observed_at`), '
+            . '`observer_user_id` = VALUES(`observer_user_id`)'
+        );
     }
 }

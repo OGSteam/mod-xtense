@@ -71,6 +71,103 @@ class SystemHandlerTest extends XtenseTestCase
     }
 
     // -------------------------------------------------------------------------
+    // Debris snapshot
+    // -------------------------------------------------------------------------
+
+    public function testHandleStoresACompleteDebrisSnapshot(): void
+    {
+        $data = $this->getDecodedData('system');
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $queries = $this->db->getQueriesContaining('game_debris_field');
+        $this->assertCount(1, $queries);
+        $this->assertStringContainsString('(`galaxy`, `system`, `position`', $queries[0]);
+        $this->assertStringContainsString('(4, 246, 7, 1000, 0, 0,', $queries[0]);
+        $this->assertStringContainsString('(4, 246, 16, 0, 0, NULL,', $queries[0]);
+        $this->assertSame(16, substr_count($queries[0], '(4, 246,'));
+    }
+
+    public function testHandleAcceptsCrystalAndLegacyCristalKeys(): void
+    {
+        $data = $this->getDecodedData('system');
+        $data['debris_fields'] = [
+            3 => ['metal' => 10, 'crystal' => 20, 'deuterium' => 30],
+            4 => ['metal' => 40, 'cristal' => 50, 'deuterium' => 60],
+        ];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 3, 10, 20, 30,', $query);
+        $this->assertStringContainsString('(4, 246, 4, 40, 50, 60,', $query);
+    }
+
+    public function testHandleKeepsUnavailableDeuteriumAsNull(): void
+    {
+        $data = $this->getDecodedData('system');
+        $data['debris_fields'] = [
+            8 => ['metal' => 100, 'crystal' => 200],
+        ];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 8, 100, 200, NULL,', $query);
+    }
+
+    public function testHandleIgnoresInvalidDebrisPositionsAndAmounts(): void
+    {
+        $data = $this->getDecodedData('system');
+        $data['debris_fields'] = [
+            0 => ['metal' => 999, 'crystal' => 999, 'deuterium' => 999],
+            17 => ['metal' => 999, 'crystal' => 999, 'deuterium' => 999],
+            5 => ['metal' => -1, 'crystal' => 'invalid', 'deuterium' => -3],
+        ];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringNotContainsString(', 999, 999, 999,', $query);
+        $this->assertStringContainsString('(4, 246, 5, 0, 0, 0,', $query);
+        $this->assertSame(16, substr_count($query, '(4, 246,'));
+    }
+
+    public function testHandleClearsMissingPositionsForAnEmptyObservedSnapshot(): void
+    {
+        $data = $this->getDecodedData('system');
+        $data['debris_fields'] = [];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 1, 0, 0, 0,', $query);
+        $this->assertStringContainsString('(4, 246, 16, 0, 0, 0,', $query);
+        $this->assertSame(16, substr_count($query, '(4, 246,'));
+    }
+
+    public function testHandleDoesNotClearDebrisWhenObservationIsMissing(): void
+    {
+        $data = $this->getDecodedData('system');
+        unset($data['debris_fields']);
+        foreach ($data['rows'] as &$row) {
+            if (is_array($row)) {
+                unset($row['debris']);
+            }
+        }
+        unset($row);
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $this->assertEmpty($this->db->getQueriesContaining('game_debris_field'));
+    }
+
+    // -------------------------------------------------------------------------
     // Game-player / ally upserts
     // -------------------------------------------------------------------------
 
