@@ -33,10 +33,10 @@ class SystemHandler extends AbstractHandler
         for ($position = 1; $position < 16; $position++) {
             if (isset($rows[$position])) {
                 $line = $rows[$position];
-                $line['player_name'] = filter_var($line['player_name']);
-                $line['planet_name'] = filter_var($line['planet_name']);
-                $line['planet_id'] = filter_var($line['planet_id'], FILTER_VALIDATE_INT);
-                $line['ally_tag'] = filter_var($line['ally_tag']);
+                $line['player_name'] = filter_var($line['player_name'] ?? '');
+                $line['planet_name'] = filter_var($line['planet_name'] ?? '');
+                $line['planet_id'] = filter_var($line['planet_id'] ?? null, FILTER_VALIDATE_INT);
+                $line['ally_tag'] = filter_var($line['ally_tag'] ?? '');
                 if (isset($line['debris'])) {
                     $line['debris'] = filter_var_array($line['debris'], [
                         'metal' => FILTER_SANITIZE_NUMBER_INT,
@@ -44,9 +44,7 @@ class SystemHandler extends AbstractHandler
                         'deuterium' => FILTER_SANITIZE_NUMBER_INT,
                     ]);
                 }
-                if (isset($line['status'])) {
-                    $line['status'] = filter_var($line['status']);
-                }
+                $line['status'] = filter_var($line['status'] ?? '');
                 $systemData[$position] = $line;
                 continue;
             }
@@ -63,65 +61,100 @@ class SystemHandler extends AbstractHandler
             ];
         }
 
-        foreach ($systemData as $position => $line) {
-            $status = Check::player_status_forbidden($line['status']) ? '' : $line['status'];
-            $playerId = isset($line['player_id']) ? (int)$line['player_id'] : -1;
+        $observedObjectIds = [];
+        foreach ($systemData as $line) {
             $planetId = isset($line['planet_id']) ? (int)$line['planet_id'] : -1;
-            $moon = isset($line['moon']) ? (int)$line['moon'] : -1;
             $moonId = isset($line['moon_id']) ? (int)$line['moon_id'] : -1;
-            $allyId = isset($line['ally_id']) ? (int)$line['ally_id'] : -1;
-            $allyTag = $line['ally_tag'] ?? '';
-            $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update`, `last_update_user_id`)
-                VALUES ({$planetId}, {$galaxy}, {$system}, {$position}, '{$line['planet_name']}', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
-                ON DUPLICATE KEY UPDATE
-                    `name` = '{$line['planet_name']}',
-                    `player_id` = {$playerId},
-                    `last_update` = {$currentTime},
-                    `last_update_user_id` = " . (int)$this->userData['id']);
+            $moon = isset($line['moon']) ? (int)$line['moon'] : 0;
 
-            if ($moonId !== -1 && $moon === 1) {
-                $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
-                    (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update_moon`, `last_update_user_id`)
-                    VALUES ({$moonId}, 'moon', {$galaxy}, {$system}, {$position}, '{$line['planet_name']} - Moon', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
-                    ON DUPLICATE KEY UPDATE
-                        `name` = '{$line['planet_name']} - Moon',
-                        `player_id` = {$playerId},
-                        `last_update_moon` = {$currentTime},
-                        `last_update_user_id` = " . (int)$this->userData['id']);
+            if ($planetId > 0) {
+                $observedObjectIds[] = $planetId;
             }
-
-            if ($playerId !== -1) {
-                $playerName = $this->db->sql_escape_string($line['player_name']);
-                $escapedStatus = $this->db->sql_escape_string($status);
-                $this->db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER . "
-                    (`id`, `name`, `status`, `ally_id`, `datadate`)
-                    VALUES ({$playerId}, '{$playerName}', '{$escapedStatus}', {$allyId}, {$currentTime})
-                    ON DUPLICATE KEY UPDATE
-                        `name` = '{$playerName}',
-                        `status` = '{$escapedStatus}',
-                        `ally_id` = {$allyId},
-                        `datadate` = {$currentTime}");
-            }
-
-            if ($allyId > 0) {
-                $this->db->sql_query("INSERT INTO " . TABLE_GAME_ALLY . " (`id`, `tag`, `datadate`)
-                    VALUES ({$allyId}, '{$allyTag}', {$currentTime})
-                    ON DUPLICATE KEY UPDATE `tag` = '{$allyTag}', `datadate` = {$currentTime}");
+            if ($moon === 1 && $moonId > 0) {
+                $observedObjectIds[] = $moonId;
             }
         }
 
-        if ($debrisSnapshot !== null && defined('TABLE_GAME_DEBRIS_FIELD')) {
-            $this->storeDebrisSnapshot(
-                $galaxy,
-                $system,
-                $debrisSnapshot,
-                $currentTime,
-                (int)$this->userData['id']
-            );
-        }
+        $this->db->sql_transaction('begin');
+        try {
+            $this->deleteStaleAstroObjects($galaxy, $system, $observedObjectIds);
 
-        $this->db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . (int)$this->userData['id']);
+            foreach ($systemData as $position => $line) {
+                $status = Check::player_status_forbidden($line['status']) ? '' : $line['status'];
+                $playerId = isset($line['player_id']) ? (int)$line['player_id'] : -1;
+                $planetId = isset($line['planet_id']) ? (int)$line['planet_id'] : -1;
+                $moon = isset($line['moon']) ? (int)$line['moon'] : -1;
+                $moonId = isset($line['moon_id']) ? (int)$line['moon_id'] : -1;
+                $allyId = isset($line['ally_id']) ? (int)$line['ally_id'] : -1;
+                $allyTag = $this->db->sql_escape_string($line['ally_tag'] ?? '');
+                $planetName = $this->db->sql_escape_string($line['planet_name']);
+
+                if ($planetId > 0) {
+                    $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                        (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update`, `last_update_user_id`)
+                        VALUES ({$planetId}, 'planet', {$galaxy}, {$system}, {$position}, '{$planetName}', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
+                        ON DUPLICATE KEY UPDATE
+                            `type` = 'planet',
+                            `galaxy` = {$galaxy},
+                            `system` = {$system},
+                            `row` = {$position},
+                            `name` = '{$planetName}',
+                            `player_id` = {$playerId},
+                            `last_update` = {$currentTime},
+                            `last_update_user_id` = " . (int)$this->userData['id']);
+                }
+
+                if ($moonId > 0 && $moon === 1) {
+                    $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
+                        (`id`, `type`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update_moon`, `last_update_user_id`)
+                        VALUES ({$moonId}, 'moon', {$galaxy}, {$system}, {$position}, '{$planetName} - Moon', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
+                        ON DUPLICATE KEY UPDATE
+                            `type` = 'moon',
+                            `galaxy` = {$galaxy},
+                            `system` = {$system},
+                            `row` = {$position},
+                            `name` = '{$planetName} - Moon',
+                            `player_id` = {$playerId},
+                            `last_update_moon` = {$currentTime},
+                            `last_update_user_id` = " . (int)$this->userData['id']);
+                }
+
+                if ($playerId > 0) {
+                    $playerName = $this->db->sql_escape_string($line['player_name']);
+                    $escapedStatus = $this->db->sql_escape_string($status);
+                    $this->db->sql_query("INSERT INTO " . TABLE_GAME_PLAYER . "
+                        (`id`, `name`, `status`, `ally_id`, `datadate`)
+                        VALUES ({$playerId}, '{$playerName}', '{$escapedStatus}', {$allyId}, {$currentTime})
+                        ON DUPLICATE KEY UPDATE
+                            `name` = '{$playerName}',
+                            `status` = '{$escapedStatus}',
+                            `ally_id` = {$allyId},
+                            `datadate` = {$currentTime}");
+                }
+
+                if ($allyId > 0) {
+                    $this->db->sql_query("INSERT INTO " . TABLE_GAME_ALLY . " (`id`, `tag`, `datadate`)
+                        VALUES ({$allyId}, '{$allyTag}', {$currentTime})
+                        ON DUPLICATE KEY UPDATE `tag` = '{$allyTag}', `datadate` = {$currentTime}");
+                }
+            }
+
+            if ($debrisSnapshot !== null && defined('TABLE_GAME_DEBRIS_FIELD')) {
+                $this->storeDebrisSnapshot(
+                    $galaxy,
+                    $system,
+                    $debrisSnapshot,
+                    $currentTime,
+                    (int)$this->userData['id']
+                );
+            }
+
+            $this->db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . (int)$this->userData['id']);
+            $this->db->sql_transaction('commit');
+        } catch (Throwable $exception) {
+            $this->db->sql_transaction('rollback');
+            throw $exception;
+        }
         $this->registerCallback('system', [
             'data' => $rows,
             'galaxy' => $galaxy,
@@ -140,6 +173,31 @@ class SystemHandler extends AbstractHandler
     public function getRequiredGrant(): string
     {
         return 'system';
+    }
+
+    /**
+     * Removes planets and moons that are no longer present in a complete
+     * observation of the system. Other astro object types are left untouched.
+     *
+     * @param int[] $observedObjectIds
+     */
+    private function deleteStaleAstroObjects(int $galaxy, int $system, array $observedObjectIds): void
+    {
+        $observedObjectIds = array_values(array_unique(array_filter(
+            array_map('intval', $observedObjectIds),
+            static fn(int $id): bool => $id > 0
+        )));
+        $preservedIds = $observedObjectIds === []
+            ? ''
+            : ' AND `id` NOT IN (' . implode(', ', $observedObjectIds) . ')';
+
+        $this->db->sql_query(
+            'DELETE FROM ' . TABLE_USER_BUILDING
+            . ' WHERE `galaxy` = ' . $galaxy
+            . ' AND `system` = ' . $system
+            . " AND `type` IN ('planet', 'moon')"
+            . $preservedIds
+        );
     }
 
     /**

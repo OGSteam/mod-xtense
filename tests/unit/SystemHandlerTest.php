@@ -33,16 +33,57 @@ class SystemHandlerTest extends XtenseTestCase
     // Core system writes
     // -------------------------------------------------------------------------
 
-    public function testHandleWritesAllFifteenPositionsToAstroObject(): void
+    public function testHandleWritesOnlyObservedAstroObjects(): void
     {
         $data    = $this->getDecodedData('system');
         $handler = $this->createHandler('SystemHandler');
         $handler->handle($data);
 
-        // One INSERT per position (rows 1-15, including empty rows with planet_id=0)
-        $queries = $this->db->getQueriesContaining('game_astro_object');
-        $this->assertGreaterThanOrEqual(15, count($queries),
-            'Expected at least 15 UPSERTs into game_astro_object (one per row)');
+        $queries = $this->db->getQueriesContaining('INSERT INTO ogspy_game_astro_object');
+        $this->assertCount(9, $queries, 'Expected seven planets and two moons');
+        $this->assertStringNotContainsString('VALUES (-1,', implode("\n", $queries));
+        $this->assertStringNotContainsString('VALUES (0,', implode("\n", $queries));
+    }
+
+    public function testHandleDeletesStalePlanetsAndMoonsFromObservedSystem(): void
+    {
+        $data = $this->getDecodedData('system');
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $queries = $this->db->getQueriesContaining('DELETE FROM ogspy_game_astro_object');
+        $this->assertCount(1, $queries);
+        $this->assertStringContainsString('`galaxy` = 4 AND `system` = 246', $queries[0]);
+        $this->assertStringContainsString("`type` IN ('planet', 'moon')", $queries[0]);
+        $this->assertStringContainsString('33717002', $queries[0]);
+        $this->assertStringContainsString('33641931', $queries[0]);
+        $this->assertStringContainsString('33693888', $queries[0]);
+    }
+
+    public function testHandleDeletesAllAstroObjectsWhenSystemIsEmpty(): void
+    {
+        $data = $this->getDecodedData('system');
+        $data['rows'] = [];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('DELETE FROM ogspy_game_astro_object')[0];
+        $this->assertStringNotContainsString('NOT IN', $query);
+        $this->assertEmpty($this->db->getQueriesContaining('INSERT INTO ogspy_game_astro_object'));
+    }
+
+    public function testHandleUpdatesCoordinatesWhenObjectIdAlreadyExists(): void
+    {
+        $data = $this->getDecodedData('system');
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('33717002')[1];
+        $this->assertStringContainsString('`type` = \'planet\'', $query);
+        $this->assertStringContainsString('`galaxy` = 4', $query);
+        $this->assertStringContainsString('`system` = 246', $query);
+        $this->assertStringContainsString('`row` = 12', $query);
     }
 
     public function testHandleWritesMoonRowsForPositionsWithMoon(): void
@@ -174,6 +215,18 @@ class SystemHandlerTest extends XtenseTestCase
         $this->assertNotEmpty($czarQueries, 'Expected game_player UPSERT for player 107056');
     }
 
+    public function testHandleDoesNotInsertBlankPlayerFromEmptyRows(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        $data['rows'][1]['player_id'] = '';
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $queries = $this->db->getQueriesContaining('INSERT INTO ogspy_game_player');
+        $this->assertStringNotContainsString('VALUES (0,', implode("\n", $queries));
+    }
+
     public function testHandleInsertsGameAllyForPositionsWithAlliance(): void
     {
         $data    = $this->getDecodedData('system');
@@ -200,6 +253,17 @@ class SystemHandlerTest extends XtenseTestCase
 
         $queries = $this->db->getQueriesContaining('planet_imports');
         $this->assertNotEmpty($queries, 'Expected UPDATE for planet_imports counter');
+    }
+
+    public function testHandleUpdatesSystemTransactionally(): void
+    {
+        $data = $this->getDecodedData('system');
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $queries = $this->db->getQueries();
+        $this->assertSame('TRANSACTION BEGIN', $queries[0]);
+        $this->assertContains('TRANSACTION COMMIT', $queries);
     }
 
     // -------------------------------------------------------------------------
