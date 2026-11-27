@@ -27,7 +27,7 @@ class SystemHandler extends AbstractHandler
         }
 
         $rows = $data['rows'];
-        $debrisSnapshot = $this->extractDebrisSnapshot($data, $rows);
+        $debrisSnapshot = $this->extractDebrisSnapshot($rows);
         $currentTime = time();
         $systemData = [];
         for ($position = 1; $position < 16; $position++) {
@@ -145,57 +145,28 @@ class SystemHandler extends AbstractHandler
     /**
      * Extracts a complete debris observation for positions 1 to 16.
      *
-     * A top-level debris_fields key is the preferred raw format. Its presence,
-     * including an empty array, means that the extension observed debris for
-     * the whole system. The debris values nested in rows remain supported for
-     * older extension versions. When neither format is present, returning null
-     * prevents an unsupported or failed observation from clearing stored data.
+     * The observation is complete only when positions 1 to 16 are all present
+     * and each contains a debris object. Older extension versions send sparse
+     * rows, so returning null for an incomplete payload prevents them from
+     * clearing stored debris fields.
      *
-     * @param array<int|string, mixed> $data
      * @param array<int|string, mixed> $rows
      * @return array<int, array{metal: int, crystal: int, deuterium: int|null}>|null
      */
-    private function extractDebrisSnapshot(array $data, array $rows): ?array
+    private function extractDebrisSnapshot(array $rows): ?array
     {
-        $rawFields = null;
+        $snapshot = [];
 
-        if (array_key_exists('debris_fields', $data) && is_array($data['debris_fields'])) {
-            $rawFields = $data['debris_fields'];
-        } else {
-            $nestedFields = [];
-            $hasDebrisObservation = false;
-
-            foreach ($rows as $position => $line) {
-                if (!is_array($line) || !array_key_exists('debris', $line) || !is_array($line['debris'])) {
-                    continue;
-                }
-
-                $hasDebrisObservation = true;
-                $nestedFields[$position] = $line['debris'];
+        for ($position = 1; $position <= 16; $position++) {
+            if (!isset($rows[$position])
+                || !is_array($rows[$position])
+                || !array_key_exists('debris', $rows[$position])
+                || !is_array($rows[$position]['debris'])
+            ) {
+                return null;
             }
 
-            if ($hasDebrisObservation) {
-                $rawFields = $nestedFields;
-            }
-        }
-
-        if ($rawFields === null) {
-            return null;
-        }
-
-        $snapshot = array_fill(1, 16, [
-            'metal' => 0,
-            'crystal' => 0,
-            'deuterium' => 0,
-        ]);
-
-        foreach ($rawFields as $position => $debris) {
-            $position = (int)$position;
-            if ($position < 1 || $position > 16 || !is_array($debris)) {
-                continue;
-            }
-
-            $snapshot[$position] = $this->normalizeDebris($debris);
+            $snapshot[$position] = $this->normalizeDebris($rows[$position]['debris']);
         }
 
         return $snapshot;
