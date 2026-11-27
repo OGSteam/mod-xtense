@@ -71,6 +71,92 @@ class SystemHandlerTest extends XtenseTestCase
     }
 
     // -------------------------------------------------------------------------
+    // Debris snapshot
+    // -------------------------------------------------------------------------
+
+    public function testHandleStoresACompleteDebrisSnapshot(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $queries = $this->db->getQueriesContaining('game_debris_field');
+        $this->assertCount(1, $queries);
+        $this->assertStringContainsString('(`galaxy`, `system`, `position`', $queries[0]);
+        $this->assertStringContainsString('(4, 246, 7, 1000, 0, 0,', $queries[0]);
+        $this->assertStringContainsString('(4, 246, 16, 0, 0, NULL,', $queries[0]);
+        $this->assertSame(16, substr_count($queries[0], '(4, 246,'));
+    }
+
+    public function testHandleAcceptsCrystalAndLegacyCristalKeys(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        $data['rows'][3]['debris'] = ['metal' => 10, 'crystal' => 20, 'deuterium' => 30];
+        $data['rows'][4]['debris'] = ['metal' => 40, 'cristal' => 50, 'deuterium' => 60];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 3, 10, 20, 30,', $query);
+        $this->assertStringContainsString('(4, 246, 4, 40, 50, 60,', $query);
+    }
+
+    public function testHandleKeepsUnavailableDeuteriumAsNull(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        $data['rows'][8]['debris'] = ['metal' => 100, 'crystal' => 200];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 8, 100, 200, NULL,', $query);
+    }
+
+    public function testHandleIgnoresInvalidDebrisPositionsAndAmounts(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        $data['rows'][0] = ['debris' => ['metal' => 999, 'crystal' => 999, 'deuterium' => 999]];
+        $data['rows'][17] = ['debris' => ['metal' => 999, 'crystal' => 999, 'deuterium' => 999]];
+        $data['rows'][5]['debris'] = ['metal' => -1, 'crystal' => 'invalid', 'deuterium' => -3];
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringNotContainsString(', 999, 999, 999,', $query);
+        $this->assertStringContainsString('(4, 246, 5, 0, 0, 0,', $query);
+        $this->assertSame(16, substr_count($query, '(4, 246,'));
+    }
+
+    public function testHandleClearsMissingPositionsForAnEmptyObservedSnapshot(): void
+    {
+        $data = $this->withCompleteDebrisObservation($this->getDecodedData('system'));
+        foreach (range(1, 16) as $position) {
+            $data['rows'][$position]['debris'] = ['metal' => 0, 'cristal' => 0];
+        }
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $query = $this->db->getQueriesContaining('game_debris_field')[0];
+        $this->assertStringContainsString('(4, 246, 1, 0, 0, NULL,', $query);
+        $this->assertStringContainsString('(4, 246, 16, 0, 0, NULL,', $query);
+        $this->assertSame(16, substr_count($query, '(4, 246,'));
+    }
+
+    public function testHandleDoesNotClearDebrisWhenObservationIsMissing(): void
+    {
+        $data = $this->getDecodedData('system');
+
+        $handler = $this->createHandler('SystemHandler');
+        $handler->handle($data);
+
+        $this->assertEmpty($this->db->getQueriesContaining('game_debris_field'));
+    }
+
+    // -------------------------------------------------------------------------
     // Game-player / ally upserts
     // -------------------------------------------------------------------------
 
@@ -174,5 +260,28 @@ class SystemHandlerTest extends XtenseTestCase
 
         $response = $this->getIoResponse();
         $this->assertSame(0, $response['status']);
+    }
+
+    private function withCompleteDebrisObservation(array $data): array
+    {
+        foreach (range(1, 16) as $position) {
+            if (!isset($data['rows'][$position]) || !is_array($data['rows'][$position])) {
+                $data['rows'][$position] = [
+                    'planet_id' => '',
+                    'planet_name' => '',
+                    'player_name' => '',
+                    'status' => '',
+                    'ally_tag' => '',
+                    'moon' => 0,
+                    'activity' => '',
+                ];
+            }
+
+            if (!isset($data['rows'][$position]['debris'])) {
+                $data['rows'][$position]['debris'] = ['metal' => 0, 'cristal' => 0];
+            }
+        }
+
+        return $data;
     }
 }

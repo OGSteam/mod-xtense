@@ -27,6 +27,8 @@ class SystemHandler extends AbstractHandler
         }
 
         $rows = $data['rows'];
+        $debrisSnapshot = $this->extractDebrisSnapshot($rows);
+        $currentTime = time();
         $systemData = [];
         for ($position = 1; $position < 16; $position++) {
             if (isset($rows[$position])) {
@@ -69,8 +71,6 @@ class SystemHandler extends AbstractHandler
             $moonId = isset($line['moon_id']) ? (int)$line['moon_id'] : -1;
             $allyId = isset($line['ally_id']) ? (int)$line['ally_id'] : -1;
             $allyTag = $line['ally_tag'] ?? '';
-            $currentTime = time();
-
             $this->db->sql_query("INSERT INTO " . TABLE_USER_BUILDING . "
                 (`id`, `galaxy`, `system`, `row`, `name`, `player_id`, `last_update`, `last_update_user_id`)
                 VALUES ({$planetId}, {$galaxy}, {$system}, {$position}, '{$line['planet_name']}', {$playerId}, {$currentTime}, " . (int)$this->userData['id'] . ")
@@ -111,6 +111,16 @@ class SystemHandler extends AbstractHandler
             }
         }
 
+        if ($debrisSnapshot !== null && defined('TABLE_GAME_DEBRIS_FIELD')) {
+            $this->storeDebrisSnapshot(
+                $galaxy,
+                $system,
+                $debrisSnapshot,
+                $currentTime,
+                (int)$this->userData['id']
+            );
+        }
+
         $this->db->sql_query("UPDATE " . TABLE_USER . " SET `planet_imports` = `planet_imports` + 15 WHERE `id` = " . (int)$this->userData['id']);
         $this->registerCallback('system', [
             'data' => $rows,
@@ -130,5 +140,102 @@ class SystemHandler extends AbstractHandler
     public function getRequiredGrant(): string
     {
         return 'system';
+    }
+
+    /**
+     * Extracts a complete debris observation for positions 1 to 16.
+     *
+     * The observation is complete only when positions 1 to 16 are all present
+     * and each contains a debris object. Older extension versions send sparse
+     * rows, so returning null for an incomplete payload prevents them from
+     * clearing stored debris fields.
+     *
+     * @param array<int|string, mixed> $rows
+     * @return array<int, array{metal: int, crystal: int, deuterium: int|null}>|null
+     */
+    private function extractDebrisSnapshot(array $rows): ?array
+    {
+        $snapshot = [];
+
+        for ($position = 1; $position <= 16; $position++) {
+            if (!isset($rows[$position])
+                || !is_array($rows[$position])
+                || !array_key_exists('debris', $rows[$position])
+                || !is_array($rows[$position]['debris'])
+            ) {
+                return null;
+            }
+
+            $snapshot[$position] = $this->normalizeDebris($rows[$position]['debris']);
+        }
+
+        return $snapshot;
+    }
+
+    /**
+     * @param array<string, mixed> $debris
+     * @return array{metal: int, crystal: int, deuterium: int|null}
+     */
+    private function normalizeDebris(array $debris): array
+    {
+        $crystal = $debris['crystal'] ?? $debris['cristal'] ?? 0;
+        $hasDeuterium = array_key_exists('deuterium', $debris)
+            && $debris['deuterium'] !== null
+            && $debris['deuterium'] !== '';
+
+        return [
+            'metal' => $this->normalizeResourceAmount($debris['metal'] ?? 0),
+            'crystal' => $this->normalizeResourceAmount($crystal),
+            'deuterium' => $hasDeuterium
+                ? $this->normalizeResourceAmount($debris['deuterium'])
+                : null,
+        ];
+    }
+
+    private function normalizeResourceAmount($amount): int
+    {
+        $filtered = filter_var($amount, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0],
+        ]);
+
+        return $filtered === false ? 0 : $filtered;
+    }
+
+    /**
+     * @param array<int, array{metal: int, crystal: int, deuterium: int|null}> $snapshot
+     */
+    private function storeDebrisSnapshot(
+        int $galaxy,
+        int $system,
+        array $snapshot,
+        int $observedAt,
+        int $observerUserId
+    ): void {
+        $values = [];
+
+        foreach ($snapshot as $position => $debris) {
+            $deuterium = $debris['deuterium'] === null ? 'NULL' : (string)$debris['deuterium'];
+            $values[] = '(' . $galaxy
+                . ', ' . $system
+                . ', ' . (int)$position
+                . ', ' . $debris['metal']
+                . ', ' . $debris['crystal']
+                . ', ' . $deuterium
+                . ', ' . $observedAt
+                . ', ' . $observerUserId
+                . ')';
+        }
+
+        $this->db->sql_query(
+            'INSERT INTO ' . TABLE_GAME_DEBRIS_FIELD . ' '
+            . '(`galaxy`, `system`, `position`, `metal`, `crystal`, `deuterium`, `observed_at`, `observer_user_id`) VALUES '
+            . implode(', ', $values)
+            . ' ON DUPLICATE KEY UPDATE '
+            . '`metal` = VALUES(`metal`), '
+            . '`crystal` = VALUES(`crystal`), '
+            . '`deuterium` = VALUES(`deuterium`), '
+            . '`observed_at` = VALUES(`observed_at`), '
+            . '`observer_user_id` = VALUES(`observer_user_id`)'
+        );
     }
 }

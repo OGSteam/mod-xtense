@@ -99,6 +99,7 @@ abstract class XtenseTestCase extends TestCase
             'TABLE_MOD'                           => $p . 'mod',
             'TABLE_STATISTIC'                     => $p . 'statistics',
             'TABLE_USER_BUILDING'                 => $p . 'game_astro_object',
+            'TABLE_GAME_DEBRIS_FIELD'             => $p . 'game_debris_field',
             'TABLE_GAME_LIFEFORM_BUILDING'        => $p . 'game_lifeform_building',
             'TABLE_GAME_LIFEFORM_RESEARCH'        => $p . 'game_lifeform_research',
             'TABLE_GAME_PLAYER'                   => $p . 'game_player',
